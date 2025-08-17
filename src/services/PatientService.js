@@ -24,5 +24,13 @@ export const PatientService = {
         } catch (error) {
             throw error.response.data;
         }
+    },
+    deleteManyPatients: async (userIds) => {
+        try {
+            const response = await axiosInstance.post('/user/delete-many-users', { userIds });
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
     }
 }

@@ -15,13 +15,15 @@ import {
     SearchOutlined,
     DownOutlined,
     MoreOutlined,
-    EyeOutlined
+    EyeOutlined,
+    ExclamationCircleOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
 const PatientPage = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
+    const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
     const [rowSelected, setRowSelected] = useState(null);
     const [formUpdate] = Form.useForm();
@@ -60,6 +62,20 @@ const PatientPage = () => {
             Message.error(error.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.");
         }
     });
+    const mutationDeleteManyPatients = useMutation({
+        mutationKey: ["deleteManyPatients"],
+        mutationFn: PatientService.deleteManyPatients,
+        onSuccess: (data) => {
+            if (data.status === "success") {
+                Message.success(data.message);
+                setSelectedRowKeys([]);
+                setIsModalOpenDeleteMany(false);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.");
+        }
+    });
     const mutationUpdatePatient = useMutation({
         mutationKey: ["updatePatient"],
         mutationFn: ({ id, ...data }) => PatientService.updatePatient(id, data),
@@ -77,6 +93,7 @@ const PatientPage = () => {
     const data = dataPatients?.data?.users;
     const { isPending: isPendingDelete } = mutationDeletePatient;
     const { isPending: isPendingUpdate } = mutationUpdatePatient;
+    const { isPending: isPendingDeleteMany } = mutationDeleteManyPatients;
 
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({
@@ -299,7 +316,7 @@ const PatientPage = () => {
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
                     domEvent.stopPropagation(); // tránh chọn row khi bấm menu
-                    if (key === "detail") return handleViewUser?.(record.key);
+                    if (key === "detail") return handleViewUser(record.key);
                     if (key === "edit") return handleEditPatient(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                 };
@@ -309,7 +326,7 @@ const PatientPage = () => {
                         menu={{ items: itemActions, onClick: onMenuClick }}
                         trigger={["click"]}
                         placement="bottomLeft"
-                        zIndex={1000} // Đặt z-index cao hơn để tránh bị che khuất
+                        zIndex={1000} // Đặt z-index cao
                         getPopupContainer={() => document.body}
                     >
                         <ButtonComponent
@@ -339,29 +356,27 @@ const PatientPage = () => {
             setIsOpenDrawer(true);
         }
     };
-    const handleOkDelete = () => {
-        mutationDeletePatient.mutate(
-            rowSelected,
-            {
-                onSettled: () => {
-                    queryGetAllPatients.refetch();
-                },
-            }
-        );
-    };
-    const handleOnUpdatePatient = (values) => {
-        mutationUpdatePatient.mutate({
-            id: rowSelected,
-            ...values
-        }, {
-            onSettled: () => {
-                queryGetAllPatients.refetch();
-            },
+    const handleViewUser = (userId) => {
+        const patient = data.find(user => user.userId === userId);
+        if (patient) {
+            // Show patient details in a modal or a new page
+        }
+    }
+    const runMutation = (mutation, payload) => {
+        mutation.mutate(payload, {
+            onSettled: () => queryGetAllPatients.refetch(),
         });
     };
-    const handleCancelDelete = () => {
-        setIsModalOpenDelete(false);
+    const handleOkDelete = () => runMutation(mutationDeletePatient, rowSelected);
+    const handleOnUpdatePatient = (values) => {
+        runMutation(mutationUpdatePatient, {
+            id: rowSelected,
+            ...values
+        });
     };
+    const handleOkDeleteMany = () => runMutation(mutationDeleteManyPatients, selectedRowKeys);
+    const handleCancelDelete = () => setIsModalOpenDelete(false);
+    const handleCancelDeleteMany = () => setIsModalOpenDeleteMany(false);
 
     const dataTable = data?.map((item, index) => {
         return {
@@ -385,7 +400,6 @@ const PatientPage = () => {
                 key: "edit",
                 label: "Chỉnh sửa",
                 icon: <EditOutlined />,
-                onClick: () => handleEditUser(selectedRowKeys[0]),
             },
             {
                 type: "divider"
@@ -394,7 +408,7 @@ const PatientPage = () => {
                 key: "delete",
                 label: "Xóa tất cả",
                 icon: <DeleteOutlined />,
-                onClick: () => handleDeleteUsers(selectedRowKeys),
+                onClick: () => setIsModalOpenDeleteMany(true),
             },
         ],
     };
@@ -412,19 +426,60 @@ const PatientPage = () => {
             </Dropdown>
             <Divider />
             <ModalComponent
-                title="Xoá người dùng"
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá người dùng</span>
+                    </span>
+                }
                 open={isModalOpenDelete}
                 onOk={handleOkDelete}
                 onCancel={handleCancelDelete}
-                style={{ borderRadius: 0 }}
+
                 okText="Xóa"
                 cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
             >
                 <LoadingComponent isLoading={isPendingDelete}>
-                    <p>
-                        Bạn có chắc chắn muốn <strong>xóa</strong> người dùng
-                        này không?
-                    </p>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            người dùng này không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá người dùng</span>
+                    </span>
+                }
+                open={isModalOpenDeleteMany}
+                onOk={handleOkDeleteMany}
+                okText="Xoá"
+                cancelText="Hủy"
+                onCancel={handleCancelDeleteMany}
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDeleteMany}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            {selectedRowKeys.length} người dùng này không?
+                        </Text>
+                    </div>
                 </LoadingComponent>
             </ModalComponent>
             <DrawerComponent
