@@ -435,7 +435,6 @@ const PatientPage = () => {
                 open={isModalOpenDelete}
                 onOk={handleOkDelete}
                 onCancel={handleCancelDelete}
-
                 okText="Xóa"
                 cancelText="Hủy"
                 okButtonProps={{ danger: true }}
