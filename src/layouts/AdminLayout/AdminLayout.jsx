@@ -30,6 +30,7 @@ import {
     SettingFilled,
     MedicineBoxOutlined,
     SolutionOutlined,
+    FileTextOutlined
 } from "@ant-design/icons";
 const menuItems = [
     {
@@ -38,9 +39,19 @@ const menuItems = [
         label: "Thống kê",
     },
     {
+        key: "/admin/accounts",
+        icon: <UserOutlined />,
+        label: "Quản lý tài khoản",
+    },
+    {
         key: "/admin/patients",
         icon: <TeamOutlined />,
-        label: "Quản lý bệnh nhân",
+        label: "Quản lý hồ sơ bệnh nhân",
+    },
+    {
+        key: "/admin/medical-records",
+        icon: <FileTextOutlined />,
+        label: "Quản lý hồ sơ bệnh án",
     },
     {
         icon: <SolutionOutlined />,
@@ -90,6 +101,7 @@ const AdminLayout = () => {
     };
     const breadcrumbNameMap = {
         "/admin": "Quản trị",
+        "/admin/accounts": "Tài khoản",
         "/admin/dashboard": "Thống kê",
         "/admin/appointments": "Lịch hẹn",
         "/admin/doctors": "Bác sĩ",

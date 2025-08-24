@@ -9,6 +9,7 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import * as Message from "@/components/Message/Message";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -277,40 +278,17 @@ const PatientPage = () => {
                 );
             }
         },
-        {
-            title: "CMND/CCCD",
-            dataIndex: "idCard",
-            key: "idCard",
-            render: (idCard) => {
-                return idCard ? (
-                    <Text>{idCard}</Text>
-                ) : (
-                    <Text type="secondary">Chưa cập nhật</Text>
-                );
-            }
-        },
-        {
-            title: "Mã thẻ BHYT",
-            dataIndex: "insuranceCode",
-            key: "insuranceCode",
-            render: (insuranceCode) => {
-                return insuranceCode ? (
-                    <Text>{insuranceCode}</Text>
-                ) : (
-                    <Text type="secondary">Chưa cập nhật</Text>
-                );
-            }
-        },
+
         {
             title: "Thao tác",
             key: "action",
             render: (_, record) => {
                 const itemActions = [
-                    { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined /> },
+                    { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined style={{ fontSize: 16 }} /> },
                     { type: "divider" },
-                    { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined /> },
+                    { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined style={{ fontSize: 16 }} /> },
                     { type: "divider" },
-                    { key: "delete", label: "Xoá", icon: <DeleteOutlined /> },
+                    { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
                 ];
 
                 const onMenuClick = ({ key, domEvent }) => {
@@ -412,19 +390,53 @@ const PatientPage = () => {
             },
         ],
     };
+    const handleSelectedAll = () => {
+        if (selectedRowKeys.length === dataTable.length) {
+            setSelectedRowKeys([]);
+        } else {
+            setSelectedRowKeys(dataTable.map(item => item.key));
+        }
+    };
     return (
         <>
             <Title level={4}>Danh sách bệnh nhân</Title>
-            <Divider />
-            <Dropdown menu={menuProps} disabled={selectedRowKeys.length === 0}>
-                <ButtonComponent type="primary" disabled={selectedRowKeys.length === 0}>
-                    <Space>
-                        Hành động
-                        <DownOutlined />
-                    </Space>
-                </ButtonComponent>
-            </Dropdown>
-            <Divider />
+            <AnimatePresence>
+                {selectedRowKeys.length > 0 && (
+                    <motion.div
+                        initial={{ y: -100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -100, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        style={{
+                            background: "#f0f2f5",
+                            padding: "10px",
+                            borderRadius: 8,
+                            margin: "10px 0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                        }}
+                    >
+                        <Text strong>Đã chọn {selectedRowKeys.length} <Text type="secondary" underline onClick={handleSelectedAll}>(Chọn tất cả)</Text></Text>
+                        <Divider type="vertical" style={{ height: "24px", margin: "0 10px" }} />
+                        <Dropdown menu={menuProps} disabled={selectedRowKeys.length === 0}>
+                            <ButtonComponent disabled={selectedRowKeys.length === 0}>
+                                <Space>
+                                    Hành động
+                                    <DownOutlined />
+                                </Space>
+                            </ButtonComponent>
+                        </Dropdown>
+                        <Divider type="vertical" style={{ height: "24px", margin: "0 10px" }} />
+                        <ButtonComponent
+
+                        >
+                            Xuất file
+                        </ButtonComponent>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -618,31 +630,32 @@ const PatientPage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
-            <LoadingComponent isLoading={isLoadingPatient} delay={200}>
-                <TableStyled
-                    rowSelection={rowSelection}
-                    rowKey={"key"}
-                    columns={columns}
-                    scroll={{ x: "max-content" }} // 👈 thêm dòng này
-                    dataSource={dataTable}
-                    locale={{ emptyText: "Không có dữ liệu bệnh nhân" }}
-                    pagination={{
-                        current: pagination.current,
-                        pageSize: pagination.pageSize,
-                        position: ["bottomCenter"],
-                        showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} bệnh nhân`,
-                        showSizeChanger: true, // Cho phép chọn số dòng/trang
-                        pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                        showQuickJumper: true, // Cho phép nhảy đến trang
-                        onChange: (page, pageSize) => {
-                            setPagination({
-                                current: page,
-                                pageSize: pageSize,
-                            });
-                        },
-                    }}
-                />
-            </LoadingComponent>
+
+            <TableStyled
+                rowSelection={rowSelection}
+                rowKey={"key"}
+                columns={columns}
+                scroll={{ x: "max-content" }} // 👈 thêm dòng này
+                dataSource={dataTable}
+                locale={{ emptyText: "Không có dữ liệu bệnh nhân" }}
+                loading={isLoadingPatient}
+                pagination={{
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    position: ["bottomCenter"],
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} bệnh nhân`,
+                    showSizeChanger: true, // Cho phép chọn số dòng/trang
+                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
+                    showQuickJumper: true, // Cho phép nhảy đến trang
+                    onChange: (page, pageSize) => {
+                        setPagination({
+                            current: page,
+                            pageSize: pageSize,
+                        });
+                    },
+                }}
+            />
+
         </>
     )
 }

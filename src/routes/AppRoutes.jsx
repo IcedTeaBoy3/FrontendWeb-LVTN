@@ -25,9 +25,9 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 >
-                    <Route index element={<Dashboard />} />
-                    <Route path="patients" element={<PatientPage />} />
+                    <Route path="accounts" element={<PatientPage />} />
                     <Route path="specialties" element={<SpecialtyPage />} />
+                    <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
                 {/* Route không khớp */}
                 <Route path="*" element={<NotFoundPage />} />
