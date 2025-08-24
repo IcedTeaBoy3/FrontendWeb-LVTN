@@ -6,7 +6,8 @@ import ProtectedRoute from "@/components/ProtectedRoute/ProtectedRoute";
 // các trang admin
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import PatientPage from "@/pages/PatientPage/PatientPage";
-import SpecialtyPage from "../pages/SpecialtyPage/SpecialtyPage";
+import SpecialtyPage from "@/pages/SpecialtyPage/SpecialtyPage";
+import PositionPage from "@/pages/PositionPage/PositionPage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 const AppRoutes = () => {
@@ -27,6 +28,7 @@ const AppRoutes = () => {
                 >
                     <Route path="accounts" element={<PatientPage />} />
                     <Route path="specialties" element={<SpecialtyPage />} />
+                    <Route path="positions" element={<PositionPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
                 {/* Route không khớp */}

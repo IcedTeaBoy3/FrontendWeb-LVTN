@@ -1,17 +1,16 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { SpecialtyService } from '@/services/SpecialtyService'
 import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
-import { TableStyled } from '../PositionPage/style';
+import { TableStyled } from './style';
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
+import { PositionService } from '@/services/PositionService';
 import * as Message from "@/components/Message/Message";
-import defaultImage from "@/assets/default_image.png";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -24,17 +23,15 @@ import {
     UploadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
-
-const SpecialtyPage = () => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [rowSelected, setRowSelected] = useState(null);
+const PositionPage = () => {
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [rowSelected, setRowSelected] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
-
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -52,21 +49,22 @@ const SpecialtyPage = () => {
         pageSize: 5,
         total: 0,
     });
-    const queryGetAllSpecialties = useQuery({
-        queryKey: ['getAllSpecialties'],
-        queryFn: SpecialtyService.getAllSpecialties,
+    // Lấy dữ liệu
+    const queryGetAllPositions = useQuery({
+        queryKey: ['getAllPositions'],
+        queryFn: PositionService.getAllPositions,
         refetchOnWindowFocus: false,
         retry: 1,
     });
-    const mutationCreateSpecialty = useMutation({
-        mutationKey: ["createSpecialty"],
-        mutationFn: SpecialtyService.createSpecialty,
+    const mutationCreatePosition = useMutation({
+        mutationKey: ['createPosition'],
+        mutationFn: PositionService.createPosition,
         onSuccess: (data) => {
-            if (data.status == "success") {
+            if (data.status == 'success') {
                 Message.success(data.message);
-                setIsModalOpenCreate(false);
                 formCreate.resetFields();
-                queryGetAllSpecialties.refetch();
+                setIsModalOpenCreate(false);
+                queryGetAllPositions.refetch();
             } else {
                 Message.error(data.message);
             }
@@ -75,15 +73,15 @@ const SpecialtyPage = () => {
             Message.error(error.message);
         },
     });
-    const mutationUpdateSpecialty = useMutation({
-        mutationKey: ["updateSpecialty"],
-        mutationFn: ({ id, formData }) => SpecialtyService.updateSpecialty(id, formData),
+    const mutationUpdatePosition = useMutation({
+        mutationKey: ['updatePosition'],
+        mutationFn: ({ id, ...data }) => PositionService.updatePosition(id, data),
         onSuccess: (data) => {
-            if (data.status == "success") {
+            if (data.status == 'success') {
                 Message.success(data.message);
-                setIsDrawerOpen(false);
                 formUpdate.resetFields();
-                queryGetAllSpecialties.refetch();
+                setIsDrawerOpen(false);
+                queryGetAllPositions.refetch();
             } else {
                 Message.error(data.message);
             }
@@ -92,14 +90,15 @@ const SpecialtyPage = () => {
             Message.error(error.message);
         },
     });
-    const mutationDeleteSpecialty = useMutation({
-        mutationKey: ["deleteSpecialty"],
-        mutationFn: SpecialtyService.deleteSpecialty,
+    const mutationDeletePosition = useMutation({
+        mutationKey: ['deletePosition'],
+        mutationFn: PositionService.deletePosition,
         onSuccess: (data) => {
-            if (data.status == "success") {
+            if (data.status == 'success') {
                 Message.success(data.message);
                 setIsModalOpenDelete(false);
-                queryGetAllSpecialties.refetch();
+                setRowSelected(null);
+                queryGetAllPositions.refetch();
             } else {
                 Message.error(data.message);
             }
@@ -108,26 +107,29 @@ const SpecialtyPage = () => {
             Message.error(error.message);
         },
     });
-    const mutationDeleteManySpecialties = useMutation({
-        mutationKey: ["deleteManySpecialties"],
-        mutationFn: SpecialtyService.deleteManySpecialties,
+    const mutationDeleteManyPosition = useMutation({
+        mutationKey: ['deleteManyPosition'],
+        mutationFn: PositionService.deleteManyPositions,
         onSuccess: (data) => {
-            if (data.status == "success") {
+            if (data.status == 'success') {
                 Message.success(data.message);
                 setIsModalOpenDeleteMany(false);
-                queryGetAllSpecialties.refetch();
-                setSelectedRowKeys([]); // Xoá selection sau khi xoá
+                queryGetAllPositions.refetch();
+                setSelectedRowKeys([]);
             } else {
                 Message.error(data.message);
             }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || error.message);
         }
     });
-    const { data: dataSpecialties, isLoading: isLoadingSpecialties } = queryGetAllSpecialties;
-    const { isPending: isPendingCreate } = mutationCreateSpecialty;
-    const { isPending: isPendingUpdate } = mutationUpdateSpecialty;
-    const { isPending: isPendingDelete } = mutationDeleteSpecialty;
-    const { isPending: isPendingDeleteMany } = mutationDeleteManySpecialties;
-    const data = dataSpecialties?.data?.specialties;
+    const { data: dataPositions, isLoading: isLoadingPositions } = queryGetAllPositions;
+    const { isPending: isPendingCreate } = mutationCreatePosition;
+    const { isPending: isPendingUpdate } = mutationUpdatePosition;
+    const { isPending: isPendingDelete } = mutationDeletePosition;
+    const { isPending: isPendingDeleteMany } = mutationDeleteManyPosition;
+    const data = dataPositions?.data?.positions;
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({
             setSelectedKeys,
@@ -206,8 +208,56 @@ const SpecialtyPage = () => {
     const handleReset = (clearFilters, confirm) => {
         clearFilters();
         setSearchText("");
-        confirm(); // refresh bảng sau khi clear
+        confirm();
     };
+
+    const handleViewPosition = (positionId) => { }
+    const handleEditPosition = (positionId) => {
+        const position = data.find(item => item.positionId === positionId);
+        formUpdate.setFieldsValue(position);
+        setIsDrawerOpen(true);
+    };
+    const handleOnUpdatePosition = (values) => {
+        mutationUpdatePosition.mutate({ id: rowSelected, ...values });
+    }
+    const handleShowConfirmDelete = () => {
+        setIsModalOpenDelete(true);
+    }
+
+    const handleOkDelete = () => {
+        mutationDeletePosition.mutate(rowSelected);
+    };
+
+    const handleCancelDelete = () => {
+        setIsModalOpenDelete(false);
+    };
+
+    const handleOkDeleteMany = () => {
+        mutationDeleteManyPosition.mutate(selectedRowKeys);
+    };
+
+    const handleCancelDeleteMany = () => {
+        setIsModalOpenDeleteMany(false);
+    };
+
+    const handleCreatePosition = () => {
+        formCreate.validateFields().then((values) => {
+            console.log('Creating position:', values);
+            mutationCreatePosition.mutate(values);
+        });
+    };
+    const handleCloseCreatePosition = () => {
+        setIsModalOpenCreate(false);
+    };
+    const dataTable = data?.map((item, index) => {
+        return {
+            key: item.positionId,
+            index: index + 1,
+            title: item.title,
+            description: item.description,
+            status: item.status,
+        };
+    });
     const columns = [
         {
             title: "STT",
@@ -216,11 +266,11 @@ const SpecialtyPage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Tên chuyên khoa",
-            dataIndex: "name",
-            key: "name",
-            ...getColumnSearchProps("name"),
-            sorter: (a, b) => a.name.length - b.name.length,
+            title: "Tên học vị",
+            dataIndex: "title",
+            key: "title",
+            ...getColumnSearchProps("title"),
+            sorter: (a, b) => a.title.length - b.title.length,
         },
         {
             title: "Mô tả",
@@ -242,21 +292,6 @@ const SpecialtyPage = () => {
                 )
             )
 
-        },
-        {
-            title: "Hình ảnh",
-            dataIndex: "image",
-            key: "image",
-            render: (text) => (
-                <Image
-                    src={`${import.meta.env.VITE_APP_BACKEND_URL}${text}`}
-                    alt={text}
-                    width={50}
-                    height={50}
-                    style={{ borderRadius: "8px", objectFit: "cover" }}
-                    fallback={defaultImage}
-                />
-            ),
         },
         {
             title: "Trạng thái",
@@ -302,8 +337,8 @@ const SpecialtyPage = () => {
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
                     domEvent.stopPropagation(); // tránh chọn row khi bấm menu
-                    if (key === "detail") return handleViewSpecialty(record.key);
-                    if (key === "edit") return handleEditSpecialty(record.key);
+                    if (key === "detail") return handleViewPosition(record.key);
+                    if (key === "edit") return handleEditPosition(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                 };
 
@@ -326,84 +361,6 @@ const SpecialtyPage = () => {
 
         },
     ];
-    const handleViewSpecialty = () => {
-        // Logic to view specialty details
-    };
-    const handleEditSpecialty = (specialtyId) => {
-        const specialty = data.find(item => item.specialtyId === specialtyId);
-        formUpdate.setFieldsValue({
-            name: specialty?.name,
-            description: specialty?.description,
-            image: [
-                {
-                    uid: "-1",
-                    name: specialty?.image,
-                    status: "done",
-                    url: specialty?.image ? `${import.meta.env.VITE_APP_BACKEND_URL}${specialty.image}` : defaultImage,
-                },
-            ],
-            status: specialty?.status,
-        })
-        setIsDrawerOpen(true);
-    };
-    const handleOnUpdateSpecialty = (values) => {
-        const formData = new FormData();
-        const fileObj = values.image?.[0]?.originFileObj;
-        if (fileObj instanceof File) {
-            // Nếu có file mới
-            formData.append("image", fileObj);
-        } else if (values.image?.[0]?.url) {
-            // Nếu không có file mới, nhưng có URL thì giữ nguyên
-            const imageUrl = values.image[0].url;
-            const imageName = imageUrl.replace(import.meta.env.VITE_APP_BACKEND_URL, ""); // Lấy lại phần tên file
-            formData.append("oldImage", imageName);
-        } else {
-            // Không có ảnh và cũng không dùng ảnh cũ → đã xoá
-            formData.append("isImageDeleted", true);
-        }
-        formData.append("name", values.name);
-        formData.append("description", values.description);
-        formData.append("status", values.status);
-        mutationUpdateSpecialty.mutate({ id: rowSelected, formData });
-    };
-    const handleShowConfirmDelete = () => {
-        setIsModalOpenDelete(true);
-    };
-    const handleOkDelete = () => {
-        mutationDeleteSpecialty.mutate(rowSelected);
-    };
-    const handleCancelDelete = () => {
-        setIsModalOpenDelete(false);
-    };
-    const handleOkDeleteMany = () => {
-        mutationDeleteManySpecialties.mutate(selectedRowKeys);
-    };
-    const handleCancelDeleteMany = () => {
-        setIsModalOpenDeleteMany(false);
-    };
-    const handleCreateSpecialty = () => {
-        formCreate.validateFields().then((values) => {
-            const fileList = values.image;
-            const formData = new FormData();
-            formData.append("name", values.name);
-            formData.append("description", values.description);
-            formData.append("image", fileList?.[0]?.originFileObj);
-            mutationCreateSpecialty.mutate(formData);
-        });
-    };
-    const handleCloseCreateSpecialty = () => {
-        setIsModalOpenCreate(false);
-    };
-    const dataTable = data?.map((item, index) => {
-        return {
-            key: item.specialtyId,
-            index: index + 1,
-            name: item.name,
-            description: item.description,
-            status: item.status,
-            image: item.image,
-        };
-    });
     const menuProps = {
         items: [
             {
@@ -416,23 +373,23 @@ const SpecialtyPage = () => {
             },
             {
                 key: "delete",
-                label: <Text type="danger">Xoá được chọn</Text>,
-                icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} />,
+                label: <Text type='danger'>Xoá tất cả</Text>,
+                icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
                 onClick: () => setIsModalOpenDeleteMany(true),
             },
         ],
     };
-    const handleSelectedAll = () => {
+    const handleSelectAll = () => {
         if (selectedRowKeys.length === dataTable.length) {
             setSelectedRowKeys([]);
         } else {
-            setSelectedRowKeys(dataTable.map(item => item.key));
+            const allKeys = dataTable.map((item) => item.key);
+            setSelectedRowKeys(allKeys);
         }
-    };
+    }
     return (
         <>
-
-            <Title level={4}>Danh sách chuyên khoa</Title>
+            <Title level={4}>Danh sách học vị</Title>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ButtonComponent
                 type="primary"
@@ -441,12 +398,150 @@ const SpecialtyPage = () => {
             >
                 Thêm mới
             </ButtonComponent>
+            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
-                handleSelectedAll={handleSelectedAll}
+                handleSelectedAll={handleSelectAll}
                 menuProps={menuProps}
             />
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
+            <LoadingComponent isLoading={isPendingCreate}>
+                <ModalComponent
+                    title="Thêm mới học vị"
+                    open={isModalOpenCreate}
+                    onOk={handleCreatePosition}
+                    onCancel={handleCloseCreatePosition}
+                    width={600}
+                    cancelText="Huỷ"
+                    okText="Thêm"
+                    style={{ borderRadius: 0 }}
+                >
+                    <Form
+                        name="formCreate"
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
+                        style={{ maxWidth: 600, padding: "20px" }}
+                        initialValues={{ remember: true }}
+                        autoComplete="off"
+                        form={formCreate}
+                    >
+                        <Form.Item
+                            label="Tên học vị"
+                            name="title"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập tên!",
+                                },
+                            ]}
+                        >
+                            <Input
+                                name="title"
+                                placeholder="Nhập vào tên học vị"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập mô tả!",
+                                },
+                            ]}
+                        >
+                            <Input.TextArea
+                                rows={4}
+                                placeholder="Nhập mô tả chi tiết tại đây..."
+                            />
+                        </Form.Item>
+                    </Form>
+                </ModalComponent>
+            </LoadingComponent>
+            <DrawerComponent
+                title="Chi tiết học vị"
+                placement="right"
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                width={window.innerWidth < 768 ? "100%" : 700}
+                forceRender
+            >
+                <LoadingComponent isLoading={isPendingUpdate}>
+                    <Form
+                        name="formUpdate"
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
+                        style={{ maxWidth: 600, padding: "20px" }}
+                        onFinish={handleOnUpdatePosition}
+                        autoComplete="off"
+                        form={formUpdate}
+                    >
+                        <Form.Item
+                            label="Tên học vị"
+                            name="title"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập tên học vị!",
+                                },
+                            ]}
+                        >
+                            <Input name="title" />
+                        </Form.Item>
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập mô tả!",
+                                },
+                            ]}
+                        >
+                            <Input.TextArea
+                                name="description"
+                                rows={4}
+                                placeholder="Nhập mô tả chi tiết tại đây..."
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Trạng thái"
+                            name="status"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn trạng thái!",
+                                },
+                            ]}
+                        >
+                            <Radio.Group>
+                                <Radio value="active">Hoạt động</Radio>
+                                <Radio value="inactive">Không hoạt động</Radio>
+                            </Radio.Group>
+
+                        </Form.Item>
+
+                        <Form.Item
+                            label={null}
+                            wrapperCol={{ offset: 18, span: 6 }}
+                        >
+                            <Space>
+                                <ButtonComponent
+                                    type="default"
+                                    onClick={() => setIsDrawerOpen(false)}
+                                >
+                                    Huỷ
+                                </ButtonComponent>
+                                <ButtonComponent
+                                    type="primary"
+                                    htmlType="submit"
+                                >
+                                    Lưu
+                                </ButtonComponent>
+                            </Space>
+                        </Form.Item>
+                    </Form>
+                </LoadingComponent>
+            </DrawerComponent>
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -503,206 +598,15 @@ const SpecialtyPage = () => {
                     </div>
                 </LoadingComponent>
             </ModalComponent>
-            <LoadingComponent isLoading={isPendingCreate}>
-                <ModalComponent
-                    title="Thêm mới chuyên khoa"
-                    open={isModalOpenCreate}
-                    onOk={handleCreateSpecialty}
-                    onCancel={handleCloseCreateSpecialty}
-                    width={600}
-                    cancelText="Huỷ"
-                    okText="Thêm"
-                    style={{ borderRadius: 0 }}
-                >
-                    <Form
-                        name="formCreate"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
-                        initialValues={{ remember: true }}
-                        autoComplete="off"
-                        form={formCreate}
-                    >
-                        <Form.Item
-                            label="Tên chuyên khoa"
-                            name="name"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên!",
-                                },
-                            ]}
-                        >
-                            <Input
-                                name="name"
-                                placeholder="Nhập vào tên chuyên khoa"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Mô tả"
-                            name="description"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập mô tả!",
-                                },
-                            ]}
-                        >
-                            <Input.TextArea
-                                rows={4}
-                                placeholder="Nhập mô tả chi tiết tại đây..."
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Ảnh"
-                            name="image"
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) =>
-                                Array.isArray(e) ? e : e && e.fileList
-                            }
-                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
-                        >
-
-
-                            <Upload
-                                name="file"
-                                beforeUpload={() => false}
-                                maxCount={1}
-                                accept=".jpg, .jpeg, .png, .gif, .webps"
-                                onRemove={() => formCreate.setFieldsValue({ image: [] })}
-                                fileList={formCreate.getFieldValue("image") || []}
-                                listType="picture"
-                            >
-                                <ButtonComponent icon={<UploadOutlined />}>
-                                    Chọn file
-                                </ButtonComponent>
-                            </Upload>
-
-
-                        </Form.Item>
-                    </Form>
-                </ModalComponent>
-            </LoadingComponent>
-            <DrawerComponent
-                title="Chi tiết chuyên khoa"
-                placement="right"
-                isOpen={isDrawerOpen}
-                onClose={() => setIsDrawerOpen(false)}
-                width={window.innerWidth < 768 ? "100%" : 700}
-                forceRender
-            >
-                <LoadingComponent isLoading={isPendingUpdate}>
-                    <Form
-                        name="formUpdate"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
-                        onFinish={handleOnUpdateSpecialty}
-                        autoComplete="off"
-                        form={formUpdate}
-                    >
-                        <Form.Item
-                            label="Tên chuyên khoa"
-                            name="name"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên chuyên khoa!",
-                                },
-                            ]}
-                        >
-                            <Input name="name" />
-                        </Form.Item>
-                        <Form.Item
-                            label="Mô tả"
-                            name="description"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập mô tả!",
-                                },
-                            ]}
-                        >
-                            <Input.TextArea
-                                name="description"
-                                rows={4}
-                                placeholder="Nhập mô tả chi tiết tại đây..."
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Ảnh"
-                            name="image"
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) =>
-                                Array.isArray(e) ? e : e && e.fileList
-                            }
-                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
-                        >
-                            <Upload
-                                name="file"
-                                beforeUpload={() => false}
-                                maxCount={1}
-                                accept=".jpg, .jpeg, .png, .gif, .webp"
-                                onRemove={() => formUpdate.setFieldsValue({ image: [] })}
-                                fileList={formUpdate.getFieldValue("image") || []}
-                                listType="picture"
-                            >
-                                <ButtonComponent icon={<UploadOutlined />}>
-                                    Chọn file
-                                </ButtonComponent>
-                            </Upload>
-
-                        </Form.Item>
-                        <Form.Item
-                            label="Trạng thái"
-                            name="status"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn trạng thái!",
-                                },
-                            ]}
-                        >
-                            <Radio.Group>
-                                <Radio value="active">Hoạt động</Radio>
-                                <Radio value="inactive">Không hoạt động</Radio>
-                            </Radio.Group>
-
-                        </Form.Item>
-
-                        <Form.Item
-                            label={null}
-                            wrapperCol={{ offset: 18, span: 6 }}
-                        >
-                            <Space>
-                                <ButtonComponent
-                                    type="default"
-                                    onClick={() => setIsDrawerOpen(false)}
-                                >
-                                    Huỷ
-                                </ButtonComponent>
-                                <ButtonComponent
-                                    type="primary"
-                                    htmlType="submit"
-                                >
-                                    Lưu
-                                </ButtonComponent>
-                            </Space>
-                        </Form.Item>
-                    </Form>
-                </LoadingComponent>
-            </DrawerComponent>
-
             <TableStyled
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}
                 scroll={{ x: "max-content" }}
-                loading={isLoadingSpecialties}
+                loading={isLoadingPositions}
                 dataSource={dataTable}
                 locale={{
-                    emptyText: "Không có dữ liệu chuyên khoa",
+                    emptyText: "Không có dữ liệu học vị",
                     filterConfirm: "Lọc",
                     filterReset: "Xóa lọc",
                 }}
@@ -710,10 +614,10 @@ const SpecialtyPage = () => {
                     current: pagination.current,
                     pageSize: pagination.pageSize,
                     position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} chuyên khoa`,
-                    showSizeChanger: true, // Cho phép chọn số dòng/trang
-                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                    showQuickJumper: true, // Cho phép nhảy đến trang
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} học vị`,
+                    showSizeChanger: true,
+                    pageSizeOptions: ["5", "8", "10", "20", "50"],
+                    showQuickJumper: true,
                     onChange: (page, pageSize) => {
                         setPagination({
                             current: page,
@@ -722,9 +626,9 @@ const SpecialtyPage = () => {
                     },
                 }}
             />
-
         </>
+
     )
 }
 
-export default SpecialtyPage
+export default PositionPage

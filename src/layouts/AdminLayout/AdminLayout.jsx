@@ -48,11 +48,7 @@ const menuItems = [
         icon: <TeamOutlined />,
         label: "Quản lý hồ sơ bệnh nhân",
     },
-    {
-        key: "/admin/medical-records",
-        icon: <FileTextOutlined />,
-        label: "Quản lý hồ sơ bệnh án",
-    },
+
     {
         icon: <SolutionOutlined />,
         label: "Quản lý bác sĩ",
@@ -60,6 +56,8 @@ const menuItems = [
             { key: "/admin/doctors", label: "Bác sĩ" },
             { key: "/admin/specialties", label: "Chuyên khoa" },
             { key: "/admin/doctor-schedules", label: "Lịch làm việc" },
+            { key: "/admin/positions", label: "Chức vụ" },
+            { key: "/admin/workplaces", label: "Nơi làm việc" },
         ],
     },
     {
@@ -70,7 +68,12 @@ const menuItems = [
     {
         key: "/admin/appointments",
         icon: <CalendarOutlined />,
-        label: "Quản lý Lịch hẹn",
+        label: "Quản lý lịch hẹn",
+    },
+    {
+        key: "/admin/medical-records",
+        icon: <FileTextOutlined />,
+        label: "Quản lý hồ sơ bệnh án",
     },
 
     { key: "/logout", icon: <LogoutOutlined />, label: "Đăng xuất" },
@@ -102,6 +105,8 @@ const AdminLayout = () => {
     const breadcrumbNameMap = {
         "/admin": "Quản trị",
         "/admin/accounts": "Tài khoản",
+        "/admin/workplaces": "Nơi làm việc",
+        "/admin/positions": "Chức vụ",
         "/admin/dashboard": "Thống kê",
         "/admin/appointments": "Lịch hẹn",
         "/admin/doctors": "Bác sĩ",

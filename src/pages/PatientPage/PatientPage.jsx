@@ -8,8 +8,9 @@ import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
+import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -400,42 +401,12 @@ const PatientPage = () => {
     return (
         <>
             <Title level={4}>Danh sách bệnh nhân</Title>
-            <AnimatePresence>
-                {selectedRowKeys.length > 0 && (
-                    <motion.div
-                        initial={{ y: -100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -100, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        style={{
-                            background: "#f0f2f5",
-                            padding: "10px",
-                            borderRadius: 8,
-                            margin: "10px 0",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-start",
-                        }}
-                    >
-                        <Text strong>Đã chọn {selectedRowKeys.length} <Text type="secondary" underline onClick={handleSelectedAll}>(Chọn tất cả)</Text></Text>
-                        <Divider type="vertical" style={{ height: "24px", margin: "0 10px" }} />
-                        <Dropdown menu={menuProps} disabled={selectedRowKeys.length === 0}>
-                            <ButtonComponent disabled={selectedRowKeys.length === 0}>
-                                <Space>
-                                    Hành động
-                                    <DownOutlined />
-                                </Space>
-                            </ButtonComponent>
-                        </Dropdown>
-                        <Divider type="vertical" style={{ height: "24px", margin: "0 10px" }} />
-                        <ButtonComponent
-
-                        >
-                            Xuất file
-                        </ButtonComponent>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <BulkActionBar
+                selectedRowKeys={selectedRowKeys}
+                onSelectedAll={handleSelectedAll}
+                menuProps={menuProps}
+                onExport={() => console.log("Exporting...")}
+            />
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ModalComponent
                 title={
@@ -635,18 +606,23 @@ const PatientPage = () => {
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}
-                scroll={{ x: "max-content" }} // 👈 thêm dòng này
+                scroll={{ x: "max-content" }}
                 dataSource={dataTable}
-                locale={{ emptyText: "Không có dữ liệu bệnh nhân" }}
+                locale={{
+                    emptyText: "Không có dữ liệu tài khoản",
+                    filterConfirm: "Lọc",
+                    filterReset: "Xóa lọc",
+
+                }}
                 loading={isLoadingPatient}
                 pagination={{
                     current: pagination.current,
                     pageSize: pagination.pageSize,
                     position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} bệnh nhân`,
-                    showSizeChanger: true, // Cho phép chọn số dòng/trang
-                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                    showQuickJumper: true, // Cho phép nhảy đến trang
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} tài khoản`,
+                    showSizeChanger: true,
+                    pageSizeOptions: ["5", "8", "10", "20", "50"],
+                    showQuickJumper: true,
                     onChange: (page, pageSize) => {
                         setPagination({
                             current: page,

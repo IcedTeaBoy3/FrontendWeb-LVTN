@@ -17,7 +17,6 @@ export const SpecialtyService = {
         }
     },
     updateSpecialty: async (id, data) => {
-        console.log('id data',id,data);
         try {
             const response = await axiosInstance.put(`/specialty/update-specialty/${id}`, data);
             return response.data;
