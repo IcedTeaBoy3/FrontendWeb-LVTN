@@ -8,7 +8,7 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
-import { PositionService } from '@/services/PositionService';
+import { DegreeService } from '@/services/DegreeService';
 import * as Message from "@/components/Message/Message";
 import {
     EditOutlined,
@@ -22,15 +22,16 @@ import {
     UploadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
-const PositionPage = () => {
+const DegreePage = () => {
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
+    const [rowSelected, setRowSelected] = useState(null);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [rowSelected, setRowSelected] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
+
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -48,87 +49,6 @@ const PositionPage = () => {
         pageSize: 5,
         total: 0,
     });
-    // Lấy dữ liệu
-    const queryGetAllPositions = useQuery({
-        queryKey: ['getAllPositions'],
-        queryFn: PositionService.getAllPositions,
-        refetchOnWindowFocus: false,
-        retry: 1,
-    });
-    const mutationCreatePosition = useMutation({
-        mutationKey: ['createPosition'],
-        mutationFn: PositionService.createPosition,
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                formCreate.resetFields();
-                setIsModalOpenCreate(false);
-                queryGetAllPositions.refetch();
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.message);
-        },
-    });
-    const mutationUpdatePosition = useMutation({
-        mutationKey: ['updatePosition'],
-        mutationFn: ({ id, ...data }) => PositionService.updatePosition(id, data),
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                formUpdate.resetFields();
-                setIsDrawerOpen(false);
-                queryGetAllPositions.refetch();
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.message);
-        },
-    });
-    const mutationDeletePosition = useMutation({
-        mutationKey: ['deletePosition'],
-        mutationFn: PositionService.deletePosition,
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                setIsModalOpenDelete(false);
-                setRowSelected(null);
-                queryGetAllPositions.refetch();
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.message);
-        },
-    });
-    const mutationDeleteManyPosition = useMutation({
-        mutationKey: ['deleteManyPosition'],
-        mutationFn: PositionService.deleteManyPositions,
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                setIsModalOpenDeleteMany(false);
-                queryGetAllPositions.refetch();
-                setSelectedRowKeys([]);
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.response.data.message || error.message);
-        }
-    });
-    const { data: dataPositions, isLoading: isLoadingPositions } = queryGetAllPositions;
-    const { isPending: isPendingCreate } = mutationCreatePosition;
-    const { isPending: isPendingUpdate } = mutationUpdatePosition;
-    const { isPending: isPendingDelete } = mutationDeletePosition;
-    const { isPending: isPendingDeleteMany } = mutationDeleteManyPosition;
-    const data = dataPositions?.data?.positions;
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({
             setSelectedKeys,
@@ -209,53 +129,133 @@ const PositionPage = () => {
         setSearchText("");
         confirm();
     };
-
-    const handleViewPosition = (positionId) => { }
-    const handleEditPosition = (positionId) => {
-        const position = data.find(item => item.positionId === positionId);
-        formUpdate.setFieldsValue(position);
-        setIsDrawerOpen(true);
-    };
-    const handleOnUpdatePosition = (values) => {
-        mutationUpdatePosition.mutate({ id: rowSelected, ...values });
-    }
-    const handleShowConfirmDelete = () => {
-        setIsModalOpenDelete(true);
-    }
-
-    const handleOkDelete = () => {
-        mutationDeletePosition.mutate(rowSelected);
-    };
-
-    const handleCancelDelete = () => {
-        setIsModalOpenDelete(false);
-    };
-
-    const handleOkDeleteMany = () => {
-        mutationDeleteManyPosition.mutate(selectedRowKeys);
-    };
-
-    const handleCancelDeleteMany = () => {
-        setIsModalOpenDeleteMany(false);
-    };
-
-    const handleCreatePosition = () => {
-        formCreate.validateFields().then((values) => {
-            mutationCreatePosition.mutate(values);
-        });
-    };
-    const handleCloseCreatePosition = () => {
-        setIsModalOpenCreate(false);
-    };
+    const queryGetAllDegrees = useQuery({
+        queryKey: ['getAllDegrees'],
+        queryFn: DegreeService.getAllDegrees,
+        refetchOnWindowFocus: false,
+        retry: 1,
+    });
+    const mutationCreateDegree = useMutation({
+        queryKey: ['createDegree'],
+        mutationFn: DegreeService.createDegree,
+        onSuccess: (data) => {
+            if (data.status == 'success') {
+                Message.success(data.message);
+                formCreate.resetFields();
+                setIsModalOpenCreate(false);
+                queryGetAllDegrees.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        },
+    });
+    const mutationUpdateDegree = useMutation({
+        queryKey: ['updateDegree'],
+        mutationFn: ({ id, ...data }) => DegreeService.updateDegree(id, data),
+        onSuccess: (data) => {
+            if (data.status == 'success') {
+                Message.success(data.message);
+                formUpdate.resetFields();
+                setIsDrawerOpen(false);
+                queryGetAllDegrees.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        },
+    });
+    const mutationDeleteDegree = useMutation({
+        queryKey: ['deleteDegree'],
+        mutationFn: DegreeService.deleteDegree,
+        onSuccess: (data) => {
+            if (data.status == 'success') {
+                Message.success(data.message);
+                setIsModalOpenDelete(false);
+                setRowSelected(null);
+                queryGetAllDegrees.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        },
+    });
+    const mutationDeleteManyDegrees = useMutation({
+        queryKey: ['deleteManyDegrees'],
+        mutationFn: DegreeService.deleteManyDegrees,
+        onSuccess: (data) => {
+            if (data.status == 'success') {
+                Message.success(data.message);
+                setIsModalOpenDeleteMany(false);
+                setSelectedRowKeys([]);
+                queryGetAllDegrees.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        },
+    });
+    const { data: dataDegrees, isLoading: isLoadingDegrees } = queryGetAllDegrees;
+    const { isPending: isPendingCreate } = mutationCreateDegree;
+    const { isPending: isPendingUpdate } = mutationUpdateDegree;
+    const { isPending: isPendingDelete } = mutationDeleteDegree;
+    const { isPending: isPendingDeleteMany } = mutationDeleteManyDegrees;
+    const data = dataDegrees?.data?.degrees;
     const dataTable = data?.map((item, index) => {
         return {
-            key: item.positionId,
+            key: item.degreeId,
             index: index + 1,
             title: item.title,
+            abbreviation: item.abbreviation,
             description: item.description,
             status: item.status,
         };
     });
+
+    const handleViewDegree = () => {
+
+    }
+    const handleEditDegree = (degreeId) => {
+        const degree = dataTable.find(item => item.key === degreeId);
+        formUpdate.setFieldsValue(degree);
+        setIsDrawerOpen(true);
+    }
+    const handleOnUpdateDegree = (values) => {
+        mutationUpdateDegree.mutate({ id: rowSelected, ...values });
+    }
+    const handleOkDelete = () => {
+        mutationDeleteDegree.mutate(rowSelected);
+    }
+    const handleCancelDelete = () => {
+        setIsModalOpenDelete(false);
+    }
+    const handleOkDeleteMany = () => {
+        mutationDeleteManyDegrees.mutate(selectedRowKeys);
+    }
+    const handleCancelDeleteMany = () => {
+        setIsModalOpenDeleteMany(false);
+    }
+    const handleCreateDegree = () => {
+        formCreate.validateFields().then((values) => {
+            mutationCreateDegree.mutate(values);
+        })
+    }
+    const handleCloseCreateDegree = () => {
+        setIsModalOpenCreate(false);
+    }
+
+    const handleShowConfirmDelete = () => {
+        setIsModalOpenDelete(true);
+    }
+
     const columns = [
         {
             title: "STT",
@@ -264,11 +264,18 @@ const PositionPage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Tên chức vụ",
+            title: "Tên học vị",
             dataIndex: "title",
             key: "title",
             ...getColumnSearchProps("title"),
             sorter: (a, b) => a.title.length - b.title.length,
+        },
+        {
+            title: "Viết tắt",
+            dataIndex: "abbreviation",
+            key: "abbreviation",
+            ...getColumnSearchProps("abbreviation"),
+            sorter: (a, b) => a.abbreviation.length - b.abbreviation.length,
         },
         {
             title: "Mô tả",
@@ -335,8 +342,8 @@ const PositionPage = () => {
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
                     domEvent.stopPropagation(); // tránh chọn row khi bấm menu
-                    if (key === "detail") return handleViewPosition(record.key);
-                    if (key === "edit") return handleEditPosition(record.key);
+                    if (key === "detail") return handleViewDegree(record.key);
+                    if (key === "edit") return handleEditDegree(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                 };
 
@@ -387,7 +394,7 @@ const PositionPage = () => {
     }
     return (
         <>
-            <Title level={4}>Danh sách chức vụ</Title>
+            <Title level={4}>Danh sách học vị</Title>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ButtonComponent
                 type="primary"
@@ -402,12 +409,13 @@ const PositionPage = () => {
                 handleSelectedAll={handleSelectAll}
                 menuProps={menuProps}
             />
+
             <LoadingComponent isLoading={isPendingCreate}>
                 <ModalComponent
-                    title="Thêm mới chức vụ"
+                    title="Thêm mới học vị"
                     open={isModalOpenCreate}
-                    onOk={handleCreatePosition}
-                    onCancel={handleCloseCreatePosition}
+                    onOk={handleCreateDegree}
+                    onCancel={handleCloseCreateDegree}
                     width={600}
                     cancelText="Huỷ"
                     okText="Thêm"
@@ -423,7 +431,7 @@ const PositionPage = () => {
                         form={formCreate}
                     >
                         <Form.Item
-                            label="Tên chức vụ"
+                            label="Tên học vị"
                             name="title"
                             rules={[
                                 {
@@ -438,14 +446,24 @@ const PositionPage = () => {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Mô tả"
-                            name="description"
+                            label="Viết tắt"
+                            name="abbreviation"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng nhập mô tả!",
+                                    message: "Vui lòng nhập tên viết tắt!",
                                 },
                             ]}
+                        >
+                            <Input
+                                name="abbreviation"
+                                placeholder="Nhập vào tên viết tắt"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+
                         >
                             <Input.TextArea
                                 rows={4}
@@ -469,31 +487,38 @@ const PositionPage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
-                        onFinish={handleOnUpdatePosition}
+                        onFinish={handleOnUpdateDegree}
                         autoComplete="off"
                         form={formUpdate}
                     >
                         <Form.Item
-                            label="Tên chức vụ"
+                            label="Tên học vị"
                             name="title"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng nhập tên chức vụ!",
+                                    message: "Vui lòng nhập tên học vị!",
                                 },
                             ]}
                         >
                             <Input name="title" />
                         </Form.Item>
                         <Form.Item
-                            label="Mô tả"
-                            name="description"
+                            label="Viết tắt"
+                            name="abbreviation"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng nhập mô tả!",
+                                    message: "Vui lòng nhập tên viết tắt!",
                                 },
                             ]}
+                        >
+                            <Input name="abbreviation" />
+                        </Form.Item>
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+
                         >
                             <Input.TextArea
                                 name="description"
@@ -572,7 +597,7 @@ const PositionPage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá chức vụ</span>
+                        <span>Xoá học vị</span>
                     </span>
                 }
                 open={isModalOpenDeleteMany}
@@ -591,7 +616,7 @@ const PositionPage = () => {
                             <Text strong type="danger">
                                 xoá
                             </Text>{" "}
-                            {selectedRowKeys.length} chức vụ này không?
+                            {selectedRowKeys.length} học vị này không?
                         </Text>
                     </div>
                 </LoadingComponent>
@@ -601,10 +626,10 @@ const PositionPage = () => {
                 rowKey={"key"}
                 columns={columns}
                 scroll={{ x: "max-content" }}
-                loading={isLoadingPositions}
+                loading={isLoadingDegrees}
                 dataSource={dataTable}
                 locale={{
-                    emptyText: "Không có dữ liệu chức vụ",
+                    emptyText: "Không có dữ liệu học vị",
                     filterConfirm: "Lọc",
                     filterReset: "Xóa lọc",
                 }}
@@ -612,7 +637,7 @@ const PositionPage = () => {
                     current: pagination.current,
                     pageSize: pagination.pageSize,
                     position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} chức vụ`,
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} học vị`,
                     showSizeChanger: true,
                     pageSizeOptions: ["5", "8", "10", "20", "50"],
                     showQuickJumper: true,
@@ -625,8 +650,7 @@ const PositionPage = () => {
                 }}
             />
         </>
-
     )
 }
 
-export default PositionPage
+export default DegreePage
