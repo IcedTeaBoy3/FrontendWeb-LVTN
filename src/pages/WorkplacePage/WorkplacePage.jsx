@@ -188,10 +188,28 @@ const WorkplacePage = () => {
             Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     });
+    const mutationDeleteManyWorkplaces = useMutation({
+        mutationKey: ['deleteManyWorkplaces'],
+        mutationFn: WorkplaceService.deleteManyWorkplaces,
+        onSuccess: (data) => {
+            if (data?.status == 'success') {
+                Message.success(data.message);
+                setIsModalOpenDeleteMany(false);
+                setSelectedRowKeys([]);
+                queryGetAllWorkplaces.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+    });
     const { data: dataWorkplaces, isLoading: isLoadingWorkplaces } = queryGetAllWorkplaces;
     const { isPending: isPendingCreate } = mutationCreateWorkplace;
     const { isPending: isPendingUpdate } = mutationUpdateWorkplace;
     const { isPending: isPendingDelete } = mutationDeleteWorkplace;
+    const { isPending: isPendingDeleteMany } = mutationDeleteManyWorkplaces;
     const data = dataWorkplaces?.data?.workplaces;
     const dataTable = data?.map((item, index) => ({
         key: item.workplaceId,
@@ -381,6 +399,12 @@ const WorkplacePage = () => {
     };
     const handleCloseCreateWorkplace = () => {
         setIsModalOpenCreate(false);
+    };
+    const handleOkDeleteMany = () => {
+        mutationDeleteManyWorkplaces.mutate(selectedRowKeys);
+    };
+    const handleCancelDeleteMany = () => {
+        setIsModalOpenDeleteMany(false);
     };
 
     const menuProps = {
@@ -706,7 +730,7 @@ const WorkplacePage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá chuyên khoa</span>
+                        <span>Xoá nơi làm việc</span>
                     </span>
                 }
                 open={isModalOpenDelete}
@@ -725,7 +749,35 @@ const WorkplacePage = () => {
                             <Text strong type="danger">
                                 xoá
                             </Text>{" "}
-                            chuyên khoa này không?
+                            nơi làm việc này không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá nơi làm việc</span>
+                    </span>
+                }
+                open={isModalOpenDeleteMany}
+                onOk={handleOkDeleteMany}
+                okText="Xoá"
+                cancelText="Hủy"
+                onCancel={handleCancelDeleteMany}
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDeleteMany}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            {selectedRowKeys.length} nơi làm việc này không?
                         </Text>
                     </div>
                 </LoadingComponent>
