@@ -17,6 +17,7 @@
     "@tanstack/react-query-devtools": "^5.85.3",
     "antd": "^5.27.0",
     "axios": "^1.11.0",
+    "dayjs": "^1.11.18",
     "dotenv": "^17.2.1",
     "framer-motion": "^12.23.12",
     "jwt-decode": "^4.0.0",

@@ -9,7 +9,8 @@ import PatientPage from "@/pages/PatientPage/PatientPage";
 import SpecialtyPage from "@/pages/SpecialtyPage/SpecialtyPage";
 import PositionPage from "@/pages/PositionPage/PositionPage";
 import DegreePage from "@/pages/DegreePage/DegreePage";
-import WorkplacePage from "../pages/WorkplacePage/WorkplacePage";
+import WorkplacePage from "@/pages/WorkplacePage/WorkplacePage";
+import DoctorPage from "@/pages/DoctorPage/DoctorPage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 const AppRoutes = () => {
@@ -33,6 +34,7 @@ const AppRoutes = () => {
                     <Route path="positions" element={<PositionPage />} />
                     <Route path="degrees" element={<DegreePage />} />
                     <Route path="workplaces" element={<WorkplacePage />} />
+                    <Route path="doctors" element={<DoctorPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
                 {/* Route không khớp */}

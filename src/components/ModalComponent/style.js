@@ -6,6 +6,10 @@ export const CustomModal = styled(Modal)`
         padding-bottom: 10px;
         border-bottom: 1px solid #eee;
     }
+    .ant-modal-header .ant-modal-title {
+        font-weight: 600;
+        font-size: 18px;
+    }
     .ant-modal-footer {
         padding-top: 10px;
         border-top: 1px solid #eee;

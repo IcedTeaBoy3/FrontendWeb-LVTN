@@ -369,8 +369,6 @@ const PatientPage = () => {
             dateOfBirth: item.dateOfBirth,
             gender: item.gender,
             ethnic: item.ethnic,
-            idCard: item.idCard,
-            insuranceCode: item.insuranceCode,
             job: item.job,
         };
     });
@@ -406,7 +404,7 @@ const PatientPage = () => {
                 selectedRowKeys={selectedRowKeys}
                 onSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
-                onExport={() => console.log("Exporting...")}
+
             />
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ModalComponent
