@@ -89,7 +89,9 @@ const DoctorPage = () => {
             if (data?.status == "success") {
                 Message.success(data?.message);
                 formCreateDegree.resetFields();
-                formCreate.setFieldValue("degreeId", data?.data?.degreeId); // chọn luôn bằng cấp vừa tạo
+                if (isModalOpenCreate)
+                    formCreate.setFieldValue("degreeId", data?.data?.degreeId); // chọn luôn bằng cấp vừa tạo
+                formUpdate.setFieldValue("degreeId", data?.data?.degreeId);
                 setIsOpenModelCreateDegree(false);
                 queryGetAllDegrees.refetch();
             } else {
@@ -698,6 +700,7 @@ const DoctorPage = () => {
                         onFinish={handleOnUpdateDoctor}
                         autoComplete="off"
                         labelAlign="left"
+                        scrollToFirstError
                         form={formUpdate}
                     >
                         <Title level={5}>Thông tin tài khoản</Title>

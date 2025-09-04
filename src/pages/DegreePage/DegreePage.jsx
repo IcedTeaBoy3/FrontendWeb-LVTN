@@ -177,6 +177,7 @@ const DegreePage = () => {
             if (data.status == 'success') {
                 Message.success(data.message);
                 setIsModalOpenDelete(false);
+                setSelectedRowKeys((prev) => prev.filter((key) => key !== rowSelected));
                 setRowSelected(null);
                 queryGetAllDegrees.refetch();
             } else {

@@ -1,5 +1,4 @@
-import React from "react";
-import { Drawer } from "antd";
+import { StyledDrawer } from "./style"
 const DrawerComponent = ({
     title = "Drawer",
     placement = "right",
@@ -8,9 +7,9 @@ const DrawerComponent = ({
     ...rests
 }) => {
     return (
-        <Drawer title={title} open={isOpen} placement={placement} {...rests}>
+        <StyledDrawer title={title} open={isOpen} placement={placement} {...rests}>
             {children}
-        </Drawer>
+        </StyledDrawer>
     );
 };
 

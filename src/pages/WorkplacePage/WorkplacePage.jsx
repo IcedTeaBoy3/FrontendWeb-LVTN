@@ -464,8 +464,11 @@ const WorkplacePage = () => {
                         name="formCreate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
-                        initialValues={{ remember: true }}
+                        style={{ maxWidth: 600, padding: "20px 10px" }}
+                        vinitialValues={{
+                            type: "hospital", // 👈 set mặc định ở đây
+                        }}
+                        labelAlign="left"
                         autoComplete="off"
                         form={formCreate}
                     >
@@ -487,12 +490,7 @@ const WorkplacePage = () => {
                         <Form.Item
                             label="Mô tả"
                             name="description"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập mô tả!",
-                                },
-                            ]}
+
                         >
                             <Input.TextArea
                                 rows={4}
@@ -532,6 +530,7 @@ const WorkplacePage = () => {
                         <Form.Item
                             label="Loại cơ sở"
                             name="type"
+
                             rules={[
                                 {
                                     required: true,
@@ -586,8 +585,9 @@ const WorkplacePage = () => {
                     <Form
                         name="formUpdate"
                         labelCol={{ span: 6 }}
+                        labelAlign="left"
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
+                        style={{ maxWidth: 600, padding: "20px 10px" }}
                         onFinish={handleOnUpdateWorkplace}
                         autoComplete="off"
                         form={formUpdate}
