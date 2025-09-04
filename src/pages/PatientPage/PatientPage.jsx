@@ -18,7 +18,8 @@ import {
     DownOutlined,
     MoreOutlined,
     EyeOutlined,
-    ExclamationCircleOutlined
+    ExclamationCircleOutlined,
+    ExportOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -376,17 +377,17 @@ const PatientPage = () => {
     const menuProps = {
         items: [
             {
-                key: "edit",
-                label: "Chỉnh sửa",
-                icon: <EditOutlined />,
+                key: "export",
+                label: "Xuất file",
+                icon: <ExportOutlined style={{ fontSize: 16 }} />,
             },
             {
                 type: "divider"
             },
             {
                 key: "delete",
-                label: "Xóa tất cả",
-                icon: <DeleteOutlined />,
+                label: <Text type='danger'>Xoá tất cả</Text>,
+                icon: <DeleteOutlined style={{ fontSize: 16, color: 'red' }} />,
                 onClick: () => setIsModalOpenDeleteMany(true),
             },
         ],

@@ -45,10 +45,6 @@ export default function BulkActionBar({
                             </Space>
                         </ButtonComponent>
                     </Dropdown>
-
-                    <Divider type="vertical" style={{ height: "24px", margin: "0 10px" }} />
-
-                    <ButtonComponent>Xuất file</ButtonComponent>
                 </motion.div>
             )}
         </AnimatePresence>

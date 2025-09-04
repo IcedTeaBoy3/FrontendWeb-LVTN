@@ -19,7 +19,8 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     PlusOutlined,
-    UploadOutlined
+    UploadOutlined,
+    ExportOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 const DegreePage = () => {
@@ -369,9 +370,9 @@ const DegreePage = () => {
     const menuProps = {
         items: [
             {
-                key: "edit",
-                label: "Chỉnh sửa",
-                icon: <EditOutlined style={{ fontSize: 16 }} />,
+                key: "export",
+                label: "Xuất file",
+                icon: <ExportOutlined style={{ fontSize: 16 }} />,
             },
             {
                 type: "divider"

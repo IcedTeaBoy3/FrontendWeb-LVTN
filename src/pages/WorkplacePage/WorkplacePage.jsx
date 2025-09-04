@@ -8,8 +8,9 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
-import { PositionService } from '@/services/PositionService';
+import { WorkplaceService } from '@/services/WorkplaceService';
 import * as Message from "@/components/Message/Message";
+import defaultImage from "@/assets/default_image.png";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -19,10 +20,12 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     PlusOutlined,
-    ExportOutlined
+    ExportOutlined,
+    UploadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
-const PositionPage = () => {
+
+const WorkplacePage = () => {
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
@@ -48,87 +51,6 @@ const PositionPage = () => {
         pageSize: 5,
         total: 0,
     });
-    // Lấy dữ liệu
-    const queryGetAllPositions = useQuery({
-        queryKey: ['getAllPositions'],
-        queryFn: PositionService.getAllPositions,
-        refetchOnWindowFocus: false,
-        retry: 1,
-    });
-    const mutationCreatePosition = useMutation({
-        mutationKey: ['createPosition'],
-        mutationFn: PositionService.createPosition,
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                formCreate.resetFields();
-                setIsModalOpenCreate(false);
-                queryGetAllPositions.refetch();
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.message);
-        },
-    });
-    const mutationUpdatePosition = useMutation({
-        mutationKey: ['updatePosition'],
-        mutationFn: ({ id, ...data }) => PositionService.updatePosition(id, data),
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                formUpdate.resetFields();
-                setIsDrawerOpen(false);
-                queryGetAllPositions.refetch();
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.message);
-        },
-    });
-    const mutationDeletePosition = useMutation({
-        mutationKey: ['deletePosition'],
-        mutationFn: PositionService.deletePosition,
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                setIsModalOpenDelete(false);
-                setRowSelected(null);
-                queryGetAllPositions.refetch();
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.message);
-        },
-    });
-    const mutationDeleteManyPosition = useMutation({
-        mutationKey: ['deleteManyPosition'],
-        mutationFn: PositionService.deleteManyPositions,
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                setIsModalOpenDeleteMany(false);
-                queryGetAllPositions.refetch();
-                setSelectedRowKeys([]);
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.response.data.message || error.message);
-        }
-    });
-    const { data: dataPositions, isLoading: isLoadingPositions } = queryGetAllPositions;
-    const { isPending: isPendingCreate } = mutationCreatePosition;
-    const { isPending: isPendingUpdate } = mutationUpdatePosition;
-    const { isPending: isPendingDelete } = mutationDeletePosition;
-    const { isPending: isPendingDeleteMany } = mutationDeleteManyPosition;
-    const data = dataPositions?.data?.positions;
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({
             setSelectedKeys,
@@ -207,55 +129,80 @@ const PositionPage = () => {
     const handleReset = (clearFilters, confirm) => {
         clearFilters();
         setSearchText("");
-        confirm();
+        confirm(); // refresh bảng sau khi clear
     };
 
-    const handleViewPosition = (positionId) => { }
-    const handleEditPosition = (positionId) => {
-        const position = data.find(item => item.positionId === positionId);
-        formUpdate.setFieldsValue(position);
-        setIsDrawerOpen(true);
-    };
-    const handleOnUpdatePosition = (values) => {
-        mutationUpdatePosition.mutate({ id: rowSelected, ...values });
-    }
-    const handleShowConfirmDelete = () => {
-        setIsModalOpenDelete(true);
-    }
-
-    const handleOkDelete = () => {
-        mutationDeletePosition.mutate(rowSelected);
-    };
-
-    const handleCancelDelete = () => {
-        setIsModalOpenDelete(false);
-    };
-
-    const handleOkDeleteMany = () => {
-        mutationDeleteManyPosition.mutate(selectedRowKeys);
-    };
-
-    const handleCancelDeleteMany = () => {
-        setIsModalOpenDeleteMany(false);
-    };
-
-    const handleCreatePosition = () => {
-        formCreate.validateFields().then((values) => {
-            mutationCreatePosition.mutate(values);
-        });
-    };
-    const handleCloseCreatePosition = () => {
-        setIsModalOpenCreate(false);
-    };
-    const dataTable = data?.map((item, index) => {
-        return {
-            key: item.positionId,
-            index: index + 1,
-            title: item.title,
-            description: item.description,
-            status: item.status,
-        };
+    const queryGetAllWorkplaces = useQuery({
+        queryKey: ['getAllWorkplaces'],
+        queryFn: WorkplaceService.getAllWorkplaces,
+        refetchOnWindowFocus: false,
+        retry: 1,
     });
+    const mutationCreateWorkplace = useMutation({
+        mutationKey: ['createWorkplace'],
+        mutationFn: WorkplaceService.createWorkplace,
+        onSuccess: (data) => {
+            if (data?.status == 'success') {
+                Message.success(data.message);
+                formCreate.resetFields();
+                setIsModalOpenCreate(false);
+                queryGetAllWorkplaces.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+    });
+    const mutationUpdateWorkplace = useMutation({
+        queryKey: ['updateWorkplace'],
+        mutationFn: ({ id, ...data }) => WorkplaceService.updateWorkplace(id, data),
+        onSuccess: (data) => {
+            if (data?.status == 'success') {
+                Message.success(data.message);
+                formUpdate.resetFields();
+                setIsDrawerOpen(false);
+                queryGetAllWorkplaces.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+    });
+    const mutationDeleteWorkplace = useMutation({
+        mutationKey: ['deleteWorkplace'],
+        mutationFn: WorkplaceService.deleteWorkplace,
+        onSuccess: (data) => {
+            if (data?.status == 'success') {
+                Message.success(data.message);
+                setIsModalOpenDelete(false);
+                queryGetAllWorkplaces.refetch();
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+    });
+    const { data: dataWorkplaces, isLoading: isLoadingWorkplaces } = queryGetAllWorkplaces;
+    const { isPending: isPendingCreate } = mutationCreateWorkplace;
+    const { isPending: isPendingUpdate } = mutationUpdateWorkplace;
+    const { isPending: isPendingDelete } = mutationDeleteWorkplace;
+    const data = dataWorkplaces?.data?.workplaces;
+    const dataTable = data?.map((item, index) => ({
+        key: item.workplaceId,
+        index: index + 1,
+        name: item.name,
+        description: item.description,
+        address: item.address,
+        phone: item.phone,
+        type: item.type,
+        thumbnail: item.thumbnail,
+    }));
     const columns = [
         {
             title: "STT",
@@ -264,11 +211,11 @@ const PositionPage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Tên chức vụ",
-            dataIndex: "title",
-            key: "title",
-            ...getColumnSearchProps("title"),
-            sorter: (a, b) => a.title.length - b.title.length,
+            title: "Tên cơ sở",
+            dataIndex: "name",
+            key: "name",
+            ...getColumnSearchProps("name"),
+            sorter: (a, b) => a.name.length - b.name.length,
         },
         {
             title: "Mô tả",
@@ -291,6 +238,54 @@ const PositionPage = () => {
             )
 
         },
+        {
+            title: "Địa chỉ",
+            dataIndex: "address",
+            key: "address",
+            render: (text) => (
+                text ? (
+                    <Popover
+                        content={<div style={{ maxWidth: 300 }}>{text}</div>}
+                        title="Nội dung đầy đủ"
+                        trigger="hover"
+                    >
+                        <Text ellipsis style={{ maxWidth: 200, display: "inline-block" }}>
+                            {text.length > 60 ? text.substring(0, 50) + "..." : text}
+                        </Text>
+                    </Popover>
+                ) : (
+                    <Text type="secondary">Chưa cập nhật</Text>
+                )
+            )
+        },
+        {
+            title: "Số điện thoại",
+            dataIndex: "phone",
+            key: "phone",
+        },
+        {
+            title: "Loại cơ sở",
+            dataIndex: "type",
+            key: "type",
+            render: (text) => (
+                text === "hospital" ? <Tag color="blue" style={{ borderRadius: "8px", padding: "0 8px" }}>Bệnh viện</Tag> : <Tag color="green" style={{ borderRadius: "8px", padding: "0 8px" }}>Phòng khám</Tag>
+            ),
+        },
+        // {
+        //     title: "Hình ảnh",
+        //     dataIndex: "thumbnail",
+        //     key: "thumbnail",
+        //     render: (text) => (
+        //         <Image
+        //             src={`${import.meta.env.VITE_APP_BACKEND_URL}${text}`}
+        //             alt={text}
+        //             width={50}
+        //             height={50}
+        //             style={{ borderRadius: "8px", objectFit: "cover" }}
+        //             fallback={defaultImage}
+        //         />
+        //     ),
+        // },
         {
             title: "Trạng thái",
             dataIndex: "status",
@@ -335,8 +330,8 @@ const PositionPage = () => {
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
                     domEvent.stopPropagation(); // tránh chọn row khi bấm menu
-                    if (key === "detail") return handleViewPosition(record.key);
-                    if (key === "edit") return handleEditPosition(record.key);
+                    if (key === "detail") return handleViewWorkplace(record.key);
+                    if (key === "edit") return handleEditWorkplace(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                 };
 
@@ -359,35 +354,63 @@ const PositionPage = () => {
 
         },
     ];
+    const handleViewWorkplace = (key) => {
+        console.log("View workplace:", key);
+    };
+    const handleEditWorkplace = (key) => {
+        const workplace = dataTable.find(item => item.key === key);
+        formUpdate.setFieldsValue(workplace);
+        setIsDrawerOpen(true);
+    };
+    const handleShowConfirmDelete = () => {
+        setIsModalOpenDelete(true);
+    };
+    const handleOnUpdateWorkplace = (values) => {
+        mutationUpdateWorkplace.mutate({ id: rowSelected, ...values });
+    };
+    const handleOkDelete = () => {
+        mutationDeleteWorkplace.mutate(rowSelected);
+    };
+    const handleCancelDelete = () => {
+        setIsModalOpenDelete(false);
+    };
+    const handleCreateWorkplace = () => {
+        formCreate.validateFields().then((values) => {
+            mutationCreateWorkplace.mutate(values);
+        });
+    };
+    const handleCloseCreateWorkplace = () => {
+        setIsModalOpenCreate(false);
+    };
+
     const menuProps = {
         items: [
             {
-                key: "export",
-                label: "Xuất file",
-                icon: <ExportOutlined style={{ fontSize: 16 }} />,
+                key: "edit",
+                label: "Chỉnh sửa",
+                icon: <EditOutlined style={{ fontSize: 16 }} />,
             },
             {
                 type: "divider"
             },
             {
                 key: "delete",
-                label: <Text type="danger">Xoá tất cả</Text>,
-                icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
+                label: <Text type="danger">Xoá được chọn</Text>,
+                icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} />,
                 onClick: () => setIsModalOpenDeleteMany(true),
             },
         ],
     };
-    const handleSelectAll = () => {
+    const handleSelectedAll = () => {
         if (selectedRowKeys.length === dataTable.length) {
             setSelectedRowKeys([]);
         } else {
-            const allKeys = dataTable.map((item) => item.key);
-            setSelectedRowKeys(allKeys);
+            setSelectedRowKeys(dataTable.map(item => item.key));
         }
-    }
+    };
     return (
         <>
-            <Title level={4}>Danh sách chức vụ</Title>
+            <Title level={4}>Danh sách nơi làm việc</Title>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ButtonComponent
                 type="primary"
@@ -396,18 +419,18 @@ const PositionPage = () => {
             >
                 Thêm mới
             </ButtonComponent>
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
-                handleSelectedAll={handleSelectAll}
+                handleSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
             />
+            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <LoadingComponent isLoading={isPendingCreate}>
                 <ModalComponent
-                    title="Thêm mới chức vụ"
+                    title="Thêm mới nơi làm việc"
                     open={isModalOpenCreate}
-                    onOk={handleCreatePosition}
-                    onCancel={handleCloseCreatePosition}
+                    onOk={handleCreateWorkplace}
+                    onCancel={handleCloseCreateWorkplace}
                     width={600}
                     cancelText="Huỷ"
                     okText="Thêm"
@@ -423,8 +446,8 @@ const PositionPage = () => {
                         form={formCreate}
                     >
                         <Form.Item
-                            label="Tên chức vụ"
-                            name="title"
+                            label="Tên cơ sở"
+                            name="name"
                             rules={[
                                 {
                                     required: true,
@@ -433,8 +456,8 @@ const PositionPage = () => {
                             ]}
                         >
                             <Input
-                                name="title"
-                                placeholder="Nhập vào tên chức vụ"
+                                name="name"
+                                placeholder="Nhập vào tên cơ sở"
                             />
                         </Form.Item>
                         <Form.Item
@@ -452,11 +475,83 @@ const PositionPage = () => {
                                 placeholder="Nhập mô tả chi tiết tại đây..."
                             />
                         </Form.Item>
+                        <Form.Item
+                            label="Địa chỉ"
+                            name="address"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập địa chỉ!",
+                                },
+                            ]}
+                        >
+                            <Input.TextArea
+                                rows={2}
+                                placeholder="Nhập địa chỉ tại đây..."
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="SĐT"
+                            name="phone"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập SĐT!",
+                                },
+                            ]}
+                        >
+                            <Input
+                                name="phone"
+                                placeholder="Nhập vào SĐT"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Loại cơ sở"
+                            name="type"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn loại cơ sở!",
+                                },
+                            ]}
+                        >
+                            <Select placeholder="Chọn loại cơ sở">
+                                <Select.Option value="hospital">Bệnh viện</Select.Option>
+                                <Select.Option value="clinic">Phòng khám</Select.Option>
+                            </Select>
+                        </Form.Item>
+                        <Form.Item
+                            label="Ảnh"
+                            name="image"
+                            valuePropName="fileList"
+                            getValueFromEvent={(e) =>
+                                Array.isArray(e) ? e : e && e.fileList
+                            }
+                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
+                        >
+
+
+                            <Upload
+                                name="file"
+                                beforeUpload={() => false}
+                                maxCount={1}
+                                accept=".jpg, .jpeg, .png, .gif, .webps"
+                                onRemove={() => formCreate.setFieldsValue({ image: [] })}
+                                fileList={formCreate.getFieldValue("image") || []}
+                                listType="picture"
+                            >
+                                <ButtonComponent icon={<UploadOutlined />}>
+                                    Chọn file
+                                </ButtonComponent>
+                            </Upload>
+
+
+                        </Form.Item>
                     </Form>
                 </ModalComponent>
             </LoadingComponent>
             <DrawerComponent
-                title="Chi tiết chức vụ"
+                title="Chi tiết nơi làm việc"
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -469,21 +564,21 @@ const PositionPage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
-                        onFinish={handleOnUpdatePosition}
+                        onFinish={handleOnUpdateWorkplace}
                         autoComplete="off"
                         form={formUpdate}
                     >
                         <Form.Item
-                            label="Tên chức vụ"
-                            name="title"
+                            label="Tên cơ sở"
+                            name="name"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng nhập tên chức vụ!",
+                                    message: "Vui lòng nhập tên cơ sở!",
                                 },
                             ]}
                         >
-                            <Input name="title" />
+                            <Input name="name" />
                         </Form.Item>
                         <Form.Item
                             label="Mô tả"
@@ -502,6 +597,73 @@ const PositionPage = () => {
                             />
                         </Form.Item>
                         <Form.Item
+                            label="Địa chỉ"
+                            name="address"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập địa chỉ!",
+                                },
+                            ]}
+                        >
+                            <Input.TextArea
+                                name="address"
+                                rows={4}
+                                placeholder="Nhập địa chỉ chi tiết "
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="SĐT"
+                            name="phone"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập SĐT!",
+                                },
+                            ]}
+                        >
+                            <Input name="phone" />
+                        </Form.Item>
+                        <Form.Item
+                            label="Loại cơ sở"
+                            name="type"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn loại cơ sở!",
+                                },
+                            ]}
+                        >
+                            <Select placeholder="Chọn loại cơ sở">
+                                <Select.Option value="hospital">Bệnh viện</Select.Option>
+                                <Select.Option value="clinic">Phòng khám</Select.Option>
+                            </Select>
+                        </Form.Item>
+                        <Form.Item
+                            label="Ảnh"
+                            name="image"
+                            valuePropName="fileList"
+                            getValueFromEvent={(e) =>
+                                Array.isArray(e) ? e : e && e.fileList
+                            }
+                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
+                        >
+                            <Upload
+                                name="file"
+                                beforeUpload={() => false}
+                                maxCount={1}
+                                accept=".jpg, .jpeg, .png, .gif, .webp"
+                                onRemove={() => formUpdate.setFieldsValue({ image: [] })}
+                                fileList={formUpdate.getFieldValue("image") || []}
+                                listType="picture"
+                            >
+                                <ButtonComponent icon={<UploadOutlined />}>
+                                    Chọn file
+                                </ButtonComponent>
+                            </Upload>
+
+                        </Form.Item>
+                        {/* <Form.Item
                             label="Trạng thái"
                             name="status"
                             rules={[
@@ -516,7 +678,7 @@ const PositionPage = () => {
                                 <Radio value="inactive">Không hoạt động</Radio>
                             </Radio.Group>
 
-                        </Form.Item>
+                        </Form.Item> */}
 
                         <Form.Item
                             label={null}
@@ -544,7 +706,7 @@ const PositionPage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá chức vụ</span>
+                        <span>Xoá chuyên khoa</span>
                     </span>
                 }
                 open={isModalOpenDelete}
@@ -563,35 +725,7 @@ const PositionPage = () => {
                             <Text strong type="danger">
                                 xoá
                             </Text>{" "}
-                            chức vụ này không?
-                        </Text>
-                    </div>
-                </LoadingComponent>
-            </ModalComponent>
-            <ModalComponent
-                title={
-                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá chức vụ</span>
-                    </span>
-                }
-                open={isModalOpenDeleteMany}
-                onOk={handleOkDeleteMany}
-                okText="Xoá"
-                cancelText="Hủy"
-                onCancel={handleCancelDeleteMany}
-                okButtonProps={{ danger: true }}
-                centered
-                style={{ borderRadius: 8 }}
-            >
-                <LoadingComponent isLoading={isPendingDeleteMany}>
-                    <div style={{ textAlign: "center", padding: "8px 0" }}>
-                        <Text>
-                            Bạn có chắc chắn muốn{" "}
-                            <Text strong type="danger">
-                                xoá
-                            </Text>{" "}
-                            {selectedRowKeys.length} chức vụ này không?
+                            chuyên khoa này không?
                         </Text>
                     </div>
                 </LoadingComponent>
@@ -601,10 +735,10 @@ const PositionPage = () => {
                 rowKey={"key"}
                 columns={columns}
                 scroll={{ x: "max-content" }}
-                loading={isLoadingPositions}
+                loading={isLoadingWorkplaces}
                 dataSource={dataTable}
                 locale={{
-                    emptyText: "Không có dữ liệu chức vụ",
+                    emptyText: "Không có dữ liệu nơi làm việc",
                     filterConfirm: "Lọc",
                     filterReset: "Xóa lọc",
                 }}
@@ -612,10 +746,10 @@ const PositionPage = () => {
                     current: pagination.current,
                     pageSize: pagination.pageSize,
                     position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} chức vụ`,
-                    showSizeChanger: true,
-                    pageSizeOptions: ["5", "8", "10", "20", "50"],
-                    showQuickJumper: true,
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} nơi làm việc`,
+                    showSizeChanger: true, // Cho phép chọn số dòng/trang
+                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
+                    showQuickJumper: true, // Cho phép nhảy đến trang
                     onChange: (page, pageSize) => {
                         setPagination({
                             current: page,
@@ -625,8 +759,7 @@ const PositionPage = () => {
                 }}
             />
         </>
-
     )
 }
 
-export default PositionPage
+export default WorkplacePage

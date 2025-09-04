@@ -15,7 +15,7 @@ export const DegreeService = {
     },
     deleteDegree: async (id) => {
         try {
-             const response = await axiosInstance.delete(`/degree/delete-degree/${id}`);
+            const response = await axiosInstance.delete(`/degree/delete-degree/${id}`);
             return response.data;
         } catch (error) {
             console.error("Error deleting degree:", error);

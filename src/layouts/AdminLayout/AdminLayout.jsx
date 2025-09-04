@@ -55,10 +55,10 @@ const menuItems = [
         children: [
             { key: "/admin/doctors", label: "Bác sĩ" },
             { key: "/admin/specialties", label: "Chuyên khoa" },
-            { key: "/admin/doctor-schedules", label: "Lịch làm việc" },
-            { key: "/admin/positions", label: "Chức vụ" },
             { key: "/admin/degrees", label: "Học vị" },
+            { key: "/admin/positions", label: "Chức vụ" },
             { key: "/admin/workplaces", label: "Nơi làm việc" },
+            { key: "/admin/doctor-schedules", label: "Lịch làm việc" },
         ],
     },
     {
