@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom';
 import { DoctorService } from '@/services/DoctorService';
 import { DegreeService } from '@/services/DegreeService';
 import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, DatePicker } from "antd";
@@ -37,6 +38,7 @@ const DoctorPage = () => {
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
     const [formCreateDegree] = Form.useForm();
+    const navigate = useNavigate();
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -255,8 +257,8 @@ const DoctorPage = () => {
             title: "Tên",
             dataIndex: "name",
             key: "name",
-            ...getColumnSearchProps("name"),
             sorter: (a, b) => a.name?.length - b.name?.length,
+            ...getColumnSearchProps("name"),
             render: (name) => {
                 return name ? <Text>{name}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
             }
@@ -326,8 +328,9 @@ const DoctorPage = () => {
             degree: item.degree?.abbreviation,
         };
     });
-
-    const handleViewDoctor = (key) => { }
+    const handleViewDoctor = (key) => {
+        navigate(`/admin/doctors/${key}`);
+    };
     const handleEditDoctor = (key) => {
         const doctor = data?.find(doc => doc.doctorId === key);
         if (doctor) {
@@ -342,15 +345,15 @@ const DoctorPage = () => {
             });
             setIsDrawerOpen(true);
         }
-    }
+    };
     const handleShowConfirmDelete = () => {
         setIsModalOpenDelete(true);
-    }
+    };
     const handleCreateDoctor = () => {
         formCreate.validateFields().then((values) => {
             mutationCreateDoctor.mutate(values);
         });
-    }
+    };
     const handleCloseCreateDoctor = () => {
         formCreate.resetFields();
         setIsModalOpenCreate(false);
@@ -399,13 +402,13 @@ const DoctorPage = () => {
             },
         ],
     };
-    // const handleSelectedAll = () => {
-    //     if (selectedRowKeys.length === dataTable.length) {
-    //         setSelectedRowKeys([]);
-    //     } else {
-    //         setSelectedRowKeys(dataTable.map(item => item.key));
-    //     }
-    // };
+    const handleSelectedAll = () => {
+        if (selectedRowKeys.length === dataTable.length) {
+            setSelectedRowKeys([]);
+        } else {
+            setSelectedRowKeys(dataTable.map(item => item.key));
+        }
+    };
     return (
         <>
             <Title level={4}>Danh sách bác sĩ</Title>
@@ -419,7 +422,7 @@ const DoctorPage = () => {
             </ButtonComponent>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
-                // onSelectedAll={handleSelectedAll}
+                onSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
 
             />
@@ -809,6 +812,7 @@ const DoctorPage = () => {
                                     label: degree.title,
                                     value: degree.degreeId
                                 }))}
+
                             />
                         </Form.Item>
                         <Form.Item
@@ -853,13 +857,13 @@ const DoctorPage = () => {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Mô tả"
+                            label="Tiểu sử"
                             name="bio"
                         >
                             <Input.TextArea
                                 name="bio"
-                                placeholder="Nhập vào mô tả"
-                                autoSize={{ minRows: 3, maxRows: 5 }}
+                                placeholder="Nhập vào tiểu sử"
+                                autoSize={{ minRows: 4, maxRows: 5 }}
                             />
                         </Form.Item>
 

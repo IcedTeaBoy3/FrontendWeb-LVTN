@@ -53,7 +53,9 @@ const menuItems = [
         icon: <SolutionOutlined />,
         label: "Quản lý bác sĩ",
         children: [
-            { key: "/admin/doctors", label: "Bác sĩ" },
+            {
+                key: "/admin/doctors", label: "Bác sĩ"
+            },
             { key: "/admin/specialties", label: "Chuyên khoa" },
             { key: "/admin/degrees", label: "Học vị" },
             { key: "/admin/positions", label: "Chức vụ" },
@@ -112,6 +114,7 @@ const AdminLayout = () => {
         "/admin/dashboard": "Thống kê",
         "/admin/appointments": "Lịch hẹn",
         "/admin/doctors": "Bác sĩ",
+        "/admin/doctors/:id": "Chi tiết bác sĩ", // route động
         "/admin/hospitals": "Bệnh viện",
         "/admin/specialties": "Chuyên khoa",
         "/admin/patients": "Người dùng",
@@ -127,12 +130,20 @@ const AdminLayout = () => {
         },
         ...pathSnippets.map((_, index) => {
             const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
+
+            // Nếu URL match với pattern /admin/doctor/:id
+            let title = breadcrumbNameMap[url];
+            if (!title && /^\/admin\/doctors\/[^/]+$/.test(url)) {
+                title = breadcrumbNameMap["/admin/doctors/:id"];
+            }
+
             return {
-                title: breadcrumbNameMap[url] || url,
+                title: title || url,
                 key: url,
             };
         }),
     ];
+
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();

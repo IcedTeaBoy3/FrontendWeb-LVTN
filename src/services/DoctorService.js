@@ -4,6 +4,10 @@ export const DoctorService = {
         const response = await axiosInstance.get('/doctor/get-all-doctors');
         return response.data;
     },
+    getDoctor: async (id) => {
+        const response = await axiosInstance.get(`/doctor/get-doctor/${id}`);
+        return response.data;
+    },
     createDoctor: async (doctorData) => {
         const response = await axiosInstance.post('/doctor/create-doctor', doctorData);
         return response.data;
