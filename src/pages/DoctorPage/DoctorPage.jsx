@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom';
 import { DoctorService } from '@/services/DoctorService';
 import { DegreeService } from '@/services/DegreeService';
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, DatePicker } from "antd";
+import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, DatePicker, Upload } from "antd";
 import { TableStyled } from './style';
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -12,6 +12,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
+import defaultImage from "@/assets/default_image.png";
 import { AnimatePresence } from "framer-motion";
 import dayjs from 'dayjs';
 import {
@@ -23,7 +24,8 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     ExportOutlined,
-    PlusOutlined
+    PlusOutlined,
+    UploadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -106,7 +108,7 @@ const DoctorPage = () => {
     });
     const mutationUpdateDoctor = useMutation({
         mutationKey: ['updateDoctor'],
-        mutationFn: ({ id, ...data }) => DoctorService.updateDoctor(id, data),
+        mutationFn: ({ id, formData }) => DoctorService.updateDoctor(id, formData),
         onSuccess: (data) => {
             if (data?.status == "success") {
                 Message.success(data?.message);
@@ -335,13 +337,21 @@ const DoctorPage = () => {
         const doctor = data?.find(doc => doc.doctorId === key);
         if (doctor) {
             formUpdate.setFieldsValue({
-                name: doctor.user?.name,
                 email: doctor.user?.email,
                 phone: doctor.user?.phone,
+                name: doctor.user?.name,
+                degreeId: doctor.degree?.degreeId,
                 dateOfBirth: doctor.user?.dateOfBirth ? dayjs(doctor.user?.dateOfBirth) : null,
                 gender: doctor.user?.gender,
                 address: doctor.user?.address,
-                degreeId: doctor.degree?.degreeId,
+                avatar: [
+                    {
+                        uid: "-1",
+                        name: doctor?.user?.avatar,
+                        status: "done",
+                        url: doctor?.user?.avatar ? `${import.meta.env.VITE_APP_BACKEND_URL}${doctor?.user?.avatar}` : defaultImage,
+                    },
+                ],
             });
             setIsDrawerOpen(true);
         }
@@ -375,7 +385,40 @@ const DoctorPage = () => {
         setRowSelected(null);
     };
     const handleOnUpdateDoctor = (values) => {
-        mutationUpdateDoctor.mutate({ id: rowSelected, ...values });
+        const formData = new FormData();
+        const fileObj = values.avatar?.[0]?.originFileObj;
+        if (fileObj instanceof File) {
+            formData.append("avatar", fileObj);
+        } else if (values.avatar?.[0]?.url) {
+            const avatarUrl = values.avatar[0].url;
+            const imageName = avatarUrl.replace(import.meta.env.VITE_APP_BACKEND_URL, ""); // Lấy lại phần tên file
+            formData.append("oldImage", imageName);
+        } else {
+            // Không có ảnh và cũng không dùng ảnh cũ → đã xoá
+            formData.append("isImageDeleted", true);
+        }
+        // --- Các field khác ---
+        const dataToAppend = {
+            email: values.email,
+            phone: values.phone,
+            password: values.password, // chỉ append nếu có
+            name: values.name,
+            degreeId: values.degreeId,
+            dateOfBirth: values.dateOfBirth
+                ? dayjs(values.dateOfBirth).format("YYYY-MM-DD")
+                : null,
+            gender: values.gender,
+            address: values.address,
+            bio: values.bio,
+        };
+
+        Object.entries(dataToAppend).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "undefined" && value !== "null") {
+                formData.append(key, value);
+            }
+        });
+        mutationUpdateDoctor.mutate({ id: rowSelected, formData });
+
     };
     const handleOkDeleteMany = () => {
         mutationDeleteManyDoctors.mutate(selectedRowKeys);
@@ -865,6 +908,30 @@ const DoctorPage = () => {
                                 placeholder="Nhập vào tiểu sử"
                                 autoSize={{ minRows: 4, maxRows: 5 }}
                             />
+                        </Form.Item>
+                        <Form.Item
+                            label="Ảnh"
+                            name="avatar"
+                            valuePropName="fileList"
+                            getValueFromEvent={(e) =>
+                                Array.isArray(e) ? e : e && e.fileList
+                            }
+                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
+                        >
+                            <Upload
+                                name="file"
+                                beforeUpload={() => false}
+                                maxCount={1}
+                                accept=".jpg, .jpeg, .png, .gif, .webp"
+                                onRemove={() => formUpdate.setFieldsValue({ file: [] })}
+                                fileList={formUpdate.getFieldValue("file") || []}
+                                listType="picture"
+                            >
+                                <ButtonComponent icon={<UploadOutlined />}>
+                                    Chọn file
+                                </ButtonComponent>
+                            </Upload>
+
                         </Form.Item>
 
 
