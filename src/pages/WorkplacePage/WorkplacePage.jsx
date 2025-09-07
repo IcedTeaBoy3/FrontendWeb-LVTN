@@ -10,17 +10,14 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import { WorkplaceService } from '@/services/WorkplaceService';
 import * as Message from "@/components/Message/Message";
-import defaultImage from "@/assets/default_image.png";
 import {
     EditOutlined,
     DeleteOutlined,
     SearchOutlined,
-    DownOutlined,
     MoreOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
     PlusOutlined,
-    ExportOutlined,
     UploadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
@@ -219,7 +216,6 @@ const WorkplacePage = () => {
         address: item.address,
         phone: item.phone,
         type: item.type,
-        thumbnail: item.thumbnail,
     }));
     const columns = [
         {
@@ -289,50 +285,6 @@ const WorkplacePage = () => {
                 text === "hospital" ? <Tag color="blue" style={{ borderRadius: "8px", padding: "0 8px" }}>Bệnh viện</Tag> : <Tag color="green" style={{ borderRadius: "8px", padding: "0 8px" }}>Phòng khám</Tag>
             ),
         },
-        // {
-        //     title: "Hình ảnh",
-        //     dataIndex: "thumbnail",
-        //     key: "thumbnail",
-        //     render: (text) => (
-        //         <Image
-        //             src={`${import.meta.env.VITE_APP_BACKEND_URL}${text}`}
-        //             alt={text}
-        //             width={50}
-        //             height={50}
-        //             style={{ borderRadius: "8px", objectFit: "cover" }}
-        //             fallback={defaultImage}
-        //         />
-        //     ),
-        // },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            key: "status",
-            render: (text) => (
-                text === "active" ? (
-                    <Tag
-                        color="green"
-                        style={{ borderRadius: "8px", padding: "0 8px" }}
-                    >
-                        Hoạt động
-                    </Tag>
-                ) : (
-                    <Tag
-                        color="red"
-                        style={{ borderRadius: "8px", padding: "0 8px" }}
-                    >
-                        Không hoạt động
-                    </Tag>
-                )
-            ),
-            filters: [
-                { text: "Hoạt động", value: "active" },
-                { text: "Không hoạt động", value: "inactive" },
-            ],
-            onFilter: (value, record) => record.status.startsWith(value),
-            filterMultiple: false,
-        },
-
         {
             title: "Hành động",
             key: "action",
@@ -543,33 +495,7 @@ const WorkplacePage = () => {
                                 <Select.Option value="clinic">Phòng khám</Select.Option>
                             </Select>
                         </Form.Item>
-                        <Form.Item
-                            label="Ảnh"
-                            name="image"
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) =>
-                                Array.isArray(e) ? e : e && e.fileList
-                            }
-                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
-                        >
 
-
-                            <Upload
-                                name="file"
-                                beforeUpload={() => false}
-                                maxCount={1}
-                                accept=".jpg, .jpeg, .png, .gif, .webps"
-                                onRemove={() => formCreate.setFieldsValue({ image: [] })}
-                                fileList={formCreate.getFieldValue("image") || []}
-                                listType="picture"
-                            >
-                                <ButtonComponent icon={<UploadOutlined />}>
-                                    Chọn file
-                                </ButtonComponent>
-                            </Upload>
-
-
-                        </Form.Item>
                     </Form>
                 </ModalComponent>
             </LoadingComponent>
@@ -663,46 +589,6 @@ const WorkplacePage = () => {
                                 <Select.Option value="clinic">Phòng khám</Select.Option>
                             </Select>
                         </Form.Item>
-                        <Form.Item
-                            label="Ảnh"
-                            name="image"
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) =>
-                                Array.isArray(e) ? e : e && e.fileList
-                            }
-                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
-                        >
-                            <Upload
-                                name="file"
-                                beforeUpload={() => false}
-                                maxCount={1}
-                                accept=".jpg, .jpeg, .png, .gif, .webp"
-                                onRemove={() => formUpdate.setFieldsValue({ image: [] })}
-                                fileList={formUpdate.getFieldValue("image") || []}
-                                listType="picture"
-                            >
-                                <ButtonComponent icon={<UploadOutlined />}>
-                                    Chọn file
-                                </ButtonComponent>
-                            </Upload>
-
-                        </Form.Item>
-                        {/* <Form.Item
-                            label="Trạng thái"
-                            name="status"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn trạng thái!",
-                                },
-                            ]}
-                        >
-                            <Radio.Group>
-                                <Radio value="active">Hoạt động</Radio>
-                                <Radio value="inactive">Không hoạt động</Radio>
-                            </Radio.Group>
-
-                        </Form.Item> */}
 
                         <Form.Item
                             label={null}

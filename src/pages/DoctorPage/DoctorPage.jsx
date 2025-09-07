@@ -910,7 +910,7 @@ const DoctorPage = () => {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Ảnh"
+                            label="Ảnh đại diện"
                             name="avatar"
                             valuePropName="fileList"
                             getValueFromEvent={(e) =>

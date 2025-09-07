@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image } from "antd";
 import { TableStyled } from '../PositionPage/style';
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -11,12 +11,10 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
-import { AnimatePresence } from "framer-motion";
 import {
     EditOutlined,
     DeleteOutlined,
     SearchOutlined,
-    DownOutlined,
     MoreOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
@@ -197,7 +195,7 @@ const SpecialtyPage = () => {
                 text
             ),
     });
-    // sửa lại để Xóa cũng confirm luôn
+    // sửa lại để xóa cũng confirm luôn
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
@@ -693,7 +691,6 @@ const SpecialtyPage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
-
             <TableStyled
                 rowSelection={rowSelection}
                 rowKey={"key"}

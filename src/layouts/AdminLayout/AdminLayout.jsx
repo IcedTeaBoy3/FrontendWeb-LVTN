@@ -60,7 +60,7 @@ const menuItems = [
             { key: "/admin/degrees", label: "Học vị" },
             { key: "/admin/positions", label: "Chức vụ" },
             { key: "/admin/workplaces", label: "Nơi làm việc" },
-            { key: "/admin/doctor-schedules", label: "Lịch làm việc" },
+            { key: "/admin/schedules", label: "Lịch làm việc" },
         ],
     },
     {
@@ -118,7 +118,7 @@ const AdminLayout = () => {
         "/admin/hospitals": "Bệnh viện",
         "/admin/specialties": "Chuyên khoa",
         "/admin/patients": "Người dùng",
-        "/admin/doctor-schedules": "Lịch làm việc",
+        "/admin/schedules": "Lịch làm việc",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);

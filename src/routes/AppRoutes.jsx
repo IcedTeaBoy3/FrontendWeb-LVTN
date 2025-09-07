@@ -11,6 +11,7 @@ import PositionPage from "@/pages/PositionPage/PositionPage";
 import DegreePage from "@/pages/DegreePage/DegreePage";
 import WorkplacePage from "@/pages/WorkplacePage/WorkplacePage";
 import DoctorPage from "@/pages/DoctorPage/DoctorPage";
+import SchedulePage from "@/pages/SchedulePage/SchedulePage";
 import DoctorDetailPage from "@/pages/DoctorDetailPage/DoctorDetailPage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
@@ -36,6 +37,7 @@ const AppRoutes = () => {
                     <Route path="degrees" element={<DegreePage />} />
                     <Route path="workplaces" element={<WorkplacePage />} />
                     <Route path="doctors" element={<DoctorPage />} />
+                    <Route path="schedules" element={<SchedulePage />} />
                     <Route path="doctors/:id" element={<DoctorDetailPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>

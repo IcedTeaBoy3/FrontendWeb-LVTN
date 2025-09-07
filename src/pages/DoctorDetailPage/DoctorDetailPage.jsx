@@ -8,16 +8,13 @@ import { WorkplaceService } from '@/services/WorkplaceService';
 import { PositionService } from '@/services/PositionService';
 import { DegreeService } from '@/services/DegreeService';
 import { SpecialtyService } from '@/services/SpecialtyService';
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, DatePicker, Row, Col, Tag, Skeleton, Checkbox, InputNumber } from "antd";
-import Highlighter from "react-highlight-words";
+import { Space, Input, Form, Avatar, Select, Radio, Typography, Divider, DatePicker, Row, Col, Skeleton, Checkbox, InputNumber, Upload } from "antd";
 import { TableStyled } from './style';
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
-import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
-import { AnimatePresence } from "framer-motion";
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -28,6 +25,12 @@ import {
     ArrowLeftOutlined,
     CheckCircleOutlined,
     CloseCircleOutlined,
+    ExperimentOutlined,
+    IdcardOutlined,
+    MedicineBoxOutlined,
+    BankOutlined,
+    UserOutlined,
+    UploadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 const DoctorDetailPage = () => {
@@ -221,7 +224,7 @@ const DoctorDetailPage = () => {
     });
     const mutationUpdateDoctor = useMutation({
         mutationKey: ['updateDoctor'],
-        mutationFn: ({ id, ...data }) => DoctorService.updateDoctor(id, data),
+        mutationFn: ({ id, data }) => DoctorService.updateDoctor(id, data),
         onSuccess: (data) => {
             if (data?.status == "success") {
                 Message.success(data?.message);
@@ -272,7 +275,6 @@ const DoctorDetailPage = () => {
     const doctorData = useMemo(() => doctor?.data || {}, [doctor]);
     const doctorWorkplaceData = doctorWorkplace?.data || [];
     const doctorSpecialtyData = doctorSpecialties?.data || [];
-    console.log('doctorSpecialtyData', doctorSpecialtyData);
     useEffect(() => {
         if (doctorData) {
             formUpdateDoctor.setFieldsValue({
@@ -286,6 +288,7 @@ const DoctorDetailPage = () => {
                     : null,
                 gender: doctorData.user?.gender,
                 address: doctorData.user?.address,
+                avatar: doctorData.user?.avatar,
             });
         }
     }, [doctorData, formUpdateDoctor]);
@@ -465,7 +468,7 @@ const DoctorDetailPage = () => {
         mutationUpdateDoctorWorkplace.mutate({ id: rowSelectedWorkplace, data: { ...values, doctorId: id } });
     };
     const handleOnUpdateDoctor = (values) => {
-        mutationUpdateDoctor.mutate({ id: id, ...values });
+        mutationUpdateDoctor.mutate({ id, data: values });
     };
     const handleCreateDegree = () => {
         formCreateDegree.validateFields().then((values) => {
@@ -510,7 +513,7 @@ const DoctorDetailPage = () => {
         mutationUpdateDoctorSpecialty.mutate({
             id: rowSelectedSpecialty, data: { ...values, doctorId: id }
         });
-    }
+    };
 
     return (
         <>
@@ -535,6 +538,7 @@ const DoctorDetailPage = () => {
                         dateOfBirth: doctorData.user?.dateOfBirth ? dayjs(doctorData.user?.dateOfBirth) : null,
                         gender: doctorData.user?.gender,
                         address: doctorData.user?.address,
+                        avatar: doctorData.user?.avatar,
                     }}
                     onFinish={handleOnUpdateDoctor}
                 >
@@ -566,7 +570,13 @@ const DoctorDetailPage = () => {
                         <Col span={12}>
                             <Title level={5}>Thông tin cá nhân</Title>
 
-                            <Form.Item label="Họ tên" name="name" rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}>
+
+
+                            <Form.Item
+                                label="Họ tên"
+                                name="name"
+                                rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+                            >
                                 <Input placeholder="Nhập họ tên" />
                             </Form.Item>
 
@@ -983,7 +993,7 @@ const DoctorDetailPage = () => {
             >Thêm nơi làm việc</ButtonComponent>
 
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
-            <Title level={4}>Chuyên khoa</Title>
+            <Title level={4}> Chuyên khoa</Title>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <LoadingComponent isLoading={isPendingCreateDoctorSpecialty}>
                 <ModalComponent
@@ -1038,7 +1048,7 @@ const DoctorDetailPage = () => {
                             name="yearsOfExperience"
                             rules={[
 
-                                ({ getFieldValue }) => ({
+                                () => ({
                                     validator(_, value) {
                                         if (value === undefined) {
                                             return Promise.resolve();
@@ -1154,7 +1164,7 @@ const DoctorDetailPage = () => {
                             name="yearsOfExperience"
                             rules={[
 
-                                ({ getFieldValue }) => ({
+                                () => ({
                                     validator(_, value) {
                                         if (value === undefined) {
                                             return Promise.resolve();
