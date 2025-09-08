@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { DoctorService } from '@/services/DoctorService';
 import { DegreeService } from '@/services/DegreeService';
 import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, DatePicker, Upload } from "antd";
-import { TableStyled } from './style';
+import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -13,7 +13,6 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
-import { AnimatePresence } from "framer-motion";
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -957,7 +956,7 @@ const DoctorPage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}

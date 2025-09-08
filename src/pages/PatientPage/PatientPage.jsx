@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { PatientService } from '@/services/PatientService'
 import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu } from "antd";
-import { TableStyled } from './style';
+import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -600,8 +600,7 @@ const PatientPage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
-
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}

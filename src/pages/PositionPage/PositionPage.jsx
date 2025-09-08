@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
-import { TableStyled } from './style';
+import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -210,7 +210,9 @@ const PositionPage = () => {
         confirm();
     };
 
-    const handleViewPosition = (positionId) => { }
+    const handleViewPosition = (positionId) => {
+        console.log("View position:", positionId);
+    }
     const handleEditPosition = (positionId) => {
         const position = data.find(item => item.positionId === positionId);
         formUpdate.setFieldsValue(position);
@@ -596,7 +598,7 @@ const PositionPage = () => {
                     </div>
                 </LoadingComponent>
             </ModalComponent>
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}

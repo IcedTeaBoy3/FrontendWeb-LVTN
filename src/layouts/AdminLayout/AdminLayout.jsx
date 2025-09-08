@@ -64,7 +64,7 @@ const menuItems = [
         ],
     },
     {
-        key: "/admin/hospitals",
+        key: "/admin/clinics",
         icon: <MedicineBoxOutlined />,
         label: "Quản lý phòng khám",
     },
@@ -114,11 +114,13 @@ const AdminLayout = () => {
         "/admin/dashboard": "Thống kê",
         "/admin/appointments": "Lịch hẹn",
         "/admin/doctors": "Bác sĩ",
-        "/admin/doctors/:id": "Chi tiết bác sĩ", // route động
+        "/admin/doctors/:id": "Chi tiết bác sĩ",
         "/admin/hospitals": "Bệnh viện",
         "/admin/specialties": "Chuyên khoa",
         "/admin/patients": "Người dùng",
         "/admin/schedules": "Lịch làm việc",
+        "/admin/medical-records": "Hồ sơ bệnh án",
+        "/admin/clinics": "Phòng khám",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);

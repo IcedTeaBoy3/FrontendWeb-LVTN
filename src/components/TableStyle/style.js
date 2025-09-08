@@ -3,6 +3,7 @@ import {Table} from 'antd'
 export const TableStyled = styled(Table)`
     & .ant-table-thead>tr>th {
         background: #91d5ff;
+        color: #000; 
     }
     /* icon filter */
     & .ant-table-filter-trigger,
@@ -16,8 +17,5 @@ export const TableStyled = styled(Table)`
     & .ant-table-filter-trigger.active {
         color: #096dd9; /* xanh đậm hơn khi active */
     }
-
-
- 
 
 `

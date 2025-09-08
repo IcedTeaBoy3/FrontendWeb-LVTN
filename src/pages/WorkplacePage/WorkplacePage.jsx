@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
-import { TableStyled } from './style';
+import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -668,7 +668,7 @@ const WorkplacePage = () => {
                     </div>
                 </LoadingComponent>
             </ModalComponent>
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}

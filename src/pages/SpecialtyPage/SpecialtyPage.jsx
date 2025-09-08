@@ -2,8 +2,8 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
 import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image } from "antd";
-import { TableStyled } from '../PositionPage/style';
 import Highlighter from "react-highlight-words";
+import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
@@ -691,7 +691,7 @@ const SpecialtyPage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}

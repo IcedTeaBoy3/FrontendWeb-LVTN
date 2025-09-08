@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { ScheduleService } from '@/services/ScheduleService'
 import { DoctorService } from '@/services/DoctorService'
 import { Space, Input, DatePicker, TimePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown, Tag } from "antd";
-import { TableStyled } from '../PositionPage/style';
+import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -790,7 +790,7 @@ const SchedulePage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}

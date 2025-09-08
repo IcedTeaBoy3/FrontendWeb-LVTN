@@ -9,7 +9,7 @@ import { PositionService } from '@/services/PositionService';
 import { DegreeService } from '@/services/DegreeService';
 import { SpecialtyService } from '@/services/SpecialtyService';
 import { Space, Input, Form, Avatar, Select, Radio, Typography, Divider, DatePicker, Row, Col, Skeleton, Checkbox, InputNumber, Upload } from "antd";
-import { TableStyled } from './style';
+import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
@@ -951,7 +951,7 @@ const DoctorDetailPage = () => {
                 </LoadingComponent>
 
             </DrawerComponent>
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelectionWorkplaces}
                 rowKey={"key"}
                 columns={columnsWorkplaces}
@@ -1219,7 +1219,7 @@ const DoctorDetailPage = () => {
                 </LoadingComponent>
 
             </DrawerComponent>
-            <TableStyled
+            <TableStyle
                 rowSelection={rowSelectionSpecialties}
                 rowKey={"key"}
                 columns={columnSpecialties}
