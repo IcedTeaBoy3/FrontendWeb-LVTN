@@ -1,15 +1,16 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
+import { SpecialtyService } from '@/services/SpecialtyService'
+import { ServiceService } from '@/services/ServiceService'
+import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag } from "antd";
+import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
-import { DegreeService } from '@/services/DegreeService';
 import * as Message from "@/components/Message/Message";
-import TableStyle from '@/components/TableStyle/TableStyle';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -21,13 +22,14 @@ import {
     ExportOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
-const DegreePage = () => {
+
+const ServicePage = () => {
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [rowSelected, setRowSelected] = useState(null);
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
-    const [rowSelected, setRowSelected] = useState(null);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
 
@@ -117,7 +119,7 @@ const DegreePage = () => {
                 text
             ),
     });
-    // sửa lại để Xóa cũng confirm luôn
+    // sửa lại để xóa cũng confirm luôn
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
@@ -126,136 +128,106 @@ const DegreePage = () => {
     const handleReset = (clearFilters, confirm) => {
         clearFilters();
         setSearchText("");
-        confirm();
+        confirm(); // refresh bảng sau khi clear
     };
-    const queryGetAllDegrees = useQuery({
-        queryKey: ['getAllDegrees'],
-        queryFn: DegreeService.getAllDegrees,
-        refetchOnWindowFocus: false,
+    const queryGetAllServices = useQuery({
+        queryKey: ['getAllServices'],
+        queryFn: ServiceService.getAllServices,
         retry: 1,
     });
-    const mutationCreateDegree = useMutation({
-        queryKey: ['createDegree'],
-        mutationFn: DegreeService.createDegree,
+    const queryGetAllSpecialties = useQuery({
+        queryKey: ['getAllSpecialties'],
+        queryFn: SpecialtyService.getAllSpecialties,
+        retry: 1,
+    });
+    const mutationCreateService = useMutation({
+        mutationKey: ['createService'],
+        mutationFn: ServiceService.createService,
         onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
+            if (data?.status == "success") {
+                Message.success("Thêm dịch vụ thành công");
+                queryGetAllServices.refetch();
                 formCreate.resetFields();
                 setIsModalOpenCreate(false);
-                queryGetAllDegrees.refetch();
             } else {
-                Message.error(data.message);
+                Message.error(data?.message || "Thêm dịch vụ thất bại");
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
-        },
+            Message.error(error?.response?.data?.message || "Thêm dịch vụ thất bại");
+        }
     });
-    const mutationUpdateDegree = useMutation({
-        queryKey: ['updateDegree'],
-        mutationFn: ({ id, ...data }) => DegreeService.updateDegree(id, data),
+    const mutationUpdateService = useMutation({
+        mutationKey: ['updateService'],
+        mutationFn: ({ serviceId, data }) => ServiceService.updateService(serviceId, data),
         onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
+            if (data?.status == "success") {
+                Message.success("Cập nhật dịch vụ thành công");
+                queryGetAllServices.refetch();
                 formUpdate.resetFields();
                 setIsDrawerOpen(false);
-                queryGetAllDegrees.refetch();
-            } else {
-                Message.error(data.message);
-            }
-        },
-        onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
-        },
-    });
-    const mutationDeleteDegree = useMutation({
-        queryKey: ['deleteDegree'],
-        mutationFn: DegreeService.deleteDegree,
-        onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                setIsModalOpenDelete(false);
-                setSelectedRowKeys((prev) => prev.filter((key) => key !== rowSelected));
                 setRowSelected(null);
-                queryGetAllDegrees.refetch();
             } else {
-                Message.error(data.message);
+                Message.error(data?.message || "Cập nhật dịch vụ thất bại");
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
-        },
+            Message.error(error?.response?.data?.message || "Cập nhật dịch vụ thất bại");
+        }
     });
-    const mutationDeleteManyDegrees = useMutation({
-        queryKey: ['deleteManyDegrees'],
-        mutationFn: DegreeService.deleteManyDegrees,
+    const mutationDeleteService = useMutation({
+        mutationKey: ['deleteService'],
+        mutationFn: (serviceId) => ServiceService.deleteService(serviceId),
         onSuccess: (data) => {
-            if (data.status == 'success') {
-                Message.success(data.message);
-                setIsModalOpenDeleteMany(false);
-                setSelectedRowKeys([]);
-                queryGetAllDegrees.refetch();
+            if (data?.status == "success") {
+                Message.success("Xoá dịch vụ thành công");
+                queryGetAllServices.refetch();
+                setRowSelected(null);
+                setIsModalOpenDelete(false);
             } else {
-                Message.error(data.message);
+                Message.error(data?.message || "Xoá dịch vụ thất bại");
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.response?.data?.message || "Xoá dịch vụ thất bại");
+        }
+    });
+    const mutationDeleteManyServices = useMutation({
+        mutationKey: ['deleteManyServices'],
+        mutationFn: (serviceIds) => ServiceService.deleteManyServices(serviceIds),
+        onSuccess: (data) => {
+            if (data?.status == "success") {
+                Message.success("Xoá dịch vụ thành công");
+                queryGetAllServices.refetch();
+                setSelectedRowKeys([]);
+                setIsModalOpenDeleteMany(false);
+            } else {
+                Message.error(data?.message || "Xoá dịch vụ thất bại");
+            }
         },
-    });
-    const { data: dataDegrees, isLoading: isLoadingDegrees } = queryGetAllDegrees;
-    const { isPending: isPendingCreate } = mutationCreateDegree;
-    const { isPending: isPendingUpdate } = mutationUpdateDegree;
-    const { isPending: isPendingDelete } = mutationDeleteDegree;
-    const { isPending: isPendingDeleteMany } = mutationDeleteManyDegrees;
-    const data = dataDegrees?.data?.degrees;
-    const dataTable = data?.map((item, index) => {
-        return {
-            key: item.degreeId,
-            index: index + 1,
-            title: item.title,
-            abbreviation: item.abbreviation,
-            description: item.description,
-            status: item.status,
-        };
+        onError: (error) => {
+            Message.error(error?.response?.data?.message || "Xoá dịch vụ thất bại");
+        }
     });
 
-    const handleViewDegree = () => {
-
-    }
-    const handleEditDegree = (degreeId) => {
-        const degree = dataTable.find(item => item.key === degreeId);
-        formUpdate.setFieldsValue(degree);
-        setIsDrawerOpen(true);
-    }
-    const handleOnUpdateDegree = (values) => {
-        mutationUpdateDegree.mutate({ id: rowSelected, ...values });
-    }
-    const handleOkDelete = () => {
-        mutationDeleteDegree.mutate(rowSelected);
-    }
-    const handleCancelDelete = () => {
-        setIsModalOpenDelete(false);
-    }
-    const handleOkDeleteMany = () => {
-        mutationDeleteManyDegrees.mutate(selectedRowKeys);
-    }
-    const handleCancelDeleteMany = () => {
-        setIsModalOpenDeleteMany(false);
-    }
-    const handleCreateDegree = () => {
-        formCreate.validateFields().then((values) => {
-            mutationCreateDegree.mutate(values);
-        })
-    }
-    const handleCloseCreateDegree = () => {
-        setIsModalOpenCreate(false);
-    }
-
-    const handleShowConfirmDelete = () => {
-        setIsModalOpenDelete(true);
-    }
-
+    const { data: services, isLoading: isLoadingServices } = queryGetAllServices;
+    const { data: specialties, isLoading: isLoadingSpecialties } = queryGetAllSpecialties;
+    const { isPending: isPendingCreate } = mutationCreateService;
+    const { isPending: isPendingDelete } = mutationDeleteService;
+    const { isPending: isPendingUpdate } = mutationUpdateService;
+    const { isPending: isPendingDeleteMany } = mutationDeleteManyServices;
+    const serviceData = services?.data?.services || [];
+    const specialtyData = specialties?.data?.specialties || [];
+    // dữ liệu bảng
+    const dataTable = serviceData?.map((item, index) => ({
+        key: item.serviceId,
+        index: index + 1,
+        name: item.name,
+        specialty: item.specialty?.name || <Text type="secondary">Chưa cập nhật</Text>,
+        description: item.description,
+        price: item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
+        status: item.status,
+    }));
     const columns = [
         {
             title: "STT",
@@ -264,18 +236,17 @@ const DegreePage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Tên học vị",
-            dataIndex: "title",
-            key: "title",
-            ...getColumnSearchProps("title"),
-            sorter: (a, b) => a.title.length - b.title.length,
+            title: "Tên dịch vụ",
+            dataIndex: "name",
+            key: "name",
+            ...getColumnSearchProps("name"),
+            sorter: (a, b) => a.name.length - b.name.length,
         },
         {
-            title: "Viết tắt",
-            dataIndex: "abbreviation",
-            key: "abbreviation",
-            ...getColumnSearchProps("abbreviation"),
-            sorter: (a, b) => a.abbreviation.length - b.abbreviation.length,
+            title: "Chuyên khoa",
+            dataIndex: "specialty",
+            key: "specialty",
+
         },
         {
             title: "Mô tả",
@@ -298,6 +269,12 @@ const DegreePage = () => {
             )
 
         },
+        {
+            title: "Giá",
+            dataIndex: "price",
+            key: "price",
+        },
+
         {
             title: "Trạng thái",
             dataIndex: "status",
@@ -342,8 +319,8 @@ const DegreePage = () => {
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
                     domEvent.stopPropagation(); // tránh chọn row khi bấm menu
-                    if (key === "detail") return handleViewDegree(record.key);
-                    if (key === "edit") return handleEditDegree(record.key);
+                    if (key === "detail") return handleViewService(record.key);
+                    if (key === "edit") return handleEditService(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                 };
 
@@ -366,6 +343,52 @@ const DegreePage = () => {
 
         },
     ];
+    const handleViewService = (serviceId) => {
+        console.log("View service:", serviceId);
+    };
+    const handleEditService = (serviceId) => {
+        const service = serviceData.find((item) => item.serviceId === serviceId);
+        if (service) {
+            formUpdate.setFieldsValue({
+                name: service.name,
+                description: service.description,
+                price: service.price,
+                specialty: service.specialty?.specialtyId,
+                status: service.status,
+            });
+            setIsDrawerOpen(true);
+        }
+    };
+    const handleOnUpdateService = (values) => {
+        mutationUpdateService.mutate({ serviceId: rowSelected, data: values });
+    };
+    const handleShowConfirmDelete = () => {
+        setIsModalOpenDelete(true);
+    };
+    const handleCreateService = () => {
+        formCreate.validateFields().then((values) => {
+            mutationCreateService.mutate(values);
+        }).catch((info) => {
+            console.log('Validate Failed:', info);
+        });
+    };
+    const handleCloseCreateService = () => {
+        formCreate.resetFields();
+        setIsModalOpenCreate(false);
+    };
+    const handleOkDelete = () => {
+        mutationDeleteService.mutate(rowSelected);
+    };
+    const handleCancelDelete = () => {
+        setRowSelected(null);
+        setIsModalOpenDelete(false);
+    };
+    const handleOkDeleteMany = () => {
+        mutationDeleteManyServices.mutate(selectedRowKeys);
+    };
+    const handleCancelDeleteMany = () => {
+        setIsModalOpenDeleteMany(false);
+    };
     const menuProps = {
         items: [
             {
@@ -378,23 +401,22 @@ const DegreePage = () => {
             },
             {
                 key: "delete",
-                label: <Text type='danger'>Xoá tất cả</Text>,
+                label: <Text type="danger">Xoá tất cả</Text>,
                 icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
                 onClick: () => setIsModalOpenDeleteMany(true),
             },
         ],
     };
-    const handleSelectAll = () => {
+    const handleSelectedAll = () => {
         if (selectedRowKeys.length === dataTable.length) {
             setSelectedRowKeys([]);
         } else {
-            const allKeys = dataTable.map((item) => item.key);
-            setSelectedRowKeys(allKeys);
+            setSelectedRowKeys(dataTable.map(item => item.key));
         }
-    }
+    };
     return (
         <>
-            <Title level={4}>Danh sách học vị</Title>
+            <Title level={4}>Danh sách dịch vụ</Title>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ButtonComponent
                 type="primary"
@@ -403,19 +425,19 @@ const DegreePage = () => {
             >
                 Thêm mới
             </ButtonComponent>
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
-                handleSelectedAll={handleSelectAll}
+                setSelectedRowKeys={handleSelectedAll}
                 menuProps={menuProps}
-            />
 
+            />
+            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <LoadingComponent isLoading={isPendingCreate}>
                 <ModalComponent
-                    title="Thêm mới học vị"
+                    title="Thêm mới dịch vụ"
                     open={isModalOpenCreate}
-                    onOk={handleCreateDegree}
-                    onCancel={handleCloseCreateDegree}
+                    onOk={handleCreateService}
+                    onCancel={handleCloseCreateService}
                     width={600}
                     cancelText="Huỷ"
                     okText="Thêm"
@@ -426,55 +448,57 @@ const DegreePage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
-                        initialValues={{ remember: true }}
+                        initialValues={{
+                            shiftDuration: 30,
+                        }}
                         autoComplete="off"
                         form={formCreate}
                     >
                         <Form.Item
-                            label="Tên học vị"
-                            name="title"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên!",
-                                },
-                            ]}
+                            label="Tên dịch vụ"
+                            name="name"
+                            rules={[{ required: true, message: "Vui lòng nhập tên dịch vụ" }]}
                         >
-                            <Input
-                                name="title"
-                                placeholder="Nhập vào tên chức vụ"
-                            />
+                            <Input placeholder="Nhập tên dịch vụ" />
                         </Form.Item>
                         <Form.Item
-                            label="Viết tắt"
-                            name="abbreviation"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên viết tắt!",
-                                },
-                            ]}
+                            label="Chuyên khoa"
+                            name="specialty"
+                            rules={[{ required: true, message: "Vui lòng chọn chuyên khoa" }]}
                         >
-                            <Input
-                                name="abbreviation"
-                                placeholder="Nhập vào tên viết tắt"
+                            <Select
+                                placeholder="Chọn chuyên khoa"
+                                showSearch
+                                optionFilterProp="label"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={specialtyData.map((specialty) => ({
+                                    label: specialty.name,
+                                    value: specialty.specialtyId,
+                                }))}
+                                loading={isLoadingSpecialties}
                             />
                         </Form.Item>
                         <Form.Item
                             label="Mô tả"
                             name="description"
-
                         >
-                            <Input.TextArea
-                                rows={4}
-                                placeholder="Nhập mô tả chi tiết tại đây..."
-                            />
+                            <Input.TextArea placeholder="Nhập mô tả" rows={4} />
                         </Form.Item>
+                        <Form.Item
+                            label="Giá"
+                            name="price"
+                            rules={[{ required: true, message: "Vui lòng nhập giá dịch vụ" }]}
+                        >
+                            <Input placeholder="Nhập giá dịch vụ" />
+                        </Form.Item>
+
                     </Form>
                 </ModalComponent>
-            </LoadingComponent>
+            </LoadingComponent >
             <DrawerComponent
-                title="Chi tiết chức vụ"
+                title="Chi tiết lịch làm việc"
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -487,45 +511,50 @@ const DegreePage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
-                        onFinish={handleOnUpdateDegree}
+                        onFinish={handleOnUpdateService}
                         autoComplete="off"
                         form={formUpdate}
                     >
                         <Form.Item
-                            label="Tên học vị"
-                            name="title"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên học vị!",
-                                },
-                            ]}
+                            label="Tên dịch vụ"
+                            name="name"
+                            rules={[{ required: true, message: "Vui lòng nhập tên dịch vụ" }]}
                         >
-                            <Input name="title" />
+                            <Input placeholder="Nhập tên dịch vụ" />
                         </Form.Item>
                         <Form.Item
-                            label="Viết tắt"
-                            name="abbreviation"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên viết tắt!",
-                                },
-                            ]}
+                            label="Chuyên khoa"
+                            name="specialty"
+                            rules={[{ required: true, message: "Vui lòng chọn chuyên khoa" }]}
                         >
-                            <Input name="abbreviation" />
+                            <Select
+                                placeholder="Chọn chuyên khoa"
+                                showSearch
+                                optionFilterProp="label"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={specialtyData.map((specialty) => ({
+                                    label: specialty.name,
+                                    value: specialty.specialtyId,
+                                }))}
+                                loading={isLoadingSpecialties}
+                            />
                         </Form.Item>
                         <Form.Item
                             label="Mô tả"
                             name="description"
-
                         >
-                            <Input.TextArea
-                                name="description"
-                                rows={4}
-                                placeholder="Nhập mô tả chi tiết tại đây..."
-                            />
+                            <Input.TextArea placeholder="Nhập mô tả" rows={4} />
                         </Form.Item>
+                        <Form.Item
+                            label="Giá"
+                            name="price"
+                            rules={[{ required: true, message: "Vui lòng nhập giá dịch vụ" }]}
+                        >
+                            <Input placeholder="Nhập giá dịch vụ" />
+                        </Form.Item>
+
                         <Form.Item
                             label="Trạng thái"
                             name="status"
@@ -569,7 +598,7 @@ const DegreePage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá chức vụ</span>
+                        <span>Xoá dịch vụ</span>
                     </span>
                 }
                 open={isModalOpenDelete}
@@ -588,7 +617,7 @@ const DegreePage = () => {
                             <Text strong type="danger">
                                 xoá
                             </Text>{" "}
-                            chức vụ này không?
+                            dịch vụ này không?
                         </Text>
                     </div>
                 </LoadingComponent>
@@ -597,7 +626,7 @@ const DegreePage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá học vị</span>
+                        <span>Xoá dịch vụ</span>
                     </span>
                 }
                 open={isModalOpenDeleteMany}
@@ -616,7 +645,7 @@ const DegreePage = () => {
                             <Text strong type="danger">
                                 xoá
                             </Text>{" "}
-                            {selectedRowKeys.length} học vị này không?
+                            {selectedRowKeys.length} dịch vụ này không?
                         </Text>
                     </div>
                 </LoadingComponent>
@@ -626,10 +655,10 @@ const DegreePage = () => {
                 rowKey={"key"}
                 columns={columns}
                 scroll={{ x: "max-content" }}
-                loading={isLoadingDegrees}
+                loading={isLoadingServices}
                 dataSource={dataTable}
                 locale={{
-                    emptyText: "Không có dữ liệu học vị",
+                    emptyText: "Không có dữ liệu dịch vụ",
                     filterConfirm: "Lọc",
                     filterReset: "Xóa lọc",
                 }}
@@ -637,10 +666,10 @@ const DegreePage = () => {
                     current: pagination.current,
                     pageSize: pagination.pageSize,
                     position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} học vị`,
-                    showSizeChanger: true,
-                    pageSizeOptions: ["5", "8", "10", "20", "50"],
-                    showQuickJumper: true,
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} dịch vụ`,
+                    showSizeChanger: true, // Cho phép chọn số dòng/trang
+                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
+                    showQuickJumper: true, // Cho phép nhảy đến trang
                     onChange: (page, pageSize) => {
                         setPagination({
                             current: page,
@@ -653,4 +682,4 @@ const DegreePage = () => {
     )
 }
 
-export default DegreePage
+export default ServicePage

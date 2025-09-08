@@ -11,7 +11,6 @@ import {
     Layout,
     Menu,
     Breadcrumb,
-    Avatar,
     theme,
     Badge,
     Popover,
@@ -30,7 +29,8 @@ import {
     SettingFilled,
     MedicineBoxOutlined,
     SolutionOutlined,
-    FileTextOutlined
+    FileTextOutlined,
+    AppstoreOutlined
 } from "@ant-design/icons";
 const menuItems = [
     {
@@ -67,6 +67,11 @@ const menuItems = [
         key: "/admin/clinics",
         icon: <MedicineBoxOutlined />,
         label: "Quản lý phòng khám",
+    },
+    {
+        key: "/admin/services",
+        icon: <AppstoreOutlined />,
+        label: "Quản lý dịch vụ",
     },
     {
         key: "/admin/appointments",
@@ -121,6 +126,7 @@ const AdminLayout = () => {
         "/admin/schedules": "Lịch làm việc",
         "/admin/medical-records": "Hồ sơ bệnh án",
         "/admin/clinics": "Phòng khám",
+        "/admin/services": "Dịch vụ",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);

@@ -18,13 +18,12 @@ import {
     EditOutlined,
     DeleteOutlined,
     SearchOutlined,
-    DownOutlined,
     MoreOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
     ExportOutlined,
     PlusOutlined,
-    UploadOutlined
+    UploadOutlined,
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -429,17 +428,17 @@ const DoctorPage = () => {
     const menuProps = {
         items: [
             {
-                key: "edit",
-                label: "Chỉnh sửa",
-                icon: <EditOutlined style={{ fontSize: 16 }} />,
+                key: "export",
+                label: "Xuất file",
+                icon: <ExportOutlined style={{ fontSize: 16 }} />,
             },
             {
                 type: "divider"
             },
             {
                 key: "delete",
-                label: <Text type="danger">Xoá được chọn</Text>,
-                icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} />,
+                label: <Text type="danger">Xoá tất cả</Text>,
+                icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
                 onClick: () => setIsModalOpenDeleteMany(true),
             },
         ],

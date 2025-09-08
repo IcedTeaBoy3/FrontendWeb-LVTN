@@ -384,8 +384,8 @@ const PatientPage = () => {
             },
             {
                 key: "delete",
-                label: <Text type='danger'>Xoá tất cả</Text>,
-                icon: <DeleteOutlined style={{ fontSize: 16, color: 'red' }} />,
+                label: <Text type="danger">Xoá tất cả</Text>,
+                icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
                 onClick: () => setIsModalOpenDeleteMany(true),
             },
         ],
