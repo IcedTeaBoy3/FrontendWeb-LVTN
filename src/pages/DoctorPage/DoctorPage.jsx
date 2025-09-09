@@ -922,10 +922,10 @@ const DoctorPage = () => {
                                 accept=".jpg, .jpeg, .png, .gif, .webp"
                                 onRemove={() => formUpdate.setFieldsValue({ file: [] })}
                                 fileList={formUpdate.getFieldValue("file") || []}
-                                listType="picture"
+                                listType="picture-card"
                             >
                                 <ButtonComponent icon={<UploadOutlined />}>
-                                    Chọn file
+
                                 </ButtonComponent>
                             </Upload>
 

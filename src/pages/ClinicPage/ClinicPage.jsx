@@ -51,7 +51,7 @@ const ClinicPage = () => {
                 phone: clinicData.phone,
                 email: clinicData.email,
                 website: clinicData.website,
-                workingHours: clinicData.workingHours,
+                workHours: clinicData.workHours,
                 services: clinicData.services,
                 images: (clinicData.images || []).map((url, index) => ({
                     uid: -index - 1,
@@ -82,7 +82,7 @@ const ClinicPage = () => {
         formData.append("phone", values.phone);
         formData.append("email", values.email || "");
         formData.append("website", values.website || "");
-        formData.append("workingHours", values.workingHours || "");
+        formData.append("workHours", values.workHours || "");
         formData.append("services", JSON.stringify(values.services || []));
         mutationUpdateClinic.mutate(formData);
     }
@@ -233,7 +233,7 @@ const ClinicPage = () => {
                     <StyledCard title="Thông tin khác" style={{ marginBottom: 20 }} hoverable={true}>
                         <Row gutter={16}>
                             <Col span={12}>
-                                <Form.Item label="Giờ làm việc" name="workingHours">
+                                <Form.Item label="Giờ làm việc" name="workHours">
                                     <Input placeholder="Ví dụ: Thứ 2 - Thứ 6: 7:00 - 17:00" />
                                 </Form.Item>
                             </Col>
