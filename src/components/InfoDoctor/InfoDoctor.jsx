@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Form, Input, Row, Col, Typography, Select, DatePicker, Radio, Space, Divider, Card } from "antd";
+import { Form, Input, Row, Col, Typography, Select, DatePicker, Radio, Space, Divider, Card, Upload } from "antd";
 import { DegreeService } from '@/services/DegreeService'
 import { DoctorService } from '@/services/DoctorService'
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import ModalComponent from '@/components/ModalComponent/ModalComponent'
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent'
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent'
@@ -47,7 +47,7 @@ const InfoDoctor = ({ id }) => {
     });
     const mutationUpdateDoctor = useMutation({
         mutationKey: ['updateDoctor'],
-        mutationFn: ({ id, data }) => DoctorService.updateDoctor(id, data),
+        mutationFn: ({ id, formData }) => DoctorService.updateDoctor(id, formData),
         onSuccess: (data) => {
             if (data?.status == "success") {
                 Message.success(data?.message);
@@ -78,12 +78,52 @@ const InfoDoctor = ({ id }) => {
                     : null,
                 gender: doctorData?.user?.gender,
                 address: doctorData?.user?.address,
-                avatar: doctorData?.user?.avatar,
+                avatar:
+                    [
+                        {
+                            uid: '-1',
+                            name: doctorData?.user?.avatar,
+                            status: 'done',
+                            url: `${import.meta.env.VITE_APP_BACKEND_URL}${doctorData?.user?.avatar}`,
+                        },
+                    ],
             });
         }
     }, [doctorData, formUpdateDoctor]);
     const handleOnUpdateDoctor = (values) => {
-        mutationUpdateDoctor.mutate({ id, data: values });
+        const formData = new FormData();
+        const fileObj = values.avatar?.[0]?.originFileObj;
+        if (fileObj instanceof File) {
+            formData.append("avatar", fileObj);
+        } else if (values.avatar?.[0]?.url) {
+            const avatarUrl = values.avatar[0].url;
+            const imageName = avatarUrl.replace(import.meta.env.VITE_APP_BACKEND_URL, ""); // Lấy lại phần tên file
+            formData.append("oldImage", imageName);
+        } else {
+            // Không có ảnh và cũng không dùng ảnh cũ → đã xoá
+            formData.append("isImageDeleted", true);
+        }
+        // --- Các field khác ---
+        const dataToAppend = {
+            email: values.email,
+            phone: values.phone,
+            password: values.password, // chỉ append nếu có
+            name: values.name,
+            degreeId: values.degreeId,
+            dateOfBirth: values.dateOfBirth
+                ? dayjs(values.dateOfBirth).format("YYYY-MM-DD")
+                : null,
+            gender: values.gender,
+            address: values.address,
+            bio: values.bio,
+        };
+
+        Object.entries(dataToAppend).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "undefined" && value !== "null") {
+                formData.append(key, value);
+            }
+        });
+        mutationUpdateDoctor.mutate({ id, formData });
     };
     const handleCreateDegree = () => {
         formCreateDegree.validateFields().then((values) => {
@@ -105,17 +145,8 @@ const InfoDoctor = ({ id }) => {
                     <Form
                         form={formUpdateDoctor}
                         layout='vertical'
-                        initialValues={{
-                            email: doctorData?.user?.email,
-                            phone: doctorData?.user?.phone,
-                            name: doctorData?.user?.name,
-                            degreeId: doctorData?.degree?.degreeId,
-                            bio: doctorData?.bio,
-                            dateOfBirth: doctorData?.user?.dateOfBirth ? dayjs(doctorData?.user?.dateOfBirth) : null,
-                            gender: doctorData?.user?.gender,
-                            address: doctorData?.user?.address,
-                            avatar: doctorData?.user?.avatar,
-                        }}
+                        name="formUpdateDoctor"
+                        labelCol={{ span: 8 }}
                         onFinish={handleOnUpdateDoctor}
                     >
                         <Row gutter={32}>
@@ -145,6 +176,29 @@ const InfoDoctor = ({ id }) => {
                             {/* Thông tin cá nhân */}
                             <Col span={12}>
                                 <Title level={5}>Thông tin cá nhân</Title>
+                                <Form.Item
+                                    label="Ảnh đại diện"
+                                    name="avatar"
+                                    valuePropName="fileList"
+                                    getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList || [])}
+                                    initialValue={[]}
+                                    extra="Chọn ảnh đại diện (jpg, jpeg, png, gif, webp) tối đa 1 file"
+                                >
+                                    <Upload
+                                        beforeUpload={() => false}
+                                        maxCount={1}
+                                        accept=".jpg, .jpeg, .png, .gif, .webp"
+                                        onRemove={() => formUpdateDoctor.setFieldsValue({ avatar: [] })}
+                                        fileList={formUpdateDoctor.getFieldValue("avatar") || []}
+                                        listType="picture-card"
+
+                                    >
+                                        <ButtonComponent icon={<UploadOutlined />}>
+                                            Chọn file
+                                        </ButtonComponent>
+                                    </Upload>
+
+                                </Form.Item>
                                 <Form.Item
                                     label="Họ tên"
                                     name="name"

@@ -1,27 +1,23 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Space, Form, Tabs, Select, Radio, Typography, Divider, Skeleton, Checkbox, InputNumber } from "antd";
+import { Tabs, Divider, Skeleton } from "antd";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import InfoDoctor from '@/components/InfoDoctor/InfoDoctor';
 import DoctorWorkplace from '@/components/DoctorWorkplace/DoctorWorkplace';
 import DoctorSpecialty from '@/components/DoctorSpecialty/DoctorSpecialty';
 import {
-
     ArrowLeftOutlined,
     UserOutlined,
     HomeOutlined,
     MedicineBoxOutlined,
     AppstoreOutlined,
     CalendarOutlined,
-    ExportOutlined
 } from "@ant-design/icons";
 const DoctorDetailPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-
     const handleBack = () => {
         navigate(-1);
     };
-
     const items = [
         {
             key: "1",
@@ -58,7 +54,6 @@ const DoctorDetailPage = () => {
             icon: <CalendarOutlined style={{ fontSize: 18 }} />
         }
     ];
-
     return (
         <>
             <ButtonComponent

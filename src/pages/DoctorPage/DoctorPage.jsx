@@ -424,7 +424,6 @@ const DoctorPage = () => {
     const handleCancelDeleteMany = () => {
         setIsModalOpenDeleteMany(false);
     };
-
     const menuProps = {
         items: [
             {

@@ -5,7 +5,6 @@ export const DoctorService = {
         return response.data;
     },
     getDoctor: async (id) => {
-        console.log("Fetching doctor with id:", id);
         const response = await axiosInstance.get(`/doctor/get-doctor/${id}`);
         return response.data;
     },

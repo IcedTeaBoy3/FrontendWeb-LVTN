@@ -1,12 +1,12 @@
 import axiosInstance from '@/config/axiosInstance';
 
 export const ClinicService = {
-    getClinic: async (clinicId) => {
-        const response = await axiosInstance.get(`/clinic/get-clinic/${clinicId}`);
+    getClinic: async () => {
+        const response = await axiosInstance.get(`/clinic/get-clinic`);
         return response.data;
     },
-    updateClinic: async (clinicId, clinicData) => {
-        const response = await axiosInstance.put(`/clinic/update-clinic/${clinicId}`, clinicData);
+    updateClinic: async (clinicData) => {
+        const response = await axiosInstance.put(`/clinic/update-clinic`, clinicData);
         return response.data;
-    }
+    },
 }
