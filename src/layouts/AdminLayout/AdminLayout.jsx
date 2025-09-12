@@ -41,50 +41,51 @@ const menuItems = [
     {
         key: "/admin/accounts",
         icon: <UserOutlined />,
-        label: "Quản lý tài khoản",
+        label: "Tài khoản",
     },
-    {
-        key: "/admin/patients",
-        icon: <TeamOutlined />,
-        label: "Quản lý hồ sơ bệnh nhân",
-    },
-
     {
         icon: <SolutionOutlined />,
-        label: "Quản lý bác sĩ",
+        label: "Bác sĩ",
         children: [
-            {
-                key: "/admin/doctors", label: "Bác sĩ"
-            },
-            { key: "/admin/specialties", label: "Chuyên khoa" },
-            { key: "/admin/degrees", label: "Học vị" },
-            { key: "/admin/positions", label: "Chức vụ" },
-            { key: "/admin/workplaces", label: "Nơi làm việc" },
+            { key: "/admin/doctors", label: "Danh sách bác sĩ" },
             { key: "/admin/schedules", label: "Lịch làm việc" },
+            { key: "/admin/shifts", label: "Ca làm việc" },
+            {
+                label: "Danh mục dùng chung",
+                children: [
+                    { key: "/admin/specialties", label: "Chuyên khoa" },
+                    { key: "/admin/degrees", label: "Học vị" },
+                    { key: "/admin/positions", label: "Chức vụ" },
+                    { key: "/admin/workplaces", label: "Nơi làm việc" },
+                ],
+            },
         ],
     },
     {
         key: "/admin/clinics",
         icon: <MedicineBoxOutlined />,
-        label: "Quản lý phòng khám",
+        label: "Phòng khám",
     },
     {
         key: "/admin/services",
         icon: <AppstoreOutlined />,
-        label: "Quản lý dịch vụ",
+        label: "Dịch vụ",
     },
     {
         key: "/admin/appointments",
         icon: <CalendarOutlined />,
-        label: "Quản lý lịch hẹn",
+        label: "Lịch hẹn",
     },
     {
         key: "/admin/medical-records",
         icon: <FileTextOutlined />,
-        label: "Quản lý hồ sơ bệnh án",
+        label: "Hồ sơ bệnh án",
     },
-
-    { key: "/logout", icon: <LogoutOutlined />, label: "Đăng xuất" },
+    {
+        key: "/logout",
+        icon: <LogoutOutlined />,
+        label: "Đăng xuất",
+    },
 ];
 
 
@@ -124,6 +125,7 @@ const AdminLayout = () => {
         "/admin/specialties": "Chuyên khoa",
         "/admin/patients": "Người dùng",
         "/admin/schedules": "Lịch làm việc",
+        "/admin/shifts": "Ca làm việc",
         "/admin/medical-records": "Hồ sơ bệnh án",
         "/admin/clinics": "Phòng khám",
         "/admin/services": "Dịch vụ",

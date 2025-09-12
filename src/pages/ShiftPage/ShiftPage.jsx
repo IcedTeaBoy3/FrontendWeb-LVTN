@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { ScheduleService } from '@/services/ScheduleService'
-import { DoctorService } from '@/services/DoctorService'
+import { ShiftService } from '@/services/ShiftService';
 import { Space, Input, DatePicker, TimePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown, Tag } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
@@ -23,7 +22,7 @@ import {
     ExportOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
-const SchedulePage = () => {
+const ShiftPage = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
@@ -130,103 +129,94 @@ const SchedulePage = () => {
         setSearchText("");
         confirm(); // refresh bảng sau khi clear
     };
-
-    const queryGetAllDoctors = useQuery({
-        queryKey: ['getAllDoctors'],
-        queryFn: DoctorService.getAllDoctors,
+    const queryGetAllShifts = useQuery({
+        queryKey: ["getAllShifts"],
+        queryFn: ShiftService.getAllShifts,
         retry: 1,
         refetchOnWindowFocus: false,
     });
-    const queryGetAllSchedules = useQuery({
-        queryKey: ['getAllSchedules'],
-        queryFn: ScheduleService.getAllSchedules,
-        retry: 1,
-        refetchOnWindowFocus: false,
-    });
-    const mutationCreateSchedule = useMutation({
-        mutationKey: ['createSchedule'],
-        mutationFn: ScheduleService.createSchedule,
+    const mutationCreateShift = useMutation({
+        mutationKey: ["createShift"],
+        mutationFn: ShiftService.createShift,
         onSuccess: (data) => {
-            if (data?.status === "success") {
+            if(data?.status == "success"){
                 Message.success(data?.message);
-                setIsModalOpenCreate(false);
-                queryGetAllSchedules.refetch();
+                queryGetAllShifts.refetch();
                 formCreate.resetFields();
-            } else {
-                Message.error(data?.message || "Có lỗi xảy ra, vui lòng thử lại sau");
+                setIsModalOpenCreate(false);
+            }else{
+                Message.error(data?.message || "Tạo ca làm việc thất bại");
             }
         },
         onError: (error) => {
-            Message.error(error?.response.data.message || "Có lỗi xảy ra, vui lòng thử lại sau");
+            Message.error(error?.response?.data?.message || "Tạo ca làm việc thất bại");
         }
     });
-    const mutationDeleteSchedule = useMutation({
-        mutationKey: ['deleteSchedule'],
-        mutationFn: ScheduleService.deleteSchedule,
+    const mutationUpdateShift = useMutation({
+        mutationKey: ["updateShift"],
+        mutationFn: ({ shiftId, ...data }) => ShiftService.updateShift(shiftId, data),
         onSuccess: (data) => {
-            if (data?.status === "success") {
+            if(data?.status == "success"){
                 Message.success(data?.message);
+                queryGetAllShifts.refetch();
+                formUpdate.resetFields();
+                setIsDrawerOpen(false);
+                setRowSelected(null);
+            }else{
+                Message.error(data?.message || "Cập nhật ca làm việc thất bại");
+            }
+        },
+        onError: (error) => {
+            Message.error(error?.response?.data?.message || "Cập nhật ca làm việc thất bại");
+        }
+    });
+    const mutationDeleteShift = useMutation({
+        mutationKey: ["deleteShift"],
+        mutationFn: (shiftId) => ShiftService.deleteShift(shiftId),
+        onSuccess: (data) => {
+            if(data?.status == "success"){
+                Message.success(data?.message);
+                queryGetAllShifts.refetch();
                 setIsModalOpenDelete(false);
                 setRowSelected(null);
-                queryGetAllSchedules.refetch();
-            } else {
-                Message.error(data?.message || "Có lỗi xảy ra, vui lòng thử lại sau");
+            }else{
+                Message.error(data?.message || "Xoá ca làm việc thất bại");
             }
         },
         onError: (error) => {
-            Message.error(error?.response.data.message || "Có lỗi xảy ra, vui lòng thử lại sau");
+            Message.error(error?.response?.data?.message || "Xoá ca làm việc thất bại");
         }
     });
-    const mutationUpdateSchedule = useMutation({
-        mutationKey: ['updateSchedule'],
-        mutationFn: ({ id, data }) => ScheduleService.updateSchedule(id, data),
+    const mutationDeleteManyShifts = useMutation({
+        mutationKey: ["deleteManyShifts"],
+        mutationFn: (shiftIds) => ShiftService.deleteManyShifts(shiftIds),
         onSuccess: (data) => {
-            if (data?.status === "success") {
+            if(data?.status == "success"){
                 Message.success(data?.message);
-                setIsDrawerOpen(false);
-                queryGetAllSchedules.refetch();
-                formUpdate.resetFields();
-            } else {
-                Message.error(data?.message || "Có lỗi xảy ra, vui lòng thử lại sau");
-            }
-        },
-        onError: (error) => {
-            Message.error(error?.response.data.message || "Có lỗi xảy ra, vui lòng thử lại sau");
-        }
-    });
-    const mutationDeleteManySchedules = useMutation({
-        mutationKey: ['deleteManySchedules'],
-        mutationFn: ScheduleService.deleteManySchedules,
-        onSuccess: (data) => {
-            if (data?.status === "success") {
-                Message.success(data?.message);
+                queryGetAllShifts.refetch();
                 setIsModalOpenDeleteMany(false);
                 setSelectedRowKeys([]);
-                queryGetAllSchedules.refetch();
-            } else {
-                Message.error(data?.message || "Có lỗi xảy ra, vui lòng thử lại sau");
+            }else{
+                Message.error(data?.message || "Xoá ca làm việc thất bại");
             }
         },
         onError: (error) => {
-            Message.error(error?.response.data.message || "Có lỗi xảy ra, vui lòng thử lại sau");
+            Message.error(error?.response?.data?.message || "Xoá ca làm việc thất bại");
         }
     });
-    const { data: doctors, isLoading: isLoadingDoctors } = queryGetAllDoctors;
-    const { data: schedules, isLoading: isLoadingSchedules } = queryGetAllSchedules;
-    const { isPending: isPendingCreate } = mutationCreateSchedule;
-    const { isPending: isPendingDelete } = mutationDeleteSchedule;
-    const { isPending: isPendingUpdate } = mutationUpdateSchedule;
-    const { isPending: isPendingDeleteMany } = mutationDeleteManySchedules;
-    const doctorData = doctors?.data?.doctors || [];
-    const scheduleData = schedules?.data?.schedules || [];
-    const dataTable = scheduleData.map((item, index) => ({
-        key: item.scheduleId,
+    const { data: dataGetAllShifts, isLoading: isLoadingShifts } = queryGetAllShifts;
+    const { isPending: isPendingCreate } = mutationCreateShift;
+    const { isPending: isPendingUpdate } = mutationUpdateShift;
+    const { isPending: isPendingDelete } = mutationDeleteShift;
+    const { isPending: isPendingDeleteMany } = mutationDeleteManyShifts;
+    const shiftData = dataGetAllShifts?.data?.shifts || [];
+
+    const dataTable = shiftData.map((item, index) => ({
+        key: item.shiftId,
         index: index + 1,
-        doctor: item.doctor?.user?.name,
-        workday: dayjs(item.workday).format("DD/MM/YYYY"),
+        name: item.name,
         startTime: item.startTime,
         endTime: item.endTime,
-        shiftDuration: item.shiftDuration,
         status: item.status,
     }));
     const columns = [
@@ -237,32 +227,22 @@ const SchedulePage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Tên bác sĩ",
-            dataIndex: "doctor",
-            key: "doctor",
-            ...getColumnSearchProps("doctor"),
-            sorter: (a, b) => a.doctor.length - b.doctor.length,
+            title: "Ca làm việc",
+            dataIndex: "name",
+            key: "name",
+            ...getColumnSearchProps("name"),
         },
         {
-            title: "Ngày làm việc",
-            dataIndex: "workday",
-            key: "workday",
-        },
-        {
-            title: "Thời bắt đầu",
+            title: "Thời gian bắt đầu",
             dataIndex: "startTime",
             key: "startTime",
         },
         {
-            title: "Thời kết thúc",
+            title: "Thời gian kết thúc",
             dataIndex: "endTime",
             key: "endTime",
         },
-        {
-            title: "Thời gian khám (phút)",
-            dataIndex: "shiftDuration",
-            key: "shiftDuration",
-        },
+
         {
             title: "Trạng thái",
             dataIndex: "status",
@@ -307,8 +287,8 @@ const SchedulePage = () => {
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
                     domEvent.stopPropagation(); // tránh chọn row khi bấm menu
-                    if (key === "detail") return handleViewSchedule(record.key);
-                    if (key === "edit") return handleEditSchedule(record.key);
+                    if (key === "detail") return handleViewShift(record.key);
+                    if (key === "edit") return handleEditShift(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                 };
 
@@ -331,64 +311,71 @@ const SchedulePage = () => {
 
         },
     ];
-    const handleCreateSchedule = () => {
-        formCreate
-            .validateFields()
-            .then((values) => {
-                const { workday, doctorId, startTime, endTime, shiftDuration } = values;
-                const formattedStartTime = startTime ? startTime.format('HH:mm') : null;
-                const formattedEndTime = endTime ? endTime.format('HH:mm') : null;
-                mutationCreateSchedule.mutate({
-                    workday,
-                    doctorId,
-                    startTime: formattedStartTime,
-                    endTime: formattedEndTime,
-                    shiftDuration
-                });
-            })
-    };
-    const handleEditSchedule = (key) => {
-        const schedule = scheduleData.find(item => item.scheduleId === key);
-        if (!schedule) return;
-        formUpdate.setFieldsValue({
-            workday: schedule.workday ? dayjs(schedule.workday) : null,
-            doctorId: schedule.doctor?.doctorId,
-            startTime: schedule.startTime ? dayjs(schedule.startTime, 'HH:mm') : null,
-            endTime: schedule.endTime ? dayjs(schedule.endTime, 'HH:mm') : null,
-            shiftDuration: schedule.shiftDuration,
-            status: schedule.status
-        });
-        setIsDrawerOpen(true);
-    };
-    const handleViewSchedule = (key) => {
-        console.log("View schedule", key);
-    };
+    const handleViewShift = (shiftId) => {
+        console.log("View shift:", shiftId);
+    }
+    const handleEditShift = (shiftId) => {
+        const shift = shiftData.find((item) => item.shiftId === shiftId);
+        if (shift) {
+            formUpdate.setFieldsValue({
+                name: shift.name,
+                startTime: shift.startTime ? dayjs(shift.startTime, "HH:mm") : null,
+                endTime: shift.endTime ? dayjs(shift.endTime, "HH:mm") : null,
+                status: shift.status,
+            });
+            setIsDrawerOpen(true);
+        }
+    }
     const handleShowConfirmDelete = () => {
         setIsModalOpenDelete(true);
     };
+    const handleCreateShift = () => {
+        formCreate
+            .validateFields()
+            .then((values) => {
+                mutationCreateShift.mutate({
+                    name: values.name,
+                    startTime: values.startTime.format("HH:mm"),
+                    endTime: values.endTime.format("HH:mm"),
+                });
+            })
+            .catch((errorInfo) => {
+                console.log("Failed to create shift:", errorInfo);
+            });
+    };
+    const handleCloseCreateShift = () => {
+        formCreate.resetFields();
+        setIsModalOpenCreate(false);
+    };
+    const handleOnUpdateShift = (values) => {
+        mutationUpdateShift.mutate({
+            shiftId: rowSelected,
+            name: values.name,
+            startTime: values.startTime.format("HH:mm"),
+            endTime: values.endTime.format("HH:mm"),
+            status: values.status,
+        });
+    };
     const handleOkDelete = () => {
-        mutationDeleteSchedule.mutate(rowSelected);
+        mutationDeleteShift.mutate(rowSelected);
     };
     const handleCancelDelete = () => {
         setIsModalOpenDelete(false);
-        setRowSelected(null);
-    };
-    const handleCloseCreateSchedule = () => {
-        setIsModalOpenCreate(false);
-        formCreate.resetFields();
-    };
-    const handleOnUpdateSchedule = (values) => {
-        const { workday, doctorId, startTime, endTime, shiftDuration, status } = values;
-        const formattedStartTime = startTime ? startTime.format('HH:mm') : null;
-        const formattedEndTime = endTime ? endTime.format('HH:mm') : null;
-        mutationUpdateSchedule.mutate({ id: rowSelected, data: { workday, doctorId, startTime: formattedStartTime, endTime: formattedEndTime, shiftDuration, status } });
     };
     const handleOkDeleteMany = () => {
-        mutationDeleteManySchedules.mutate(selectedRowKeys);
+        mutationDeleteManyShifts.mutate(selectedRowKeys);
     };
     const handleCancelDeleteMany = () => {
         setIsModalOpenDeleteMany(false);
-    }
+    };
+
+    const handleSelectedAll = () => {
+        if (selectedRowKeys.length === dataTable.length) {
+            setSelectedRowKeys([]);
+        } else {
+            setSelectedRowKeys(dataTable.map((item) => item.key));
+        }
+    };
     const menuProps = {
         items: [
             {
@@ -407,17 +394,9 @@ const SchedulePage = () => {
             },
         ],
     };
-    const handleSelectedAll = () => {
-        if (selectedRowKeys.length === dataTable.length) {
-            setSelectedRowKeys([]);
-        } else {
-            setSelectedRowKeys(dataTable.map(item => item.key));
-        }
-    };
-
     return (
         <>
-            <Title level={4}>Danh sách lịch làm việc</Title>
+            <Title level={4}>Ca làm việc</Title>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ButtonComponent
                 type="primary"
@@ -436,8 +415,8 @@ const SchedulePage = () => {
                 <ModalComponent
                     title="Thêm mới lịch làm việc"
                     open={isModalOpenCreate}
-                    onOk={handleCreateSchedule}
-                    onCancel={handleCloseCreateSchedule}
+                    onOk={handleCreateShift}
+                    onCancel={handleCloseCreateShift}
                     width={600}
                     cancelText="Huỷ"
                     okText="Thêm"
@@ -454,46 +433,18 @@ const SchedulePage = () => {
                         autoComplete="off"
                         form={formCreate}
                     >
+                
                         <Form.Item
-                            label="Bác sĩ"
-                            name="doctorId"
+                            label="Ca làm việc"
+                            name="name"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng chọn bác sĩ!",
+                                    message: "Vui lòng nhập vào ca làm việc!",
                                 },
                             ]}
                         >
-                            <Select
-                                placeholder="Chọn bác sĩ"
-                                loading={isLoadingDoctors}
-                                showSearch
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={doctorData.map(doctor => ({
-                                    label: doctor.user?.name,
-                                    value: doctor.doctorId
-                                }))}
-
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Ngày làm việc"
-                            name="workday"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn ngày làm việc!",
-                                },
-                            ]}
-                        >
-                            <DatePicker
-                                style={{ width: "100%" }}
-                                format="DD/MM/YYYY"
-                                disabledDate={(current) => current && current < dayjs().startOf("day")}
-                            />
+                            <Input placeholder="Nhập vào ca làm việc" />
                         </Form.Item>
                         <Form.Item
                             label="Thời gian bắt đầu"
@@ -548,84 +499,11 @@ const SchedulePage = () => {
                                 placeholder="Chọn giờ kết thúc"
                             />
                         </Form.Item>
-                        <Form.Item
-                            label="Thời gian khám"
-                            name="shiftDuration"
-                        >
-                            <Select
-                                placeholder="Chọn thời gian khám"
-                                options={[
-                                    { label: '15 phút', value: 15 },
-                                    { label: '20 phút', value: 20 },
-                                    { label: '30 phút', value: 30 },
-                                    { label: '45 phút', value: 45 },
-                                    { label: '60 phút', value: 60 },
-                                ]}
-                            />
-
-                        </Form.Item>
-
                     </Form>
                 </ModalComponent>
             </LoadingComponent >
-            <ModalComponent
-                title={
-                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá lịch làm việc</span>
-                    </span>
-                }
-                open={isModalOpenDelete}
-                onOk={handleOkDelete}
-                onCancel={handleCancelDelete}
-                okText="Xóa"
-                cancelText="Hủy"
-                okButtonProps={{ danger: true }}
-                centered
-                style={{ borderRadius: 8 }}
-            >
-                <LoadingComponent isLoading={isPendingDelete}>
-                    <div style={{ textAlign: "center", padding: "8px 0" }}>
-                        <Text>
-                            Bạn có chắc chắn muốn{" "}
-                            <Text strong type="danger">
-                                xoá
-                            </Text>{" "}
-                            lịch làm việc này không?
-                        </Text>
-                    </div>
-                </LoadingComponent>
-            </ModalComponent>
-            <ModalComponent
-                title={
-                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá lịch làm việc</span>
-                    </span>
-                }
-                open={isModalOpenDeleteMany}
-                onOk={handleOkDeleteMany}
-                okText="Xoá"
-                cancelText="Hủy"
-                onCancel={handleCancelDeleteMany}
-                okButtonProps={{ danger: true }}
-                centered
-                style={{ borderRadius: 8 }}
-            >
-                <LoadingComponent isLoading={isPendingDeleteMany}>
-                    <div style={{ textAlign: "center", padding: "8px 0" }}>
-                        <Text>
-                            Bạn có chắc chắn muốn{" "}
-                            <Text strong type="danger">
-                                xoá
-                            </Text>{" "}
-                            {selectedRowKeys.length} lịch làm việc này không?
-                        </Text>
-                    </div>
-                </LoadingComponent>
-            </ModalComponent>
             <DrawerComponent
-                title="Chi tiết lịch làm việc"
+                title="Chi tiết ca làm việc"
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -638,50 +516,22 @@ const SchedulePage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
-                        onFinish={handleOnUpdateSchedule}
+                        onFinish={handleOnUpdateShift}
                         autoComplete="off"
                         form={formUpdate}
                     >
+                        
                         <Form.Item
-                            label="Bác sĩ"
-                            name="doctorId"
+                            label="Ca làm việc"
+                            name="name"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng chọn bác sĩ!",
+                                    message: "Vui lòng chọn ca làm việc!",
                                 },
                             ]}
                         >
-                            <Select
-                                placeholder="Chọn bác sĩ"
-                                loading={isLoadingDoctors}
-                                showSearch
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={doctorData.map(doctor => ({
-                                    label: doctor.user?.name,
-                                    value: doctor.doctorId
-                                }))}
-
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Ngày làm việc"
-                            name="workday"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn ngày làm việc!",
-                                },
-                            ]}
-                        >
-                            <DatePicker
-                                style={{ width: "100%" }}
-                                format="DD/MM/YYYY"
-                                disabledDate={(current) => current && current < dayjs().startOf("day")}
-                            />
+                            <Input placeholder="Nhập vào ca làm việc" />
                         </Form.Item>
                         <Form.Item
                             label="Thời gian bắt đầu"
@@ -736,22 +586,7 @@ const SchedulePage = () => {
                                 placeholder="Chọn giờ kết thúc"
                             />
                         </Form.Item>
-                        <Form.Item
-                            label="Thời gian khám"
-                            name="shiftDuration"
-                        >
-                            <Select
-                                placeholder="Chọn thời gian khám"
-                                options={[
-                                    { label: '15 phút', value: 15 },
-                                    { label: '20 phút', value: 20 },
-                                    { label: '30 phút', value: 30 },
-                                    { label: '45 phút', value: 45 },
-                                    { label: '60 phút', value: 60 },
-                                ]}
-                            />
-
-                        </Form.Item>
+                
                         <Form.Item
                             label="Trạng thái"
                             name="status"
@@ -791,15 +626,71 @@ const SchedulePage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá ca làm việc</span>
+                    </span>
+                }
+                open={isModalOpenDelete}
+                onOk={handleOkDelete}
+                onCancel={handleCancelDelete}
+                okText="Xóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDelete}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            ca làm việc này không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá ca làm việc</span>
+                    </span>
+                }
+                open={isModalOpenDeleteMany}
+                onOk={handleOkDeleteMany}
+                okText="Xoá"
+                cancelText="Hủy"
+                onCancel={handleCancelDeleteMany}
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDeleteMany}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            {selectedRowKeys.length} ca làm việc này không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
             <TableStyle
                 rowSelection={rowSelection}
                 rowKey={"key"}
                 columns={columns}
                 scroll={{ x: "max-content" }}
-                loading={isLoadingSchedules}
+                loading={isLoadingShifts}
                 dataSource={dataTable}
                 locale={{
-                    emptyText: "Không có dữ liệu lịch làm việc",
+                    emptyText: "Không có dữ liệu ca làm việc",
                     filterConfirm: "Lọc",
                     filterReset: "Xóa lọc",
                 }}
@@ -807,7 +698,7 @@ const SchedulePage = () => {
                     current: pagination.current,
                     pageSize: pagination.pageSize,
                     position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} lịch làm việc`,
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} ca làm việc`,
                     showSizeChanger: true, // Cho phép chọn số dòng/trang
                     pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
                     showQuickJumper: true, // Cho phép nhảy đến trang
@@ -823,4 +714,4 @@ const SchedulePage = () => {
     )
 }
 
-export default SchedulePage
+export default ShiftPage
