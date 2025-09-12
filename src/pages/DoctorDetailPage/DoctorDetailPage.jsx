@@ -22,17 +22,15 @@ const DoctorDetailPage = () => {
         {
             key: "1",
             label: `Thông tin bác sĩ`,
-            children: <>
-                {
-                    id ? <InfoDoctor id={id} /> : <Skeleton active paragraph={{ rows: 4 }} />
-                }
-            </>,
+            children: <>{id && <InfoDoctor id={id} />}</>,
             icon: <UserOutlined style={{ fontSize: 18 }} />
         },
         {
             key: "2",
             label: `Nơi làm việc`,
-            children: <DoctorWorkplace id={id} />,
+            children: <>
+                {id && <DoctorWorkplace id={id} />}
+            </>,
             icon: <HomeOutlined style={{ fontSize: 18 }} />
         },
         {

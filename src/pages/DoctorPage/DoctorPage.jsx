@@ -407,7 +407,6 @@ const DoctorPage = () => {
                 : null,
             gender: values.gender,
             address: values.address,
-            bio: values.bio,
         };
 
         Object.entries(dataToAppend).forEach(([key, value]) => {
@@ -894,16 +893,6 @@ const DoctorPage = () => {
                                 name="address"
                                 placeholder="Nhập vào địa chỉ"
                                 autoSize={{ minRows: 2, maxRows: 4 }}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Tiểu sử"
-                            name="bio"
-                        >
-                            <Input.TextArea
-                                name="bio"
-                                placeholder="Nhập vào tiểu sử"
-                                autoSize={{ minRows: 4, maxRows: 5 }}
                             />
                         </Form.Item>
                         <Form.Item

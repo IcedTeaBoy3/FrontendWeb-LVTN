@@ -7,12 +7,13 @@ import { ClinicService } from "@/services/ClinicService";
 import { ServiceService } from "@/services/ServiceService";
 import { StyledCard } from "./style";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
-
-const { TextArea } = Input;
+import CKEditorComponent from "@/components/CKEditorComponent/CKEditorComponent";
+import { useState} from "react";
 const { Title } = Typography;
 
 const ClinicPage = () => {
     const [formUpdate] = Form.useForm();
+    const [editorData, setEditorData] = useState("");
     const mutationUpdateClinic = useMutation({
         mutationKey: ['updateClinic'],
         mutationFn: (formData) => ClinicService.updateClinic(formData),
@@ -46,7 +47,8 @@ const ClinicPage = () => {
         if (clinicData) {
             formUpdate.setFieldsValue({
                 name: clinicData.name,
-                description: clinicData.description,
+                criteria: clinicData.criteria,
+                
                 address: clinicData.address,
                 phone: clinicData.phone,
                 email: clinicData.email,
@@ -60,6 +62,7 @@ const ClinicPage = () => {
                     url: `${import.meta.env.VITE_APP_BACKEND_URL}${url}`,
                 }))
             });
+            setEditorData(clinicData.description || ""); // Cập nhật dữ liệu mô tả vào state
         }
     }, [clinicData]);
 
@@ -81,6 +84,7 @@ const ClinicPage = () => {
         formData.append("address", values.address);
         formData.append("phone", values.phone);
         formData.append("email", values.email || "");
+        formData.append("criteria",values.criteria || "");
         formData.append("website", values.website || "");
         formData.append("workHours", values.workHours || "");
         formData.append("services", JSON.stringify(values.services || []));
@@ -114,13 +118,23 @@ const ClinicPage = () => {
                         >
                             <Input placeholder="Nhập tên phòng khám" />
                         </Form.Item>
+                        <Form.Item
+                            label="Phương châm"
+                            name="criteria"
+
+                        >
+                            <Input placeholder="Nhập phương châm" />
+                        </Form.Item>
 
                         <Form.Item
                             label="Mô tả"
                             name="description"
                             rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
                         >
-                            <TextArea rows={4} placeholder="Nhập mô tả" />
+                            <CKEditorComponent
+                                editorData={editorData}
+                                onChange={(data) => formUpdate.setFieldsValue({ description: data })}
+                            />
                         </Form.Item>
 
                         <Form.Item

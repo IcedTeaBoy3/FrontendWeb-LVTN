@@ -7,6 +7,7 @@ import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import ModalComponent from '@/components/ModalComponent/ModalComponent'
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent'
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent'
+import CKEditorComponent from '@/components/CKEditorComponent/CKEditorComponent';
 import * as Message from '@/components/Message/Message'
 import dayjs from 'dayjs';
 
@@ -15,6 +16,7 @@ const InfoDoctor = ({ id }) => {
     const [formUpdateDoctor] = Form.useForm();
     const [formCreateDegree] = Form.useForm();
     const [isOpenModalCreateDegree, setIsOpenModalCreateDegree] = useState(false);
+    const [editorData, setEditorData] = useState("");
 
     const queryGetAllDegrees = useQuery({
         queryKey: ['getAllDegrees'],
@@ -72,7 +74,6 @@ const InfoDoctor = ({ id }) => {
                 phone: doctorData?.user?.phone,
                 name: doctorData?.user?.name,
                 degreeId: doctorData?.degree?.degreeId, // hoặc doctorData.degree?.degreeId
-                bio: doctorData?.bio,
                 dateOfBirth: doctorData?.user?.dateOfBirth
                     ? dayjs(doctorData?.user?.dateOfBirth)
                     : null,
@@ -88,6 +89,7 @@ const InfoDoctor = ({ id }) => {
                         },
                     ],
             });
+            setEditorData(doctorData?.bio || ""); // Cập nhật dữ liệu ban đầu cho CKEditor
         }
     }, [doctorData, formUpdateDoctor]);
     const handleOnUpdateDoctor = (values) => {
@@ -194,7 +196,7 @@ const InfoDoctor = ({ id }) => {
 
                                     >
                                         <ButtonComponent icon={<UploadOutlined />}>
-                                            Chọn file
+                                            
                                         </ButtonComponent>
                                     </Upload>
 
@@ -245,7 +247,10 @@ const InfoDoctor = ({ id }) => {
                                 </Form.Item>
 
                                 <Form.Item label="Tiểu sử" name="bio">
-                                    <Input.TextArea rows={4} placeholder="Nhập tiểu sử" />
+                                    <CKEditorComponent
+                                        editorData={editorData}
+                                        onChange={(data) => formUpdateDoctor.setFieldsValue({ bio: data })}
+                                    />
                                 </Form.Item>
 
                                 <Form.Item label="Ngày sinh" name="dateOfBirth">

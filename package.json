@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
+    "@ckeditor/ckeditor5-react": "^11.0.0",
     "@fontsource/roboto": "^5.2.6",
     "@reduxjs/toolkit": "^2.8.2",
     "@tanstack/react-query": "^5.85.3",
