@@ -16,7 +16,7 @@ import ClinicPage from "@/pages/ClinicPage/ClinicPage";
 import ServicePage from "@/pages/ServicePage/ServicePage";
 import DoctorDetailPage from "@/pages/DoctorDetailPage/DoctorDetailPage";
 import ShiftPage from "@/pages/ShiftPage/ShiftPage";
-
+import ScheduleDetailPage from "@/pages/ScheduleDetailPage/ScheduleDetailPage";
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 const AppRoutes = () => {
     return (
@@ -45,6 +45,7 @@ const AppRoutes = () => {
                     <Route path="schedules" element={<SchedulePage />} />
                     <Route path="doctors/:id" element={<DoctorDetailPage />} />
                     <Route path="shifts" element={<ShiftPage />} />
+                    <Route path="schedules/:id" element={<ScheduleDetailPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
                 {/* Route không khớp */}

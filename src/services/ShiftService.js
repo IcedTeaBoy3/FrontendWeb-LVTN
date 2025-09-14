@@ -5,6 +5,10 @@ export const ShiftService = {
         const response = await axiosInstance.get('/shift/get-all-shifts');
         return response.data;
     },
+    getAllShiftBySchedule: async (scheduleId) => {
+        const response = await axiosInstance.get(`/shift/get-all-shifts-by-schedule/${scheduleId}`);
+        return response.data;
+    },
     getShift: async (id) => {
         const response = await axiosInstance.get(`/shift/get-shift/${id}`);
         return response.data;

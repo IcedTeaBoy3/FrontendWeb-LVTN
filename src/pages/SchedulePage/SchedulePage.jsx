@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { ScheduleService } from '@/services/ScheduleService'
 import { DoctorService } from '@/services/DoctorService'
+import { ShiftService } from '@/services/ShiftService'
 import { Space, Input, DatePicker, TimePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown, Tag } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
@@ -24,6 +26,7 @@ import {
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 const SchedulePage = () => {
+    const navigate = useNavigate();
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
@@ -137,6 +140,12 @@ const SchedulePage = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
+    const queryGetAllShifts = useQuery({
+        queryKey: ['getAllShifts'],
+        queryFn: ShiftService.getAllShifts,
+        retry: 1,
+        refetchOnWindowFocus: false,
+    });
     const queryGetAllSchedules = useQuery({
         queryKey: ['getAllSchedules'],
         queryFn: ScheduleService.getAllSchedules,
@@ -212,21 +221,24 @@ const SchedulePage = () => {
         }
     });
     const { data: doctors, isLoading: isLoadingDoctors } = queryGetAllDoctors;
+    const { data: shifts, isLoading: isLoadingShifts } = queryGetAllShifts;
     const { data: schedules, isLoading: isLoadingSchedules } = queryGetAllSchedules;
     const { isPending: isPendingCreate } = mutationCreateSchedule;
     const { isPending: isPendingDelete } = mutationDeleteSchedule;
     const { isPending: isPendingUpdate } = mutationUpdateSchedule;
     const { isPending: isPendingDeleteMany } = mutationDeleteManySchedules;
     const doctorData = doctors?.data?.doctors || [];
+    const shiftData = shifts?.data?.shifts || [];
     const scheduleData = schedules?.data?.schedules || [];
     const dataTable = scheduleData.map((item, index) => ({
         key: item.scheduleId,
         index: index + 1,
         doctor: item.doctor?.user?.name,
         workday: dayjs(item.workday).format("DD/MM/YYYY"),
-        startTime: item.startTime,
-        endTime: item.endTime,
-        shiftDuration: item.shiftDuration,
+        // shiftId: item.shift?.name,
+        shiftCount: item.shiftCount,
+        slotCount: item.slotCount,
+        slotDuration: item.slotDuration,
         status: item.status,
     }));
     const columns = [
@@ -237,61 +249,34 @@ const SchedulePage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Tên bác sĩ",
+            title: "Ngày làm việc",
+            dataIndex: "workday",
+            key: "workday",
+            ...getColumnSearchProps("workday"),
+        },
+        {
+            title: "Bác sĩ",
             dataIndex: "doctor",
             key: "doctor",
             ...getColumnSearchProps("doctor"),
             sorter: (a, b) => a.doctor.length - b.doctor.length,
         },
+       
+       
         {
-            title: "Ngày làm việc",
-            dataIndex: "workday",
-            key: "workday",
+            title: "Thời gian khám (phút) / lượt",
+            dataIndex: "slotDuration",
+            key: "slotDuration",
         },
-        {
-            title: "Thời bắt đầu",
-            dataIndex: "startTime",
-            key: "startTime",
-        },
-        {
-            title: "Thời kết thúc",
-            dataIndex: "endTime",
-            key: "endTime",
-        },
-        {
-            title: "Thời gian khám (phút)",
-            dataIndex: "shiftDuration",
-            key: "shiftDuration",
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            key: "status",
-            render: (text) => (
-                text === "active" ? (
-                    <Tag
-                        color="green"
-                        style={{ borderRadius: "8px", padding: "0 8px" }}
-                    >
-                        Hoạt động
-                    </Tag>
-                ) : (
-                    <Tag
-                        color="red"
-                        style={{ borderRadius: "8px", padding: "0 8px" }}
-                    >
-                        Không hoạt động
-                    </Tag>
-                )
-            ),
-            filters: [
-                { text: "Hoạt động", value: "active" },
-                { text: "Không hoạt động", value: "inactive" },
-            ],
-            onFilter: (value, record) => record.status.startsWith(value),
-            filterMultiple: false,
-        },
+         {
+            title: "Số ca",
+            dataIndex: "shiftCount"
 
+        },
+        {
+            title: "Tổng slot",
+            dataIndex: "slotCount"
+        },
         {
             title: "Hành động",
             key: "action",
@@ -335,15 +320,11 @@ const SchedulePage = () => {
         formCreate
             .validateFields()
             .then((values) => {
-                const { workday, doctorId, startTime, endTime, shiftDuration } = values;
-                const formattedStartTime = startTime ? startTime.format('HH:mm') : null;
-                const formattedEndTime = endTime ? endTime.format('HH:mm') : null;
+                const { workday, doctorId, slotDuration } = values;
                 mutationCreateSchedule.mutate({
                     workday,
                     doctorId,
-                    startTime: formattedStartTime,
-                    endTime: formattedEndTime,
-                    shiftDuration
+                    slotDuration
                 });
             })
     };
@@ -353,15 +334,13 @@ const SchedulePage = () => {
         formUpdate.setFieldsValue({
             workday: schedule.workday ? dayjs(schedule.workday) : null,
             doctorId: schedule.doctor?.doctorId,
-            startTime: schedule.startTime ? dayjs(schedule.startTime, 'HH:mm') : null,
-            endTime: schedule.endTime ? dayjs(schedule.endTime, 'HH:mm') : null,
-            shiftDuration: schedule.shiftDuration,
+            slotDuration: schedule.slotDuration,
             status: schedule.status
         });
         setIsDrawerOpen(true);
     };
     const handleViewSchedule = (key) => {
-        console.log("View schedule", key);
+        navigate(`/admin/schedules/${key}`);
     };
     const handleShowConfirmDelete = () => {
         setIsModalOpenDelete(true);
@@ -378,17 +357,15 @@ const SchedulePage = () => {
         formCreate.resetFields();
     };
     const handleOnUpdateSchedule = (values) => {
-        const { workday, doctorId, startTime, endTime, shiftDuration, status } = values;
-        const formattedStartTime = startTime ? startTime.format('HH:mm') : null;
-        const formattedEndTime = endTime ? endTime.format('HH:mm') : null;
-        mutationUpdateSchedule.mutate({ id: rowSelected, data: { workday, doctorId, startTime: formattedStartTime, endTime: formattedEndTime, shiftDuration, status } });
+        const { workday, doctorId, slotDuration, status } = values;
+        mutationUpdateSchedule.mutate({ id: rowSelected, data: { workday, doctorId,slotDuration, status } });
     };
     const handleOkDeleteMany = () => {
         mutationDeleteManySchedules.mutate(selectedRowKeys);
     };
     const handleCancelDeleteMany = () => {
         setIsModalOpenDeleteMany(false);
-    }
+    };
     const menuProps = {
         items: [
             {
@@ -449,7 +426,7 @@ const SchedulePage = () => {
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
                         initialValues={{
-                            shiftDuration: 30,
+                            slotDuration: 30,
                         }}
                         autoComplete="off"
                         form={formCreate}
@@ -492,65 +469,37 @@ const SchedulePage = () => {
                             <DatePicker
                                 style={{ width: "100%" }}
                                 format="DD/MM/YYYY"
-                                disabledDate={(current) => current && current < dayjs().startOf("day")}
+                              
+                                disabledDate={(current) => current && current < dayjs().add(1, "day").startOf("day")}
                             />
                         </Form.Item>
-                        <Form.Item
-                            label="Thời gian bắt đầu"
-                            name="startTime"
+                        {/* <Form.Item
+                            label="Ca làm việc"
+                            name="shiftId"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng chọn thời gian bắt đầu!",
+                                    message: "Vui lòng chọn ca làm việc!",
                                 },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        const startTime = getFieldValue('startTime');
-                                        const endTime = getFieldValue('endTime');
-                                        if (startTime && endTime && startTime.isAfter(endTime)) {
-                                            return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
-                                        }
-                                        return Promise.resolve();
-                                    }
-                                })
                             ]}
                         >
-                            <TimePicker
-                                format="HH:mm"
-                                style={{ width: "100%" }}
-                                placeholder="Chọn giờ bắt đầu"
+                            <Select
+                                showSearch
+                                optionFilterProp="children"
+                                loading={isLoadingShifts}
+                                filterOption={(input, option) =>
+                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                }
+                                placeholder="Chọn ca làm việc"
+                                options={shiftData.map(shift => ({
+                                    label: `${shift.name} (${dayjs(shift.startTime).format("HH:mm")} - ${dayjs(shift.endTime).format("HH:mm")})`,
+                                    value: shift.shiftId
+                                }))}
                             />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Thời gian kết thúc"
-                            name="endTime"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn thời gian kết thúc!",
-                                },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        const startTime = getFieldValue('startTime');
-                                        const endTime = getFieldValue('endTime');
-                                        if (startTime && endTime && startTime.isAfter(endTime)) {
-                                            return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
-                                        }
-                                        return Promise.resolve();
-                                    }
-                                })
-                            ]}
-                        >
-                            <TimePicker
-                                format="HH:mm"
-                                style={{ width: "100%" }}
-                                placeholder="Chọn giờ kết thúc"
-                            />
-                        </Form.Item>
+                        </Form.Item> */}
                         <Form.Item
                             label="Thời gian khám"
-                            name="shiftDuration"
+                            name="slotDuration"
                         >
                             <Select
                                 placeholder="Chọn thời gian khám"
@@ -683,62 +632,34 @@ const SchedulePage = () => {
                                 disabledDate={(current) => current && current < dayjs().startOf("day")}
                             />
                         </Form.Item>
-                        <Form.Item
-                            label="Thời gian bắt đầu"
-                            name="startTime"
+                        {/* <Form.Item
+                            label="Ca làm việc"
+                            name="shiftId"
+                            
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng chọn thời gian bắt đầu!",
+                                    message: "Vui lòng chọn ca làm việc!",
                                 },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        const startTime = getFieldValue('startTime');
-                                        const endTime = getFieldValue('endTime');
-                                        if (startTime && endTime && startTime.isAfter(endTime)) {
-                                            return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
-                                        }
-                                        return Promise.resolve();
-                                    }
-                                })
                             ]}
                         >
-                            <TimePicker
-                                format="HH:mm"
-                                style={{ width: "100%" }}
-                                placeholder="Chọn giờ bắt đầu"
+                            <Select
+                                placeholder="Chọn ca làm việc"
+                                showSearch
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                }
+                                loading={isLoadingShifts}
+                                options={shiftData.map(shift => ({
+                                    label: `${shift.name} (${dayjs(shift.startTime).format("HH:mm")} - ${dayjs(shift.endTime).format("HH:mm")})`,
+                                    value: shift.shiftId
+                                }))}
                             />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Thời gian kết thúc"
-                            name="endTime"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn thời gian kết thúc!",
-                                },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        const startTime = getFieldValue('startTime');
-                                        const endTime = getFieldValue('endTime');
-                                        if (startTime && endTime && startTime.isAfter(endTime)) {
-                                            return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
-                                        }
-                                        return Promise.resolve();
-                                    }
-                                })
-                            ]}
-                        >
-                            <TimePicker
-                                format="HH:mm"
-                                style={{ width: "100%" }}
-                                placeholder="Chọn giờ kết thúc"
-                            />
-                        </Form.Item>
+                        </Form.Item> */}
                         <Form.Item
                             label="Thời gian khám"
-                            name="shiftDuration"
+                            name="slotDuration"
                         >
                             <Select
                                 placeholder="Chọn thời gian khám"

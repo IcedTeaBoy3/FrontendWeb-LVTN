@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { ShiftService } from '@/services/ShiftService';
+import {ScheduleService} from '@/services/ScheduleService';
 import { Space, Input, DatePicker, TimePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown, Tag } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
@@ -135,6 +136,12 @@ const ShiftPage = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
+    const queryGetAllSchedules = useQuery({
+        queryKey: ["getAllSchedules"],
+        queryFn: ScheduleService.getAllSchedules,
+        retry: 1,
+        refetchOnWindowFocus: false,
+    });
     const mutationCreateShift = useMutation({
         mutationKey: ["createShift"],
         mutationFn: ShiftService.createShift,
@@ -205,16 +212,19 @@ const ShiftPage = () => {
         }
     });
     const { data: dataGetAllShifts, isLoading: isLoadingShifts } = queryGetAllShifts;
+    const { data: dataGetAllSchedules, isLoading: isLoadingSchedules } = queryGetAllSchedules;
     const { isPending: isPendingCreate } = mutationCreateShift;
     const { isPending: isPendingUpdate } = mutationUpdateShift;
     const { isPending: isPendingDelete } = mutationDeleteShift;
     const { isPending: isPendingDeleteMany } = mutationDeleteManyShifts;
     const shiftData = dataGetAllShifts?.data?.shifts || [];
+    const scheduleData = dataGetAllSchedules?.data?.schedules || [];
 
     const dataTable = shiftData.map((item, index) => ({
         key: item.shiftId,
         index: index + 1,
         name: item.name,
+        shiftId: dayjs(item.schedule?.workday).format("DD/MM/YYYY"),
         startTime: item.startTime,
         endTime: item.endTime,
         status: item.status,
@@ -233,45 +243,22 @@ const ShiftPage = () => {
             ...getColumnSearchProps("name"),
         },
         {
+            title: "Lịch làm việc",
+            dataIndex: "shiftId",
+            key: "shiftId",
+        },
+        {
             title: "Thời gian bắt đầu",
             dataIndex: "startTime",
             key: "startTime",
+            render: (text) => dayjs(text).format("HH:mm"),
         },
         {
             title: "Thời gian kết thúc",
             dataIndex: "endTime",
             key: "endTime",
+            render: (text) => dayjs(text).format("HH:mm"),
         },
-
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            key: "status",
-            render: (text) => (
-                text === "active" ? (
-                    <Tag
-                        color="green"
-                        style={{ borderRadius: "8px", padding: "0 8px" }}
-                    >
-                        Hoạt động
-                    </Tag>
-                ) : (
-                    <Tag
-                        color="red"
-                        style={{ borderRadius: "8px", padding: "0 8px" }}
-                    >
-                        Không hoạt động
-                    </Tag>
-                )
-            ),
-            filters: [
-                { text: "Hoạt động", value: "active" },
-                { text: "Không hoạt động", value: "inactive" },
-            ],
-            onFilter: (value, record) => record.status.startsWith(value),
-            filterMultiple: false,
-        },
-
         {
             title: "Hành động",
             key: "action",
@@ -333,11 +320,7 @@ const ShiftPage = () => {
         formCreate
             .validateFields()
             .then((values) => {
-                mutationCreateShift.mutate({
-                    name: values.name,
-                    startTime: values.startTime.format("HH:mm"),
-                    endTime: values.endTime.format("HH:mm"),
-                });
+                mutationCreateShift.mutate(values);
             })
             .catch((errorInfo) => {
                 console.log("Failed to create shift:", errorInfo);
@@ -445,6 +428,30 @@ const ShiftPage = () => {
                             ]}
                         >
                             <Input placeholder="Nhập vào ca làm việc" />
+                        </Form.Item>
+                        <Form.Item
+                            label="Lịch làm việc"
+                            name="scheduleId"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn lịch làm việc!",
+                                },
+                            ]}
+                        >
+                            <Select
+                                placeholder="Chọn lịch làm việc"
+                                options={scheduleData.map((schedule) => ({
+                                    label: dayjs(schedule.workday).format("DD/MM/YYYY"),
+                                    value: schedule.scheduleId,
+                                }))}
+                                allowClear
+                                showSearch
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    option.label.toLowerCase().includes(input.toLowerCase())
+                                }
+                            />
                         </Form.Item>
                         <Form.Item
                             label="Thời gian bắt đầu"
