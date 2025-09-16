@@ -306,7 +306,7 @@ const PatientPage = () => {
         },
 
         {
-            title: "Thao tác",
+            title: "Hành động",
             key: "action",
             render: (_, record) => {
                 const itemActions = [

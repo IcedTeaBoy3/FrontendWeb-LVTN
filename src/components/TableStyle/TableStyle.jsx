@@ -2,7 +2,7 @@ import { TableStyled } from "./style"
 import { ConfigProvider } from "antd"
 import viVN from "antd/es/locale/vi_VN";
 
-const TableStyle = ({ rowSelection, columns, dataSource, loading, pagination, onChange, ...rests }) => {
+const TableStyle = ({ rowSelection, columns, dataSource, loading, pagination, onChange, emptyText, ...rests }) => {
     return (
         <ConfigProvider
             locale={viVN}     
@@ -14,7 +14,7 @@ const TableStyle = ({ rowSelection, columns, dataSource, loading, pagination, on
                 scroll={{ x: "max-content" }}
                 dataSource={dataSource} 
                 locale={{
-                    emptyText: "Không có dữ liệu tài khoản",
+                    emptyText: emptyText || "Không có dữ liệu",
                     filterConfirm: "Lọc",
                     filterReset: "Xóa lọc",
                     triggerDesc: "Sắp xếp giảm dần",

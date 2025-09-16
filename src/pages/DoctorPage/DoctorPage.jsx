@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom';
 import { DoctorService } from '@/services/DoctorService';
 import { DegreeService } from '@/services/DegreeService';
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, DatePicker, Upload } from "antd";
+import { Space, Input, Form, Select, Radio, Typography, Divider, Dropdown, DatePicker, Upload, Tag, Popover } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -166,6 +166,21 @@ const DoctorPage = () => {
     const { isPending: isPendingDeleteMany } = mutationDeleteManyDoctors;
     const data = dataDoctors?.data?.doctors;
     const degrees = dataDegrees?.data?.degrees;
+    const uniqueSpecialties = [
+        ...new Set(
+            data?.flatMap((doctor) =>
+            doctor?.doctorSpecialties.map((ds) => ds?.specialty.name)
+            )
+        ),
+    ];
+    const uniqueWorkplaces = [
+        ...new Set(
+            data?.flatMap((doctor) =>
+                doctor?.doctorWorkplaces.map((ws) => ws?.workplace.name)
+            )
+        ),
+    ];
+    // const workplaces = data?.
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({
             setSelectedKeys,
@@ -198,13 +213,13 @@ const DoctorPage = () => {
                     >
                         Tìm
                     </ButtonComponent>
-                    <Button
+                    <ButtonComponent
                         onClick={() => handleReset(clearFilters, confirm)}
                         size="small"
                         style={{ width: 90 }}
                     >
                         Xóa
-                    </Button>
+                    </ButtonComponent>
                 </Space>
             </div>
         ),
@@ -276,9 +291,48 @@ const DoctorPage = () => {
             ...getColumnSearchProps("phone"),
         },
         {
+            title: "Chuyên khoa",
+            dataIndex: "specialty",
+            key: "specialty",
+            render: (dS) => {
+                return dS ? <Tag color="blue">{dS?.specialty.name}</Tag> : <Text type="secondary">Chưa cập nhật</Text>;
+            },
+            filters: uniqueSpecialties.map((spec) => ({ text: spec, value: spec })),
+            onFilter: (value, record) => record?.specialty?.specialty?.name === value,
+            filterSearch: true,
+        },
+        {
+            title: "Nơi làm việc",
+            dataIndex: "workplace",
+            key: "workplace",
+            render: (dW) => {
+                return dW ? (
+                    <Popover
+                        content={<div style={{ maxWidth: 300 }}>{dW?.workplace.name}</div>}
+                        title="Nội dung đầy đủ"
+                        trigger="hover"
+                    >
+                        <Text ellipsis style={{ maxWidth: 200, display: "inline-block" }}>
+                            {dW?.workplace.name.length > 60 ? dW?.workplace.name.substring(0, 50) + "..." : dW?.workplace.name}
+                        </Text>
+                    </Popover>
+                ) : (
+                    <Text type="secondary">Chưa cập nhật</Text>
+                );
+            },
+            filters: uniqueWorkplaces.map((work) => ({ text: work, value: work })),
+            onFilter: (value, record) => record?.workplace?.workplace?.name === value,
+            filterSearch: true,
+        },
+        {
             title: "Bằng cấp",
             dataIndex: "degree",
             key: "degree",
+            render: (degree) => {
+                return degree ? <Text>{degree}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
+            },
+            filters: degrees?.map((deg) => ({ text: deg.title, value: deg.title })),
+            onFilter: (value, record) => record?.degree === value,
         },
         {
             title: "Hành động",
@@ -320,12 +374,14 @@ const DoctorPage = () => {
     ].filter(Boolean);
     const dataTable = data?.map((item, index) => {
         return {
-            key: item.doctorId,
+            key: item.doctorId || item.id,
             index: index + 1,
             name: item.user?.name,
             email: item.user?.email,
             phone: item.user?.phone,
-            degree: item.degree?.abbreviation,
+            degree: item.degree?.title,
+            specialty: item.doctorSpecialties.find((spec) => spec.isPrimary === true),
+            workplace: item.doctorWorkplaces.find((work) => work.isPrimary === true),
         };
     });
     const handleViewDoctor = (key) => {
@@ -461,7 +517,7 @@ const DoctorPage = () => {
             </ButtonComponent>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
-                onSelectedAll={handleSelectedAll}
+                handleSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
 
             />
@@ -945,30 +1001,17 @@ const DoctorPage = () => {
             </DrawerComponent>
             <TableStyle
                 rowSelection={rowSelection}
-                rowKey={"key"}
+                emptyText="Không có dữ liệu bác sĩ"
                 columns={columns}
-                scroll={{ x: "max-content" }}
                 loading={isLoadingDoctors}
                 dataSource={dataTable}
-                locale={{
-                    emptyText: "Không có dữ liệu bác sĩ",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-                }}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} bác sĩ`,
-                    showSizeChanger: true, // Cho phép chọn số dòng/trang
-                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                    showQuickJumper: true, // Cho phép nhảy đến trang
-                    onChange: (page, pageSize) => {
-                        setPagination({
-                            current: page,
-                            pageSize: pageSize,
-                        });
-                    },
+                pagination={pagination}
+                onChange={(page, pageSize) => {
+                    setPagination((prev) => ({
+                        ...prev,
+                        current: page,
+                        pageSize: pageSize,
+                    }));
                 }}
             />
         </>
