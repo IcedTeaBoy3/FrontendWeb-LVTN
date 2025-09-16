@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion,AnimatePresence } from "framer-motion";
 import { Typography, Divider, Dropdown, Space } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";

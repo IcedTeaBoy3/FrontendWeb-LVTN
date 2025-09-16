@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { PatientService } from '@/services/PatientService'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu } from "antd";
+import { Space, Input, Form,  Radio, Typography, Popover, Divider, Dropdown } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -10,12 +10,11 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
-import { AnimatePresence } from "framer-motion";
+import dayjs from "dayjs";
 import {
     EditOutlined,
     DeleteOutlined,
     SearchOutlined,
-    DownOutlined,
     MoreOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
@@ -130,13 +129,13 @@ const PatientPage = () => {
                     >
                         Tìm
                     </ButtonComponent>
-                    <Button
+                    <ButtonComponent
                         onClick={() => handleReset(clearFilters, confirm)}
                         size="small"
                         style={{ width: 90 }}
                     >
                         Xóa
-                    </Button>
+                    </ButtonComponent>
                 </Space>
             </div>
         ),
@@ -188,13 +187,7 @@ const PatientPage = () => {
             sorter: (a, b) => a.index - b.index,
 
         },
-        {
-            title: "Email",
-            dataIndex: "email",
-            key: "email",
-            ...getColumnSearchProps("email"),
-        },
-        {
+         {
             title: "Tên",
             dataIndex: "name",
             key: "name",
@@ -202,15 +195,30 @@ const PatientPage = () => {
             sorter: (a, b) => a.name?.length - b.name?.length,
         },
         {
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+            ...getColumnSearchProps("email"),
+            sorter: (a, b) => a.email?.length - b.email?.length,
+        },
+        {
             title: "Số điện thoại",
             dataIndex: "phone",
             key: "phone",
             ...getColumnSearchProps("phone"),
             render: (phone) => {
-                return phone ? (
-                    <Text>{phone}</Text>
+                if (!phone) {
+                return <Text type="secondary">Chưa cập nhật</Text>;
+                }
+                return searchedColumn === "phone" ? (
+                <Highlighter
+                    highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }}
+                    searchWords={[searchText]}
+                    autoEscape
+                    textToHighlight={phone.toString()}
+                />
                 ) : (
-                    <Text type="secondary">Chưa cập nhật</Text>
+                <Text>{phone}</Text>
                 );
             },
         },
@@ -218,7 +226,6 @@ const PatientPage = () => {
             title: "Địa chỉ",
             dataIndex: "address",
             key: "address",
-            ...getColumnSearchProps("address"),
             render: (text) => (
                 text ? (
                     <Popover
@@ -265,7 +272,7 @@ const PatientPage = () => {
                 { text: "Nữ", value: "female" },
                 { text: "Khác", value: "other" },
             ],
-            onFilter: (value, record) => record.gender.includes(value),
+            onFilter: (value, record) => record.gender?.includes(value),
 
         },
         {
@@ -279,6 +286,23 @@ const PatientPage = () => {
                     <Text type="secondary">Chưa cập nhật</Text>
                 );
             }
+        },
+        {
+            title: "Vai trò",
+            dataIndex: "role",
+            key: "role",
+            render: (role) => {
+                return role ? (
+                    <Text>{convertRole(role)}</Text>
+                ) : (
+                    <Text type="secondary">Chưa cập nhật</Text>
+                );
+            },
+            filters: [
+                { text: "Người dùng", value: "user" },
+                { text: "Bác sĩ", value: "doctor" },
+            ],
+            onFilter: (value, record) => record?.role?.includes(value),
         },
 
         {
@@ -319,6 +343,18 @@ const PatientPage = () => {
             },
         },
     ].filter(Boolean);
+    const convertRole = (role) => {
+        switch (role) {
+            case "user":
+                return "Người dùng";
+            case "doctor":
+                return "Bác sĩ";
+            case "admin":
+                return "Quản trị viên";
+            default:
+                return "Chưa cập nhật";
+        }
+    };
     const handleShowConfirmDelete = () => {
         setIsModalOpenDelete(true);
     };
@@ -370,6 +406,7 @@ const PatientPage = () => {
             gender: item.gender,
             ethnic: item.ethnic,
             job: item.job,
+            role: item?.role,
         };
     });
     const menuProps = {
@@ -399,10 +436,10 @@ const PatientPage = () => {
     };
     return (
         <>
-            <Title level={4}>Danh sách bệnh nhân</Title>
+            <Title level={4}>Danh sách tài khoản</Title>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
-                onSelectedAll={handleSelectedAll}
+                handleSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
 
             />
@@ -468,13 +505,14 @@ const PatientPage = () => {
                 placement="right"
                 isOpen={isOpenDrawer}
                 onClose={() => setIsOpenDrawer(false)}
-                width={window.innerWidth < 768 ? "100%" : 600}
+                width={window.innerWidth < 768 ? "100%" : 700}
                 forceRender
             >
                 <LoadingComponent isLoading={isPendingUpdate}>
                     <Form
                         name="formUpdate"
                         labelCol={{ span: 6 }}
+                        labelAlign='left'
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
                         initialValues={{ remember: true }}
@@ -529,42 +567,36 @@ const PatientPage = () => {
                         <Form.Item
                             label="Địa chỉ"
                             name="address"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập địa chỉ!",
-                                },
-                            ]}
+                            
                         >
                             <Input.TextArea name="address" rows={4} />
                         </Form.Item>
 
                         <Form.Item
-                            label="Ngày sinh"
-                            name="dateOfBirth"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn ngày sinh!",
-                                },
-                            ]}
-                        >
-                            <Input
-                                type="date"
-                                name="dateOfBirth"
-                                style={{ width: "100%" }}
-                            />
+                        label="Ngày sinh"
+                        name="dateOfBirth"
+                        rules={[
+                            () => ({
+                            validator(_, value) {
+                                if (!value) {
+                                    return Promise.resolve();
+                                }
+                                const selectedDate = dayjs(value);
+                                const today = dayjs();
 
+                                if (selectedDate.isAfter(today, "day")) {
+                                    return Promise.reject(new Error("Ngày sinh phải sau ngày hiện tại!"));
+                                }
+                                return Promise.resolve();
+                            },
+                            }),
+                        ]}
+                        >
+                            <Input type="date" style={{ width: "100%" }} />
                         </Form.Item>
                         <Form.Item
                             label="Giới tính"
                             name="gender"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn giới tính!",
-                                },
-                            ]}
                         >
                             <Radio.Group name="gender">
                                 <Radio value="male">Nam</Radio>
@@ -572,9 +604,6 @@ const PatientPage = () => {
                                 <Radio value="other">Khác</Radio>
                             </Radio.Group>
                         </Form.Item>
-
-
-
                         <Form.Item
                             label={null}
                             wrapperCol={{ offset: 17, span: 7 }}
@@ -599,37 +628,21 @@ const PatientPage = () => {
                         </Form.Item>
                     </Form>
                 </LoadingComponent>
-            </DrawerComponent>
+            </DrawerComponent> 
             <TableStyle
                 rowSelection={rowSelection}
-                rowKey={"key"}
                 columns={columns}
-                scroll={{ x: "max-content" }}
                 dataSource={dataTable}
-                locale={{
-                    emptyText: "Không có dữ liệu tài khoản",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-
-                }}
                 loading={isLoadingPatient}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} tài khoản`,
-                    showSizeChanger: true,
-                    pageSizeOptions: ["5", "8", "10", "20", "50"],
-                    showQuickJumper: true,
-                    onChange: (page, pageSize) => {
-                        setPagination({
-                            current: page,
-                            pageSize: pageSize,
-                        });
-                    },
+                pagination={pagination}
+                onChange={(page, pageSize) => {
+                    setPagination((prev) => ({
+                        ...prev,
+                        current: page,
+                        pageSize: pageSize,
+                    }));
                 }}
             />
-
         </>
     )
 }
