@@ -49,7 +49,6 @@ const menuItems = [
         children: [
             { key: "/admin/doctors", label: "Danh sách bác sĩ" },
             { key: "/admin/schedules", label: "Lịch làm việc" },
-            { key: "/admin/shifts", label: "Ca làm việc" },
             {
                 label: "Danh mục dùng chung",
                 children: [
@@ -126,7 +125,6 @@ const AdminLayout = () => {
         "/admin/specialties": "Chuyên khoa",
         "/admin/patients": "Người dùng",
         "/admin/schedules": "Lịch làm việc",
-        "/admin/shifts": "Ca làm việc",
         "/admin/medical-records": "Hồ sơ bệnh án",
         "/admin/clinics": "Phòng khám",
         "/admin/services": "Dịch vụ",

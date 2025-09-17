@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftOutlined, UserOutlined, PlusOutlined ,SearchOutlined, EyeOutlined, CalendarOutlined, EditOutlined , DeleteOutlined , MoreOutlined, ExclamationCircleOutlined, AppstoreOutlined, ClockCircleOutlined   } from "@ant-design/icons";
-import { Form, Input, TimePicker, Space, Button, Dropdown, Typography, Card, Tag, Row, Divider, Col } from 'antd';
+import { Form, Input, TimePicker, Space, Button, Dropdown, Typography, Card, Tag, Row, Divider, Col, Select } from 'antd';
 import Highlighter from "react-highlight-words";
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent'
 import ModalComponent from '@/components/ModalComponent/ModalComponent';
@@ -227,11 +227,13 @@ const DetailSchedulePage = () => {
     {
       title: "Thời gian kết thúc",
       dataIndex: "endTime",
+      sorter: (a, b) => dayjs(a.endTime).unix() - dayjs(b.endTime).unix(),
     },
    
     {
-      title: "Tổng slot",
-      dataIndex: "slotCount"
+      title: "Số slot",
+      dataIndex: "slotCount",
+      sorter: (a, b) => a?.slotCount - b?.slotCount,
     },
     {
       title: "Hành động",
@@ -278,7 +280,7 @@ const DetailSchedulePage = () => {
     setIsModalOpenDetail(true);
   };
   const handleEditShift = (shiftId) => {
-
+    Message.info("Chức năng đang phát triển" + shiftId);
   };
   const handleShowConfirmDelete = () => {
     setIsModalOpenDelete(true);
@@ -287,12 +289,30 @@ const DetailSchedulePage = () => {
     mutationDeleteShift.mutate(rowSelected);
   };
   const handleCancelDelete = () => {
-    setIsModalOpenDelete(true);
+    setIsModalOpenDelete(false);
   };
+  const handleOnchange = (value) => {
+    if(value === 'Ca sáng') {
+      formCreate.setFieldsValue({
+        startTime: dayjs('08:00', 'HH:mm'),
+        endTime: dayjs('12:00', 'HH:mm'),
+      });
+    } else if(value === 'Ca chiều') {
+      formCreate.setFieldsValue({
+        startTime: dayjs('13:00', 'HH:mm'),
+        endTime: dayjs('17:00', 'HH:mm'),
+      });
+    } else if(value === 'Ca tối') {
+      formCreate.setFieldsValue({
+        startTime: dayjs('18:00', 'HH:mm'),
+        endTime: dayjs('22:00', 'HH:mm'),
+      });
+    }
+  }
   return (
     <>
       <ButtonComponent
-        type="link"
+        type="text"
         icon={<ArrowLeftOutlined />}
         onClick={handleBack}
         style={{ fontSize: 18, padding: 0 }}
@@ -362,23 +382,32 @@ const DetailSchedulePage = () => {
                   wrapperCol={{ span: 18 }}
                   style={{ maxWidth: 600, padding: "20px" }}
                   initialValues={{
-                      shiftDuration: 30,
+                    shiftDuration: 30,
                   }}
                   autoComplete="off"
                   form={formCreate}
               >
           
                   <Form.Item
-                      label="Ca làm việc"
-                      name="name"
-                      rules={[
-                          {
-                              required: true,
-                              message: "Vui lòng nhập vào ca làm việc!",
-                          },
-                      ]}
+                    label="Ca làm việc"
+                    name="name"
+                    rules={[
+                        {
+                          required: true,
+                          message: "Vui lòng chọn ca làm việc!",
+                        },
+                    ]}
                   >
-                      <Input placeholder="Nhập vào ca làm việc" />
+                    <Select
+                      placeholder="Chọn ca làm việc"
+                      style={{ width: "100%" }}
+                      onChange={handleOnchange}
+                      options={[
+                        { value: 'Ca sáng', label: 'Ca sáng' },
+                        { value: 'Ca chiều', label: 'Ca chiều' },
+                        { value: 'Ca tối', label: 'Ca tối' },
+                      ]}
+                    />
                   </Form.Item>
                   <Form.Item
                       label="Thời gian bắt đầu"

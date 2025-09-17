@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { PatientService } from '@/services/PatientService'
 import { Space, Input, Form,  Radio, Typography, Popover, Divider, Dropdown } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
@@ -29,6 +30,7 @@ const PatientPage = () => {
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
     const [rowSelected, setRowSelected] = useState(null);
     const [formUpdate] = Form.useForm();
+    const Navigate = useNavigate();
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -373,10 +375,8 @@ const PatientPage = () => {
         }
     };
     const handleViewUser = (userId) => {
-        const patient = data.find(user => user.userId === userId);
-        if (patient) {
-            // Show patient details in a modal or a new page
-        }
+        const user = data.find(user => user.userId === userId);
+        if(!user) return Message.error("Người dùng không tồn tại");
     }
     const runMutation = (mutation, payload) => {
         mutation.mutate(payload, {
