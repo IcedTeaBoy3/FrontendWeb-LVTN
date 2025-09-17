@@ -456,11 +456,11 @@ const DetailSchedulePage = () => {
                           })
                       ]}
                   >
-                      <TimePicker
-                          format="HH:mm"
-                          style={{ width: "100%" }}
-                          placeholder="Chọn giờ kết thúc"
-                      />
+                    <TimePicker
+                      format="HH:mm"
+                      style={{ width: "100%" }}
+                      placeholder="Chọn giờ kết thúc"
+                    />
                   </Form.Item>
               </Form>
           </ModalComponent>
@@ -494,12 +494,12 @@ const DetailSchedulePage = () => {
           </LoadingComponent>
       </ModalComponent>
       <DrawerComponent
-          title="Chi tiết ca làm việc"
-          placement="right"
-          isOpen={isModalOpenDetail}
-          onClose={() => setIsModalOpenDetail(false)}
-          width={window.innerWidth < 768 ? "100%" : 800}
-          forceRender
+        title="Chi tiết ca làm việc"
+        placement="right"
+        isOpen={isModalOpenDetail}
+        onClose={() => setIsModalOpenDetail(false)}
+        width={window.innerWidth < 768 ? "100%" : 800}
+        forceRender
       >
         <LoadingComponent isLoading={isLoadingSlots}>
           <Card
@@ -566,11 +566,22 @@ const DetailSchedulePage = () => {
                 key: "status",
                 render: (status) => {
                   let color = "green";
+                  let text = "Còn trống";
                   if (status === "booked") {
                     color = "red";
+                    text = "Đã đặt";
                   }
-                  return <Tag color={color}>{status}</Tag>;
-                }
+                
+                  return <Tag color={color}>{text}</Tag>;
+                },
+                filters: [
+                  { text: 'Còn trống', value: 'available' },
+                  { text: 'Đã đặt', value: 'booked' },
+                ],
+                onFilter: (value, record) => record?.status === value,
+                filterSearch: true,
+                filterMultiple: false,
+                defaultFilteredValue: ['available']
               }
             ]}
             loading={isLoadingSlots}

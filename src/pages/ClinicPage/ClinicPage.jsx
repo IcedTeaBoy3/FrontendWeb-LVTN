@@ -248,7 +248,7 @@ const ClinicPage = () => {
                         <Row gutter={16}>
                             <Col span={12}>
                                 <Form.Item label="Giờ làm việc" name="workHours">
-                                    <Input placeholder="Ví dụ: Thứ 2 - Thứ 6: 7:00 - 17:00" />
+                                    <Input.TextArea rows={3} placeholder="Ví dụ: Thứ 2 - Thứ 6: 8h - 17h, Thứ 7 - Chủ nhật: 8h - 12h" />
                                 </Form.Item>
                             </Col>
                             <Col span={12}>
@@ -269,7 +269,6 @@ const ClinicPage = () => {
                                             value: service.serviceId,
                                         }))}
                                     >
-
                                     </Select>
                                 </Form.Item>
                             </Col>

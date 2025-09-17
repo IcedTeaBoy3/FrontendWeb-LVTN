@@ -1,7 +1,13 @@
 import axiosInstance from '@/config/axiosInstance';
 export const ServiceService = {
-    getAllServices: async () => {
-        const response = await axiosInstance.get('/service/get-all-services');
+    getAllServices: async ({status, page, limit}) => {
+        const response = await axiosInstance.get('/service/get-all-services', {
+            params: {
+                status,
+                page,
+                limit
+            }
+        });
         return response.data;
     },
     getService: async (serviceId) => {

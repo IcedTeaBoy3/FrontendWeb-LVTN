@@ -434,6 +434,7 @@ const SchedulePage = () => {
                         style={{ maxWidth: 600, padding: "20px" }}
                         initialValues={{
                             slotDuration: 30,
+                            workday: null,
                         }}
                         autoComplete="off"
                         form={formCreate}
@@ -471,17 +472,25 @@ const SchedulePage = () => {
                                     required: true,
                                     message: "Vui lòng chọn ngày làm việc!",
                                 },
+                                {
+                                    validator: (_, value) => {
+                                        if (value && value.day() === 0) {
+                                            return Promise.reject("Phòng khám không làm việc vào ngày Chủ nhật!");
+                                        }
+                                        return Promise.resolve();
+                                    }
+                                }
                             ]}
                         >
-                             <ConfigProvider locale={viVN}>
-                                <DatePicker
-                                    style={{ width: "100%" }}
-                                    format="DD/MM/YYYY"
-                                    disabledDate={(current) =>
-                                        current && current < dayjs().add(1, "day").startOf("day")
-                                    }
-                                />
-                            </ConfigProvider>
+                             
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                format="DD/MM/YYYY"
+                                disabledDate={(current) =>
+                                    current && current < dayjs().add(1, "day").startOf("day")
+                                }
+                            />
+                            
                         </Form.Item>
                         <Form.Item
                             label="Thời gian khám"
@@ -610,12 +619,13 @@ const SchedulePage = () => {
                                     required: true,
                                     message: "Vui lòng chọn ngày làm việc!",
                                 },
+                                
                             ]}
                         >
                             <DatePicker
                                 style={{ width: "100%" }}
                                 format="DD/MM/YYYY"
-                                disabledDate={(current) => current && current < dayjs().startOf("day")}
+                                disabledDate={(current) => current && (current < dayjs().add(1,'day').startOf('day') || current.day() === 0)}
                             />
                         </Form.Item>
                         <Form.Item

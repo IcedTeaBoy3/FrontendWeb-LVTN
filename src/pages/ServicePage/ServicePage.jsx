@@ -132,7 +132,7 @@ const ServicePage = () => {
     };
     const queryGetAllServices = useQuery({
         queryKey: ['getAllServices'],
-        queryFn: ServiceService.getAllServices,
+        queryFn: () => ServiceService.getAllServices({ page: 1, limit: 1000 }),
         retry: 1,
     });
     const queryGetAllSpecialties = useQuery({
