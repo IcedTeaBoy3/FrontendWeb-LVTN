@@ -64,7 +64,7 @@ const DoctorPage = () => {
     });
     const queryGetAllDegrees = useQuery({
         queryKey: ['getAllDegrees'],
-        queryFn: DegreeService.getAllDegrees,
+        queryFn: () => DegreeService.getAllDegrees({ status: 'active', page: 1, limit: 1000 }),
         retry: 1,
     });
     const mutationCreateDoctor = useMutation({

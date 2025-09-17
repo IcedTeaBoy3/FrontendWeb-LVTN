@@ -623,30 +623,16 @@ const DegreePage = () => {
             </ModalComponent>
             <TableStyle
                 rowSelection={rowSelection}
-                rowKey={"key"}
                 columns={columns}
-                scroll={{ x: "max-content" }}
                 loading={isLoadingDegrees}
                 dataSource={dataTable}
-                locale={{
-                    emptyText: "Không có dữ liệu học vị",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-                }}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} học vị`,
-                    showSizeChanger: true,
-                    pageSizeOptions: ["5", "8", "10", "20", "50"],
-                    showQuickJumper: true,
-                    onChange: (page, pageSize) => {
-                        setPagination({
-                            current: page,
-                            pageSize: pageSize,
-                        });
-                    },
+                pagination={pagination}
+                onChange={(page, pageSize) => {
+                    setPagination((prev) => ({
+                        ...prev,
+                        current: page,
+                        pageSize: pageSize,
+                    }));
                 }}
             />
         </>

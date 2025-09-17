@@ -1,8 +1,14 @@
 import axiosInstance from '@/config/axiosInstance';
 
 export const WorkplaceService = {
-    getAllWorkplaces: async () => {
-        const response = await axiosInstance.get('/workplace/get-all-workplaces');
+    getAllWorkplaces: async ({status, page, limit}) => {
+        const response = await axiosInstance.get('/workplace/get-all-workplaces', {
+            params: {
+                status,
+                page,
+                limit
+            }
+        });
         return response.data;
     },
     createWorkplace: async (data) => {

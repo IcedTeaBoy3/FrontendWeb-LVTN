@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Tabs, Divider, Skeleton } from "antd";
+import { Divider } from "antd";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
+import TabsComponent from '@/components/TabsComponent/TabsComponent';
 import InfoDoctor from '@/components/InfoDoctor/InfoDoctor';
 import DoctorWorkplace from '@/components/DoctorWorkplace/DoctorWorkplace';
 import DoctorSpecialty from '@/components/DoctorSpecialty/DoctorSpecialty';
@@ -61,7 +62,7 @@ const DoctorDetailPage = () => {
                 style={{ fontSize: 18, padding: 0 }}
             >Chi tiết bác sĩ</ButtonComponent>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
-            <Tabs
+            <TabsComponent
                 defaultActiveKey="1"
                 items={items}
             />

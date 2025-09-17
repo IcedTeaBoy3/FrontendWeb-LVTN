@@ -1,8 +1,8 @@
 import axiosInstance from '@/config/axiosInstance';
 export const SpecialtyService = {
-    getAllSpecialties: async () => {
+    getAllSpecialties: async ({ status, page, limit }) => {
         try {
-            const response = await axiosInstance.get('/specialty/get-all-specialties');
+            const response = await axiosInstance.get('/specialty/get-all-specialties?status=' + status + '&page=' + page + '&limit=' + limit);
             return response.data;
         } catch (error) {
             throw error.response.data;

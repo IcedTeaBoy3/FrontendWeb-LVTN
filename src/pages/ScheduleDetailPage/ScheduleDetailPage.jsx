@@ -1,20 +1,19 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeftOutlined, UserOutlined, PlusOutlined ,SearchOutlined, EyeOutlined, CalendarOutlined, EditOutlined , DeleteOutlined , MoreOutlined, ExclamationCircleOutlined, AppstoreOutlined, ClockCircleOutlined   } from "@ant-design/icons";
+import { Form, Input, TimePicker, Space, Button, Dropdown, Typography, Card, Tag, Row, Divider, Col } from 'antd';
 import Highlighter from "react-highlight-words";
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent'
-import { ArrowLeftOutlined,PlusOutlined ,SearchOutlined,EyeOutlined ,EditOutlined ,DeleteOutlined ,MoreOutlined,ExclamationCircleOutlined  } from "@ant-design/icons";
-import { useNavigate, useParams } from 'react-router-dom';
 import ModalComponent from '@/components/ModalComponent/ModalComponent';
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent';
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import TableStyle from '@/components/TableStyle/TableStyle';
-import {ShiftService} from '@/services/ShiftService';
+import { ShiftService } from '@/services/ShiftService';
 import { ScheduleService } from '@/services/ScheduleService';
 import { SlotService } from '@/services/SlotService';
 import * as Message from "@/components/Message/Message";
-import { Form, Input, TimePicker,Space,Button,Dropdown,Typography, Card,Tag } from 'antd';
 import dayjs from 'dayjs';
-import { Divider } from 'antd';
 const {Text} =Typography;
 
 const DetailSchedulePage = () => {
@@ -293,19 +292,51 @@ const DetailSchedulePage = () => {
   return (
     <>
       <ButtonComponent
-        type="text"
+        type="link"
         icon={<ArrowLeftOutlined />}
         onClick={handleBack}
         style={{ fontSize: 18, padding: 0 }}
 
       >Chi tiết lịch</ButtonComponent>
       <Card
-        style={{ marginTop: 16 }}
+        style={{
+          marginTop: 16,
+          borderRadius: 12,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        }}
         loading={isLoadingSchedule}
       >
-        <Text><b>Ngày làm việc: </b>{dayjs(scheduleInfo?.workday).format("DD/MM/YYYY") || ""}</Text><br />
-        <Text><b>Bác sĩ: </b>{scheduleInfo.doctor?.user?.name || ""}</Text><br />
-        <Text><b>Thời gian slot: </b>{scheduleInfo?.slotDuration} phút</Text>
+        <Row gutter={[0, 12]}>
+          <Col span={24}>
+            <Space>
+              <CalendarOutlined style={{ color: "#1890ff" }} />
+              <Text>
+                <b>Ngày làm việc: </b>
+                {scheduleInfo?.workday
+                  ? dayjs(scheduleInfo.workday).format("DD/MM/YYYY")
+                  : "—"}
+              </Text>
+            </Space>
+          </Col>
+          <Col span={24}>
+            <Space>
+              <UserOutlined style={{ color: "#52c41a" }} />
+              <Text>
+                <b>Bác sĩ: </b>
+                {scheduleInfo?.doctor?.user?.name || "—"}
+              </Text>
+            </Space>
+          </Col>
+          <Col span={24}>
+            <Space>
+              <ClockCircleOutlined style={{ color: "#faad14" }} />
+              <Text>
+                <b>Thời gian slot: </b>
+                {scheduleInfo?.slotDuration || "—"} phút
+              </Text>
+            </Space>
+          </Col>
+        </Row>
       </Card>
       <Divider style={{ margin: "12px 0" }} />
       <ButtonComponent 
@@ -442,13 +473,47 @@ const DetailSchedulePage = () => {
           forceRender
       >
         <LoadingComponent isLoading={isLoadingSlots}>
-          <Card style={{ marginBottom: 16 }}>
-            <Text><b>Ca làm việc: </b>{shiftSelected?.name || ""}</Text><br />
-            <Text><b>Thời gian: </b>{shiftSelected ? `${dayjs(shiftSelected.startTime).format("HH:mm")} - ${dayjs(shiftSelected.endTime).format("HH:mm")}` : ""}</Text><br />
-            <Text><b>Tổng số slot: </b>{shiftSelected?.slotCount || 0}</Text>
+          <Card
+            style={{
+              marginBottom: 16,
+              borderRadius: 12,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              padding: "12px 16px",
+            }}
+          >
+            <Row gutter={[0, 12]}>
+              <Col span={24}>
+                <Text strong>
+                  <AppstoreOutlined style={{ color: "#1890ff", marginRight: 8 }} />
+                  Ca làm việc:{" "}
+                </Text>
+                <Text>{shiftSelected?.name || "—"}</Text>
+              </Col>
+
+              <Col span={24}>
+                <Text strong>
+                  <ClockCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                  Thời gian:{" "}
+                </Text>
+                <Text>
+                  {shiftSelected
+                    ? `${dayjs(shiftSelected.startTime).format("HH:mm")} - ${dayjs(
+                        shiftSelected.endTime
+                      ).format("HH:mm")}`
+                    : "—"}
+                </Text>
+              </Col>
+
+              <Col span={24}>
+                <Text strong>
+                  <CalendarOutlined style={{ color: "#faad14", marginRight: 8 }} />
+                  Tổng số slot:{" "}
+                </Text>
+                <Text>{shiftSelected?.slotCount || 0}</Text>
+              </Col>
+            </Row>
           </Card>
           <TableStyle
-            rowKey={"key"}
             columns={[
               {
                 title: "STT",
@@ -479,7 +544,6 @@ const DetailSchedulePage = () => {
                 }
               }
             ]}
-            scroll={{ x: "max-content" }}
             loading={isLoadingSlots}
             dataSource={slotsData.map((item, index) => ({
               key: item.slotId,
@@ -497,26 +561,12 @@ const DetailSchedulePage = () => {
       </DrawerComponent>
       <TableStyle
         rowSelection={rowSelection}
-        rowKey={"key"}
         columns={columns}
-        scroll={{ x: "max-content" }}
         loading={isLoadingShifts}
         dataSource={dataTable}
-        locale={{
-          emptyText: "Không có dữ liệu lịch làm việc",
-          filterConfirm: "Lọc",
-          filterReset: "Xóa lọc",
-        }}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          position: ["bottomCenter"],
-          showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} lịch làm việc`,
-          showSizeChanger: true, // Cho phép chọn số dòng/trang
-          pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-          showQuickJumper: true, // Cho phép nhảy đến trang
-      }}
-    />
+        pagination={pagination}
+        onChange={(page) => setPagination(page)}
+      />
     </>
   )
 }

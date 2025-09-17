@@ -36,13 +36,13 @@ const DoctorWorkplace = ({ id }) => {
     });
     const queryGetAllWorkplaces = useQuery({
         queryKey: ['getAllWorkplaces'],
-        queryFn: WorkplaceService.getAllWorkplaces,
+        queryFn: () => WorkplaceService.getAllWorkplaces({ status: 'active', page: 1, limit: 1000 }),
         refetchOnWindowFocus: false,
         retry: 1,
     });
     const queryGetAllPositions = useQuery({
         queryKey: ['getAllPositions'],
-        queryFn: PositionService.getAllPositions,
+        queryFn: () => PositionService.getAllPositions({ status: 'active', page: 1, limit: 1000 }),
         refetchOnWindowFocus: false,
         retry: 1,
     });

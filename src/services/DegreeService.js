@@ -1,8 +1,14 @@
 import axiosInstance from '@/config/axiosInstance';
 
 export const DegreeService = {
-    getAllDegrees: async () => {
-        const response = await axiosInstance.get('/degree/get-all-degrees');
+    getAllDegrees: async ({ status, page, limit }) => {
+        const response = await axiosInstance.get('/degree/get-all-degrees', {
+            params: {
+                status,
+                page,
+                limit
+            }
+        });
         return response.data;
     },
     createDegree: async (data) => {

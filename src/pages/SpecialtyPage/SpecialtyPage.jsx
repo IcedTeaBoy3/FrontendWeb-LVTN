@@ -53,7 +53,7 @@ const SpecialtyPage = () => {
     });
     const queryGetAllSpecialties = useQuery({
         queryKey: ['getAllSpecialties'],
-        queryFn: SpecialtyService.getAllSpecialties,
+        queryFn: () => SpecialtyService.getAllSpecialties({ status: '', page: 1, limit: 1000 }),
         refetchOnWindowFocus: false,
         retry: 1,
     });
@@ -694,30 +694,16 @@ const SpecialtyPage = () => {
             </DrawerComponent>
             <TableStyle
                 rowSelection={rowSelection}
-                rowKey={"key"}
                 columns={columns}
-                scroll={{ x: "max-content" }}
                 loading={isLoadingSpecialties}
                 dataSource={dataTable}
-                locale={{
-                    emptyText: "Không có dữ liệu chuyên khoa",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-                }}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} chuyên khoa`,
-                    showSizeChanger: true, // Cho phép chọn số dòng/trang
-                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                    showQuickJumper: true, // Cho phép nhảy đến trang
-                    onChange: (page, pageSize) => {
-                        setPagination({
-                            current: page,
-                            pageSize: pageSize,
-                        });
-                    },
+                pagination={pagination}
+                onChange={(page, pageSize) => {
+                    setPagination((prev) => ({
+                        ...prev,
+                        current: page,
+                        pageSize: pageSize,
+                    }));
                 }}
             />
 

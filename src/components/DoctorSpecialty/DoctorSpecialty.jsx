@@ -33,7 +33,7 @@ const DoctorSpecialty = ({ id }) => {
     });
     const queryGetAllSpecialties = useQuery({
         queryKey: ['getAllSpecialties'],
-        queryFn: SpecialtyService.getAllSpecialties,
+        queryFn:() => SpecialtyService.getAllSpecialties({ status: 'active', page: 1, limit: 1000 }),
         refetchOnWindowFocus: false,
         retry: 1,
     });

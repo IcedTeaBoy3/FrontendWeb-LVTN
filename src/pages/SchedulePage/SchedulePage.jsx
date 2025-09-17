@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { ScheduleService } from '@/services/ScheduleService'
 import { DoctorService } from '@/services/DoctorService'
-import { ShiftService } from '@/services/ShiftService'
-import { Space, Input, DatePicker, TimePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown, Tag } from "antd";
+import { Space, Input, DatePicker, TimePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown, ConfigProvider} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -14,6 +13,7 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import dayjs from 'dayjs';
+import viVN from "antd/locale/vi_VN";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -140,12 +140,12 @@ const SchedulePage = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
-    const queryGetAllShifts = useQuery({
-        queryKey: ['getAllShifts'],
-        queryFn: ShiftService.getAllShifts,
-        retry: 1,
-        refetchOnWindowFocus: false,
-    });
+    // const queryGetAllShifts = useQuery({
+    //     queryKey: ['getAllShifts'],
+    //     queryFn: ShiftService.getAllShifts,
+    //     retry: 1,
+    //     refetchOnWindowFocus: false,
+    // });
     const queryGetAllSchedules = useQuery({
         queryKey: ['getAllSchedules'],
         queryFn: ScheduleService.getAllSchedules,
@@ -221,14 +221,12 @@ const SchedulePage = () => {
         }
     });
     const { data: doctors, isLoading: isLoadingDoctors } = queryGetAllDoctors;
-    const { data: shifts, isLoading: isLoadingShifts } = queryGetAllShifts;
     const { data: schedules, isLoading: isLoadingSchedules } = queryGetAllSchedules;
     const { isPending: isPendingCreate } = mutationCreateSchedule;
     const { isPending: isPendingDelete } = mutationDeleteSchedule;
     const { isPending: isPendingUpdate } = mutationUpdateSchedule;
     const { isPending: isPendingDeleteMany } = mutationDeleteManySchedules;
     const doctorData = doctors?.data?.doctors || [];
-    const shiftData = shifts?.data?.shifts || [];
     const scheduleData = schedules?.data?.schedules || [];
     const dataTable = scheduleData.map((item, index) => ({
         key: item.scheduleId,
@@ -261,21 +259,30 @@ const SchedulePage = () => {
             ...getColumnSearchProps("doctor"),
             sorter: (a, b) => a.doctor.length - b.doctor.length,
         },
-       
-       
         {
             title: "Thời gian khám (phút) / lượt",
             dataIndex: "slotDuration",
             key: "slotDuration",
+            filters: [
+                { text: '15 phút', value: 15 },
+                { text: '20 phút', value: 20 },
+                { text: '30 phút', value: 30 },
+                { text: '45 phút', value: 45 },
+                { text: '60 phút', value: 60 },
+            ],
+            onFilter: (value, record) => record?.slotDuration === value,
         },
          {
-            title: "Số ca",
-            dataIndex: "shiftCount"
-
+            title: "Số ca / ngày",
+            dataIndex: "shiftCount",
+            key: "shiftCount",
+            sorter: (a, b) => a?.shiftCount - b?.shiftCount,
         },
         {
-            title: "Tổng slot",
-            dataIndex: "slotCount"
+            title: "Số slot / ngày",
+            dataIndex: "slotCount",
+            key: "slotCount",
+            sorter: (a, b) => a?.slotCount - b?.slotCount,
         },
         {
             title: "Hành động",
@@ -333,7 +340,7 @@ const SchedulePage = () => {
         if (!schedule) return;
         formUpdate.setFieldsValue({
             workday: schedule.workday ? dayjs(schedule.workday) : null,
-            doctorId: schedule.doctor?.doctorId,
+            doctorId: schedule.doctor?.doctorId || schedule?.doctor?.id,
             slotDuration: schedule.slotDuration,
             status: schedule.status
         });
@@ -466,37 +473,16 @@ const SchedulePage = () => {
                                 },
                             ]}
                         >
-                            <DatePicker
-                                style={{ width: "100%" }}
-                                format="DD/MM/YYYY"
-                              
-                                disabledDate={(current) => current && current < dayjs().add(1, "day").startOf("day")}
-                            />
+                             <ConfigProvider locale={viVN}>
+                                <DatePicker
+                                    style={{ width: "100%" }}
+                                    format="DD/MM/YYYY"
+                                    disabledDate={(current) =>
+                                        current && current < dayjs().add(1, "day").startOf("day")
+                                    }
+                                />
+                            </ConfigProvider>
                         </Form.Item>
-                        {/* <Form.Item
-                            label="Ca làm việc"
-                            name="shiftId"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn ca làm việc!",
-                                },
-                            ]}
-                        >
-                            <Select
-                                showSearch
-                                optionFilterProp="children"
-                                loading={isLoadingShifts}
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                placeholder="Chọn ca làm việc"
-                                options={shiftData.map(shift => ({
-                                    label: `${shift.name} (${dayjs(shift.startTime).format("HH:mm")} - ${dayjs(shift.endTime).format("HH:mm")})`,
-                                    value: shift.shiftId
-                                }))}
-                            />
-                        </Form.Item> */}
                         <Form.Item
                             label="Thời gian khám"
                             name="slotDuration"
@@ -632,31 +618,6 @@ const SchedulePage = () => {
                                 disabledDate={(current) => current && current < dayjs().startOf("day")}
                             />
                         </Form.Item>
-                        {/* <Form.Item
-                            label="Ca làm việc"
-                            name="shiftId"
-                            
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn ca làm việc!",
-                                },
-                            ]}
-                        >
-                            <Select
-                                placeholder="Chọn ca làm việc"
-                                showSearch
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                loading={isLoadingShifts}
-                                options={shiftData.map(shift => ({
-                                    label: `${shift.name} (${dayjs(shift.startTime).format("HH:mm")} - ${dayjs(shift.endTime).format("HH:mm")})`,
-                                    value: shift.shiftId
-                                }))}
-                            />
-                        </Form.Item> */}
                         <Form.Item
                             label="Thời gian khám"
                             name="slotDuration"
@@ -671,22 +632,6 @@ const SchedulePage = () => {
                                     { label: '60 phút', value: 60 },
                                 ]}
                             />
-
-                        </Form.Item>
-                        <Form.Item
-                            label="Trạng thái"
-                            name="status"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn trạng thái!",
-                                },
-                            ]}
-                        >
-                            <Radio.Group>
-                                <Radio value="active">Hoạt động</Radio>
-                                <Radio value="inactive">Không hoạt động</Radio>
-                            </Radio.Group>
 
                         </Form.Item>
 
@@ -714,31 +659,11 @@ const SchedulePage = () => {
             </DrawerComponent>
             <TableStyle
                 rowSelection={rowSelection}
-                rowKey={"key"}
                 columns={columns}
-                scroll={{ x: "max-content" }}
                 loading={isLoadingSchedules}
                 dataSource={dataTable}
-                locale={{
-                    emptyText: "Không có dữ liệu lịch làm việc",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-                }}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} lịch làm việc`,
-                    showSizeChanger: true, // Cho phép chọn số dòng/trang
-                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                    showQuickJumper: true, // Cho phép nhảy đến trang
-                    onChange: (page, pageSize) => {
-                        setPagination({
-                            current: page,
-                            pageSize: pageSize,
-                        });
-                    },
-                }}
+                pagination={pagination}
+                onChange={(page) => setPagination(page)}
             />
         </>
     )

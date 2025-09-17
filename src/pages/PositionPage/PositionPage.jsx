@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Tag } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -14,7 +14,6 @@ import {
     EditOutlined,
     DeleteOutlined,
     SearchOutlined,
-    DownOutlined,
     MoreOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
@@ -600,30 +599,16 @@ const PositionPage = () => {
             </ModalComponent>
             <TableStyle
                 rowSelection={rowSelection}
-                rowKey={"key"}
                 columns={columns}
-                scroll={{ x: "max-content" }}
                 loading={isLoadingPositions}
                 dataSource={dataTable}
-                locale={{
-                    emptyText: "Không có dữ liệu chức vụ",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-                }}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} chức vụ`,
-                    showSizeChanger: true,
-                    pageSizeOptions: ["5", "8", "10", "20", "50"],
-                    showQuickJumper: true,
-                    onChange: (page, pageSize) => {
-                        setPagination({
-                            current: page,
-                            pageSize: pageSize,
-                        });
-                    },
+                pagination={pagination}
+                onChange={(page, pageSize) => {
+                    setPagination((prev) => ({
+                        ...prev,
+                        current: page,
+                        pageSize: pageSize,
+                    }));
                 }}
             />
         </>

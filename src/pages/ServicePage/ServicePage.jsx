@@ -652,30 +652,17 @@ const ServicePage = () => {
             </ModalComponent>
             <TableStyle
                 rowSelection={rowSelection}
-                rowKey={"key"}
+                emptyText="Không có dữ liệu dịch vụ"
                 columns={columns}
-                scroll={{ x: "max-content" }}
                 loading={isLoadingServices}
                 dataSource={dataTable}
-                locale={{
-                    emptyText: "Không có dữ liệu dịch vụ",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-                }}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} dịch vụ`,
-                    showSizeChanger: true, // Cho phép chọn số dòng/trang
-                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                    showQuickJumper: true, // Cho phép nhảy đến trang
-                    onChange: (page, pageSize) => {
-                        setPagination({
-                            current: page,
-                            pageSize: pageSize,
-                        });
-                    },
+                pagination={pagination}
+                onChange={(page, pageSize) => {
+                    setPagination((prev) => ({
+                        ...prev,
+                        current: page,
+                        pageSize: pageSize,
+                    }));
                 }}
             />
         </>

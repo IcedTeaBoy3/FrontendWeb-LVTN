@@ -1,8 +1,14 @@
 import axiosInstance from '@/config/axiosInstance';
 export const PositionService = {
-    getAllPositions: async () => {
+    getAllPositions: async ({status, page, limit}) => {
         try {
-            const response = await axiosInstance.get('/position/get-all-positions');
+            const response = await axiosInstance.get('/position/get-all-positions', {
+                params: {
+                    status,
+                    page,
+                    limit
+                }
+            });
             return response.data;
         } catch (error){
             console.error("Error fetching positions:", error);
