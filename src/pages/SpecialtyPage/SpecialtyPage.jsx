@@ -568,7 +568,7 @@ const SpecialtyPage = () => {
                                 name="file"
                                 beforeUpload={() => false}
                                 maxCount={1}
-                                accept=".jpg, .jpeg, .png, .gif, .webps"
+                                accept=".jpg, .jpeg, .png, .gif, .webp"
                                 onRemove={() => formCreate.setFieldsValue({ image: [] })}
                                 fileList={formCreate.getFieldValue("image") || []}
                                 listType="picture"

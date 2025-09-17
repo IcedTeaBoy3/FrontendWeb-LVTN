@@ -285,6 +285,11 @@ const WorkplacePage = () => {
             render: (text) => (
                 text === "hospital" ? <Tag color="blue" style={{ borderRadius: "8px", padding: "0 8px" }}>Bệnh viện</Tag> : <Tag color="green" style={{ borderRadius: "8px", padding: "0 8px" }}>Phòng khám</Tag>
             ),
+            filters: [
+                { text: 'Bệnh viện', value: 'hospital' },
+                { text: 'Phòng khám', value: 'clinic' },
+            ],
+            onFilter: (value, record) => record.type === value,
         },
         {
             title: "Hành động",

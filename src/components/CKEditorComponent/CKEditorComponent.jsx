@@ -1,9 +1,9 @@
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { StyledCKEditor } from "./style";
 const CKEditorComponent = ({ editorData, onChange }) => {
   return (
-    <CKEditor
+    <StyledCKEditor
         editor={ClassicEditor}
         config={{
             toolbar: [

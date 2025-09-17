@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
 import { ServiceService } from '@/services/ServiceService'
-import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag } from "antd";
+import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -137,7 +137,7 @@ const ServicePage = () => {
     });
     const queryGetAllSpecialties = useQuery({
         queryKey: ['getAllSpecialties'],
-        queryFn: SpecialtyService.getAllSpecialties,
+        queryFn: () => SpecialtyService.getAllSpecialties({status: 'active', page: 1, limit: 1000}),
         retry: 1,
     });
     const mutationCreateService = useMutation({
@@ -246,7 +246,20 @@ const ServicePage = () => {
             title: "Chuyên khoa",
             dataIndex: "specialty",
             key: "specialty",
-
+            filters: specialtyData.map((specialty) => ({
+                text: specialty.name,
+                value: specialty.name,
+            })),
+            onFilter: (value, record) => record?.specialty === value,
+            showSearch: true,
+            filterSearch: true,
+            render: (text) => (
+                text ? (
+                    <Tag color="blue">{text}</Tag>
+                ) : (
+                    <Text type="secondary">Chưa cập nhật</Text>
+                )
+            ),
         },
         {
             title: "Mô tả",
@@ -273,6 +286,29 @@ const ServicePage = () => {
             title: "Giá",
             dataIndex: "price",
             key: "price",
+            sorter: (a, b) => {
+                const priceA = parseInt(a.price.replace(/[^0-9]/g, ''));
+                const priceB = parseInt(b.price.replace(/[^0-9]/g, ''));
+                return priceA - priceB;
+            },
+            defaultSortOrder: 'ascend',
+            filters: [
+                { text: 'Dưới 200.000đ', value: 'under_200k' },
+                { text: '200.000đ - 500.000đ', value: '200k_500k' },
+                { text: '500.000đ - 1.000.000đ', value: '500k_1m' },
+                { text: 'Trên 1.000.000đ', value: 'above_1m' },
+            ],
+            onFilter: (value, record) => {
+                const price = parseInt(record.price.replace(/[^0-9]/g, ''));
+                if (value === 'under_200k') return price < 200000;
+                if (value === '200k_500k') return price >= 200000 && price <= 500000;
+                if (value === '500k_1m') return price > 500000 && price <= 1000000;
+                if (value === 'above_1m') return price > 1000000;
+                return false;
+            },
+            render: (text) => (
+                <Text>{text}</Text>
+            ),
         },
 
         {
@@ -489,9 +525,16 @@ const ServicePage = () => {
                         <Form.Item
                             label="Giá"
                             name="price"
-                            rules={[{ required: true, message: "Vui lòng nhập giá dịch vụ" }]}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập giá dịch vụ" },
+                                {
+                                    pattern: /^\d+$/,
+                                    message: "Giá dịch vụ phải là số dương",
+                                },
+                               
+                            ]}
                         >
-                            <Input placeholder="Nhập giá dịch vụ" />
+                            <InputNumber placeholder='Nhập giá dịch vụ' style={{ width: "100%" }} />
                         </Form.Item>
 
                     </Form>
@@ -550,9 +593,16 @@ const ServicePage = () => {
                         <Form.Item
                             label="Giá"
                             name="price"
-                            rules={[{ required: true, message: "Vui lòng nhập giá dịch vụ" }]}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập giá dịch vụ" },
+                                {
+                                    pattern: /^\d+$/,
+                                    message: "Giá dịch vụ phải là số dương",
+                                },
+                              
+                            ]}
                         >
-                            <Input placeholder="Nhập giá dịch vụ" />
+                            <InputNumber placeholder='Nhập giá dịch vụ' style={{ width: "100%" }} />
                         </Form.Item>
 
                         <Form.Item
