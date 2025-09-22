@@ -8,7 +8,7 @@ export const CustomTabs = styled(Tabs)`
     margin: 0;
   }
   & .ant-tabs-tab {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 400;
     color: #1890ff;
     padding: 16px 30px;

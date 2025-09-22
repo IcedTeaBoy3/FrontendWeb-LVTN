@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Form, Typography, Space, Divider, Select, Skeleton, InputNumber, Checkbox, Card } from "antd";
 import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { SpecialtyService } from "../../services/SpecialtyService";
-import { DoctorSpecialtyService } from "../../services/DoctorSpecialtyService";
+import { SpecialtyService } from "@/services/SpecialtyService";
+import { DoctorSpecialtyService } from "@/services/DoctorSpecialtyService";
 import * as Message from "@/components/Message/Message";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import TableStyle from "@/components/TableStyle/TableStyle";
@@ -444,31 +444,13 @@ const DoctorSpecialty = ({ id }) => {
             </DrawerComponent>
             <TableStyle
                 rowSelection={rowSelectionSpecialties}
-                rowKey={"key"}
                 columns={columnSpecialties}
-                scroll={{ x: "max-content" }}
                 loading={isLoadingSpecialtiesByDoctor}
                 dataSource={dataTableSpecialties}
-                locale={{
-                    emptyText: "Không có dữ liệu",
-                    filterConfirm: "Lọc",
-                    filterReset: "Xóa lọc",
-                }}
-                pagination={{
-                    current: paginationSpecialties.current,
-                    pageSize: paginationSpecialties.pageSize,
-                    position: ["bottomCenter"],
-                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} chuyên khoa`,
-                    showSizeChanger: true, // Cho phép chọn số dòng/trang
-                    pageSizeOptions: ["5", "8", "10", "20", "50"], // Tuỳ chọn số dòng
-                    showQuickJumper: true, // Cho phép nhảy đến trang
-                    onChange: (page, pageSize) => {
-                        setPaginationSpecialties((prev) => ({
-                            ...prev,
-                            current: page,
-                            pageSize: pageSize,
-                        }));
-                    },
+              
+                pagination={paginationSpecialties}
+                onChange={(page) => {
+                    setPaginationSpecialties(page);
                 }}
                 onRow={(record) => ({
                     onClick: () => {

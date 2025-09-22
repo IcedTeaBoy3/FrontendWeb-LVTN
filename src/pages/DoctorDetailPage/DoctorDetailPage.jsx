@@ -5,6 +5,7 @@ import TabsComponent from '@/components/TabsComponent/TabsComponent';
 import InfoDoctor from '@/components/InfoDoctor/InfoDoctor';
 import DoctorWorkplace from '@/components/DoctorWorkplace/DoctorWorkplace';
 import DoctorSpecialty from '@/components/DoctorSpecialty/DoctorSpecialty';
+import DoctorService from './compoents/DoctorService';
 import {
     ArrowLeftOutlined,
     UserOutlined,
@@ -43,7 +44,7 @@ const DoctorDetailPage = () => {
         {
             key: "4",
             label: `Dịch vụ`,
-            children: `Dịch vụ`,
+            children: <DoctorService id={id} />,
             icon: <AppstoreOutlined style={{ fontSize: 18 }} />
         },
         {
