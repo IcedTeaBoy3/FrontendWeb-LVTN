@@ -195,6 +195,12 @@ const PatientPage = () => {
             key: "name",
             ...getColumnSearchProps("name"),
             sorter: (a, b) => a.name?.length - b.name?.length,
+            render: (name) => {
+                if (!name) {
+                    return <Text type="secondary">Chưa cập nhật</Text>;
+                }
+                return <Text>{name}</Text>;
+            }
         },
         {
             title: "Email",
@@ -277,18 +283,18 @@ const PatientPage = () => {
             onFilter: (value, record) => record.gender?.includes(value),
 
         },
-        {
-            title: "Dân tộc",
-            dataIndex: "ethnic",
-            key: "ethnic",
-            render: (ethnic) => {
-                return ethnic ? (
-                    <Text>{ethnic}</Text>
-                ) : (
-                    <Text type="secondary">Chưa cập nhật</Text>
-                );
-            }
-        },
+        // {
+        //     title: "Dân tộc",
+        //     dataIndex: "ethnic",
+        //     key: "ethnic",
+        //     render: (ethnic) => {
+        //         return ethnic ? (
+        //             <Text>{ethnic}</Text>
+        //         ) : (
+        //             <Text type="secondary">Chưa cập nhật</Text>
+        //         );
+        //     }
+        // },
         {
             title: "Vai trò",
             dataIndex: "role",

@@ -1,6 +1,6 @@
 
 import { BackgroundContainer } from './style.js'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate} from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { setUser } from '@/redux/slices/authSlice'
 import FormAuth from '@/components/FormAuth/FormAuth'
@@ -24,6 +24,7 @@ const AuthPage = () => {
                 Message.success(data.message);
                 if (!isRegister) {
                     const { user, accessToken } = data.data;
+                    // lưu thông tin đăng nhập vào redux
                     const newUser = {
                         ...user,
                         accessToken
@@ -38,7 +39,7 @@ const AuthPage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.");
+            Message.error(error.response.data?.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.");
         },
     });
     const isPending = mutationAuth.isPending;
