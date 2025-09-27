@@ -16,6 +16,7 @@ import ClinicPage from "@/pages/ClinicPage/ClinicPage";
 import ServicePage from "@/pages/ServicePage/ServicePage";
 import DoctorDetailPage from "@/pages/DoctorDetailPage/DoctorDetailPage";
 import ScheduleDetailPage from "@/pages/ScheduleDetailPage/ScheduleDetailPage";
+import AccountPage from "@/pages/AccountPage/AccountPage";
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 const AppRoutes = () => {
     return (
@@ -35,7 +36,7 @@ const AppRoutes = () => {
                 >
                     <Route path="services" element={<ServicePage />} />
                     <Route path="clinics" element={<ClinicPage />} />
-                    <Route path="accounts" element={<PatientPage />} />
+                    <Route path="accounts" element={<AccountPage />} />
                     <Route path="specialties" element={<SpecialtyPage />} />
                     <Route path="positions" element={<PositionPage />} />
                     <Route path="degrees" element={<DegreePage />} />

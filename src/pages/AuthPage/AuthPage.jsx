@@ -23,13 +23,14 @@ const AuthPage = () => {
             if (data.status === "success") {
                 Message.success(data.message);
                 if (!isRegister) {
-                    const { user, accessToken } = data.data;
+                    console.log('data', data);
+                    const { account, accessToken } = data.data;
                     // lưu thông tin đăng nhập vào redux
-                    const newUser = {
-                        ...user,
+                    const newAccount = {
+                        ...account,
                         accessToken
                     };
-                    dispatch(setUser(newUser));
+                    dispatch(setUser(newAccount));
                     navigate('/admin');
                 } else {
                     setIsRegister(!isRegister);
@@ -39,10 +40,11 @@ const AuthPage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data?.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.");
+            Message.error(error?.response?.data?.message || error.message || "Đã có lỗi xảy ra, vui lòng thử lại!");
         },
     });
     const isPending = mutationAuth.isPending;
+    console.log('mutationAuth', mutationAuth);
     const handleOnSubmit = (data) => {
         mutationAuth.mutate(data);
     };
