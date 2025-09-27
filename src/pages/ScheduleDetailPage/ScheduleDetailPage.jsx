@@ -343,7 +343,7 @@ const DetailSchedulePage = () => {
               <UserOutlined style={{ color: "#52c41a" }} />
               <Text>
                 <b>Bác sĩ: </b>
-                {scheduleInfo?.doctor?.user?.name || "—"}
+                {scheduleInfo?.doctor?.person?.fullName || "—"}
               </Text>
             </Space>
           </Col>

@@ -70,22 +70,22 @@ const InfoDoctor = ({ id }) => {
     useEffect(() => {
         if (doctorData) {
             formUpdateDoctor.setFieldsValue({
-                email: doctorData?.user?.email,
-                phone: doctorData?.user?.phone,
-                name: doctorData?.user?.name,
+                email: doctorData?.account?.email,
+                phone: doctorData?.account?.phone,
+                fullName: doctorData?.person?.fullName,
                 degreeId: doctorData?.degree?.degreeId, // hoặc doctorData.degree?.degreeId
-                dateOfBirth: doctorData?.user?.dateOfBirth
-                    ? dayjs(doctorData?.user?.dateOfBirth)
+                dateOfBirth: doctorData?.person?.dateOfBirth
+                    ? dayjs(doctorData?.person?.dateOfBirth)
                     : null,
-                gender: doctorData?.user?.gender,
-                address: doctorData?.user?.address,
+                gender: doctorData?.person?.gender,
+                address: doctorData?.person?.address,
                 avatar:
                     [
                         {
                             uid: '-1',
-                            name: doctorData?.user?.avatar,
+                            name: doctorData?.person?.avatar,
                             status: 'done',
-                            url: `${import.meta.env.VITE_APP_BACKEND_URL}${doctorData?.user?.avatar}`,
+                            url: `${import.meta.env.VITE_APP_BACKEND_URL}${doctorData?.person?.avatar}`,
                         },
                     ],
             });
@@ -110,7 +110,7 @@ const InfoDoctor = ({ id }) => {
             email: values.email,
             phone: values.phone,
             password: values.password, // chỉ append nếu có
-            name: values.name,
+            fullName: values.fullName,
             degreeId: values.degreeId,
             dateOfBirth: values.dateOfBirth
                 ? dayjs(values.dateOfBirth).format("YYYY-MM-DD")
@@ -203,7 +203,7 @@ const InfoDoctor = ({ id }) => {
                                 </Form.Item>
                                 <Form.Item
                                     label="Họ tên"
-                                    name="name"
+                                    name="fullName"
                                     rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
                                 >
                                     <Input placeholder="Nhập họ tên" />

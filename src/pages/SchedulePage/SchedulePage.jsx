@@ -231,7 +231,7 @@ const SchedulePage = () => {
     const dataTable = scheduleData.map((item, index) => ({
         key: item.scheduleId,
         index: index + 1,
-        doctor: item.doctor?.user?.name,
+        doctor: item.doctor?.person?.fullName,
         workday: dayjs(item.workday).format("DD/MM/YYYY"),
         // shiftId: item.shift?.name,
         shiftCount: item.shiftCount,
@@ -458,7 +458,7 @@ const SchedulePage = () => {
                                     (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
                                 }
                                 options={doctorData.map(doctor => ({
-                                    label: doctor.user?.name,
+                                    label: doctor.person?.fullName,
                                     value: doctor.doctorId
                                 }))}
 
@@ -605,7 +605,7 @@ const SchedulePage = () => {
                                     (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
                                 }
                                 options={doctorData.map(doctor => ({
-                                    label: doctor.user?.name,
+                                    label: doctor.person?.fullName,
                                     value: doctor.doctorId
                                 }))}
 

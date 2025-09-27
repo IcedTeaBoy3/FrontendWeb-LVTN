@@ -269,13 +269,13 @@ const DoctorPage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Tên",
-            dataIndex: "name",
-            key: "name",
-            sorter: (a, b) => a.name?.length - b.name?.length,
-            ...getColumnSearchProps("name"),
-            render: (name) => {
-                return name ? <Text>{name}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
+            title: "Họ và tên",
+            dataIndex: "fullName",
+            key: "fullName",
+            sorter: (a, b) => a.fullName?.length - b.fullName?.length,
+            ...getColumnSearchProps("fullName"),
+            render: (fullName) => {
+                return fullName ? <Text>{fullName}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
             }
         },
         {
@@ -376,9 +376,9 @@ const DoctorPage = () => {
         return {
             key: item.doctorId || item.id,
             index: index + 1,
-            name: item.user?.name,
-            email: item.user?.email,
-            phone: item.user?.phone,
+            email: item.account?.email,
+            phone: item.account?.phone,
+            fullName: item.person?.fullName,
             degree: item.degree?.title,
             specialty: item.doctorSpecialties.find((spec) => spec.isPrimary === true),
             workplace: item.doctorWorkplaces.find((work) => work.isPrimary === true),
@@ -391,19 +391,19 @@ const DoctorPage = () => {
         const doctor = data?.find(doc => doc.doctorId === key);
         if (doctor) {
             formUpdate.setFieldsValue({
-                email: doctor.user?.email,
-                phone: doctor.user?.phone,
-                name: doctor.user?.name,
+                email: doctor.account?.email,
+                phone: doctor.account?.phone,
+                fullName: doctor.person?.fullName,
                 degreeId: doctor.degree?.degreeId,
-                dateOfBirth: doctor.user?.dateOfBirth ? dayjs(doctor.user?.dateOfBirth) : null,
-                gender: doctor.user?.gender,
-                address: doctor.user?.address,
+                dateOfBirth: doctor.person?.dateOfBirth ? dayjs(doctor.person?.dateOfBirth) : null,
+                gender: doctor.person?.gender,
+                address: doctor.person?.address,
                 avatar: [
                     {
                         uid: "-1",
-                        name: doctor?.user?.avatar,
+                        name: doctor?.person?.avatar,
                         status: "done",
-                        url: doctor?.user?.avatar ? `${import.meta.env.VITE_APP_BACKEND_URL}${doctor?.user?.avatar}` : defaultImage,
+                        url: doctor?.person?.avatar ? `${import.meta.env.VITE_APP_BACKEND_URL}${doctor?.person?.avatar}` : defaultImage,
                     },
                 ],
             });
@@ -456,7 +456,7 @@ const DoctorPage = () => {
             email: values.email,
             phone: values.phone,
             password: values.password, // chỉ append nếu có
-            name: values.name,
+            fullName: values.fullName,
             degreeId: values.degreeId,
             dateOfBirth: values.dateOfBirth
                 ? dayjs(values.dateOfBirth).format("YYYY-MM-DD")
@@ -720,10 +720,10 @@ const DoctorPage = () => {
                         <Divider style={{ margin: "14px 0" }} />
                         <Form.Item
                             label="Họ và tên"
-                            name="name"
+                            name="fullName"
                         >
                             <Input
-                                name="name"
+                                name="fullName"
                                 placeholder="Nhập vào họ và tên"
                             />
                         </Form.Item>
@@ -777,7 +777,6 @@ const DoctorPage = () => {
                                 autoSize={{ minRows: 3, maxRows: 5 }}
                             />
                         </Form.Item>
-
                     </Form>
                 </ModalComponent>
             </LoadingComponent>
@@ -856,7 +855,7 @@ const DoctorPage = () => {
                         <Divider style={{ margin: "14px 0" }} />
                         <Form.Item
                             label="Họ và tên"
-                            name="name"
+                            name="fullName"
                             rules={[
                                 {
                                     required: true,
@@ -865,7 +864,7 @@ const DoctorPage = () => {
                             ]}
                         >
                             <Input
-                                name="name"
+                                name="fullName"
                                 placeholder="Nhập vào họ và tên"
                             />
                         </Form.Item>
