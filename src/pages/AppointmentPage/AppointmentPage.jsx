@@ -26,12 +26,12 @@ import {
 } from "@ant-design/icons";
 const { Text,Title } = Typography;
 const AppointmentPage = () => {
-    const listStatus = [
-        { label: "Chờ xác nhận", value: "pending" },
-        { label: "Đã xác nhận", value: "confirmed" },
-        { label: "Đã hoàn thành", value: "completed" },
-        { label: "Đã hủy", value: "cancelled" },
-    ]
+    // const listStatus = [
+    //     { label: "Chờ xác nhận", value: "pending" },
+    //     { label: "Đã xác nhận", value: "confirmed" },
+    //     { label: "Đã hoàn thành", value: "completed" },
+    //     { label: "Đã hủy", value: "cancelled" },
+    // ]
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
@@ -260,14 +260,14 @@ const AppointmentPage = () => {
            dataIndex: "doctorName",
            key: "doctorName",
            ...getColumnSearchProps("doctorName"),
-           sorter: (a, b) => a.doctorName.length - b.doctorName.length, 
+           sorter: (a, b) => a?.doctorName?.length - b?.doctorName?.length, 
         },
         {
             title: "Bệnh nhân",
             dataIndex: "patientName",
             key: "patientName",
             ...getColumnSearchProps("patientName"),
-            sorter: (a, b) => a.patientName.length - b.patientName.length,
+            sorter: (a, b) => a?.patientName?.length - b?.patientName?.length,
         },
         {
             title: "Trạng thái",

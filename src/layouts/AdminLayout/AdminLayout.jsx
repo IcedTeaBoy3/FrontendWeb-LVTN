@@ -44,6 +44,11 @@ const menuItems = [
         label: "Tài khoản",
     },
     {
+        key: "/admin/patients",
+        icon: <TeamOutlined />,
+        label: "Bệnh nhân",
+    },
+    {
         icon: <SolutionOutlined />,
         label: "Bác sĩ",
         children: [
@@ -123,7 +128,7 @@ const AdminLayout = () => {
         "/admin/schedules/:id": "Chi tiết lịch làm việc",
         "/admin/hospitals": "Bệnh viện",
         "/admin/specialties": "Chuyên khoa",
-        "/admin/patients": "Người dùng",
+        "/admin/patients": "Bệnh nhân",
         "/admin/schedules": "Lịch làm việc",
         "/admin/medical-records": "Hồ sơ bệnh án",
         "/admin/clinics": "Phòng khám",

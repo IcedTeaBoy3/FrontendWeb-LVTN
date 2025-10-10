@@ -406,19 +406,18 @@ const AccountPage = () => {
         mutationDeleteManyAccounts.mutate(selectedRowKeys);
     };
     const handleOnUpdateAccount = (values) => {
-        console.log('Received values of form: ', values);
         if (!rowSelected) return;
         mutationUpdateAccount.mutate({ id: rowSelected, accountData: values });
     };
     // chặn
     const handleBlockAccount = (accountId) => {
         setRowSelected(accountId);
+        const account = data.find(acc => acc.accountId === accountId);
+        if(!account) return;
+        setAccount(account);
         setIsModalOpenBlock(true);
     };
     const handleOkBlock = () => {
-        if (!rowSelected) return;
-        const account = data.find(acc => acc.accountId === rowSelected);
-        if(!account) return;
         if(account.isBlocked) {
             // nếu đang bị khoá thì mở khoá
             mutationUnblockAccount.mutate(account.accountId);
@@ -525,12 +524,10 @@ const AccountPage = () => {
                 <div style={{ padding: "8px 0" }}>
                     <Avatar
                     size={100}
-                    src={account?.avatar?.startsWith("http") ? `${import.meta.env.VITE_APP_BACKEND_URL}/${account?.avatar}` : account?.avatar || defaultImage}
+                    src={account?.avatar?.startsWith("https") ? account?.avatar : `${import.meta.env.VITE_APP_BACKEND_URL}${account?.avatar}` || defaultImage}
                     style={{ marginBottom: 16 }}
                     />
                 </div>
-
-                
                 <Row style={{ marginBottom: 8 }}>
                     <Col span={10}>
                         <Text strong>Email:</Text>
@@ -585,9 +582,7 @@ const AccountPage = () => {
                         <Tag color={account?.isVerified ? "green" : "red"}>{account?.isVerified ? "Đã xác thực" : "Chưa xác thực"}</Tag>
                     </Col>
                 </Row>
-            
             </ModalComponent>
-
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -620,15 +615,15 @@ const AccountPage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Chặn tài khoản</span>
+                        <span>{account?.isBlocked ? "Mở khoá tài khoản" : "Khoá tài khoản"}</span>
                     </span>
                 }
                 open={isModalOpenBlock}
                 onOk={handleOkBlock}
                 onCancel={handleCancelBlock}
-                okText="Chặn"
+                okText={account?.isBlocked ? "Mở khoá" : "Khoá"}
                 cancelText="Hủy"
-                okButtonProps={{ danger: true }}
+                okButtonProps={{ style: { backgroundColor: account?.isBlocked ? "green" : "red", borderColor: account?.isBlocked ? "green" : "red" }, danger: !account?.isBlocked }}
                 centered
                 style={{ borderRadius: 8 }}
             >
@@ -636,8 +631,8 @@ const AccountPage = () => {
                     <div style={{ textAlign: "center", padding: "8px 0" }}>
                         <Text>
                             Bạn có chắc chắn muốn{" "}
-                            <Text strong type="danger">
-                                chặn
+                            <Text strong type={account?.isBlocked ? "success" : "danger"}>
+                                {account?.isBlocked ? "mở khoá" : "khoá"}
                             </Text>{" "}
                             tài khoản này không?
                         </Text>
