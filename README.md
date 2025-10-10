@@ -1,12 +1,40 @@
 # React + Vite
+## 📁 Project Structure
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+.
 
-Currently, two official plugins are available:
+├── public/ # Static files
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+├── src/
 
-## Expanding the ESLint configuration
+│ ├── assets/ # Hình ảnh, biểu tượng
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+│ ├── components/ # Reusable UI components
+
+│ ├── config/ # Cấu hình (axios, token...)
+
+│ ├── layouts/ # Các layout của website
+
+│ ├── pages/ # Các trang chính (Home, Login...)
+
+│ ├── redux/ # Global state (store, slices)
+
+│ ├── routes/ # Định nghĩa tuyến đường
+
+│ ├── services/ # API service (axios instance)
+
+│ ├── styles/ # Lưu style chung
+
+│ ├── utils/ # Hàm tiện ích chung
+
+│ ├── App.jsx # Root component
+
+│ └── main.jsx # Entry point (ReactDOM)
+
+├── .env # Biến môi trường
+
+├── index.html
+
+├── package.json
+
+└── README.md
