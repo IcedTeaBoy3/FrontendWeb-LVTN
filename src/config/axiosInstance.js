@@ -2,6 +2,7 @@ import axios from "axios";
 import { store } from "@/redux/store"; // nơi chứa store Redux
 import {AuthService} from "@/services/AuthService"; // nơi chứa các hàm gọi API
 import { logout, setUser } from "@/redux/slices/authSlice";
+
 const axiosInstance = axios.create({
     baseURL: `${import.meta.env.VITE_APP_BACKEND_URL}/api`,
     withCredentials: true, // để gửi cookie lên nếu dùng HttpOnly
@@ -52,14 +53,13 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
             try {
                 const res = await AuthService.refreshToken();
-                console.log('res',res)
                 if (res?.status === "error") {
                     // store.dispatch(logout());
                     return Promise.reject(res);
                 } else if (res?.status === "success") {
-                    console.log("Token mới:", res?.accessToken);
+                    // console.log("Token mới:", res?.data.accessToken);
                     const user = store.getState().auth.user;
-                    const newAccessToken = res.accessToken;
+                    const newAccessToken = res?.data.accessToken;
                     store.dispatch(
                         setUser({ ...user, accessToken: newAccessToken }),
                     );

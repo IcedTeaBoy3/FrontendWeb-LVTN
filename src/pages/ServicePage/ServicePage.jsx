@@ -541,7 +541,7 @@ const ServicePage = () => {
                 </ModalComponent>
             </LoadingComponent >
             <DrawerComponent
-                title="Chi tiết lịch làm việc"
+                title="Chi tiết dịch vụ"
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}

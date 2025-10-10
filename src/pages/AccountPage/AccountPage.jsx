@@ -136,6 +136,18 @@ const AccountPage = () => {
         retry: 1,
     });
     // xóa 1
+    const convertRole = (role) => {
+        switch (role) {
+            case 'user':
+                return 'Người dùng';
+            case 'doctor':
+                return 'Bác sĩ';
+            case 'admin':
+                return 'Quản trị viên';
+            default:
+                return 'Không xác định';
+        }
+    };
     const mutationDeleteAccount = useMutation({
         mutationKey: ["deleteAccount"],
         mutationFn: AccountService.deleteAccount,
@@ -197,11 +209,13 @@ const AccountPage = () => {
         key: item.accountId,
         index: index + 1,
         email: item.email,
+        username: item.userName,
         phone: item.phone,
         role: item.role,
         isBlocked: item.isBlocked,
         isVerified: item.isVerified,
     }));
+    // cột bảng
      const columns = [
         {
             title: "STT",
@@ -217,23 +231,31 @@ const AccountPage = () => {
             sorter: (a, b) => a?.email.length - b?.email.length,
         },
         {
+            title: "Tên tài khoản",
+            dataIndex: "userName",
+            key: "userName",
+            ...getColumnSearchProps("userName"),
+            render: (text) => text || <Text type="secondary">Chưa cập nhật</Text>,
+        },
+        {
             title: "Số điện thoại",
             dataIndex: "phone",
             key: "phone",
             ...getColumnSearchProps("phone"),
-            sorter: (a, b) => a?.phone.length - b?.phone.length,
+            render: (text) => text || <Text type="secondary">Chưa cập nhật</Text>,
         },
         {
             title: "Vai trò",
             dataIndex: "role",
             key: "role",
             filters: [
-                { text: 'User', value: 'user' },
-                { text: 'Doctor', value: 'doctor' },
-                { text: 'Admin', value: 'admin' },
+                { text: 'Người dùng', value: 'user' },
+                { text: 'Bác sĩ', value: 'doctor' },
+                { text: 'Quản trị viên', value: 'admin' },
             ],
             onFilter: (value, record) => record.role === value,
             sorter: (a, b) => a?.role.length - b?.role.length,
+            render: (role) => convertRole(role),
         },
         {
             title: "Trạng thái",
