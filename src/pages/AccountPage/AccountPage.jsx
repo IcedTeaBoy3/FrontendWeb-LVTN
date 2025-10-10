@@ -19,6 +19,7 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     ExportOutlined,
+    BlockOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -29,6 +30,7 @@ const AccountPage = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [isModalOpenBlock, setIsModalOpenBlock] = useState(false);
     // const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
 
@@ -165,6 +167,40 @@ const AccountPage = () => {
             Message.error(error.message || "Đã có lỗi xảy ra");
         },
     });
+    const mutationBlockAccount = useMutation({
+        mutationKey: ["blockAccount"],
+        mutationFn: AccountService.blockAccount,
+        onSuccess: (data) => {
+            if (data.status == "success") {
+                Message.success(data.message);
+                setIsModalOpenBlock(false);
+                queryGetAllAccounts.refetch();
+                setRowSelected(null);
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.message || "Đã có lỗi xảy ra");
+        },
+    });
+    const mutationUnblockAccount = useMutation({
+        mutationKey: ["unblockAccount"],
+        mutationFn: AccountService.unblockAccount,
+        onSuccess: (data) => {
+            if (data.status == "success") {
+                Message.success(data.message);
+                setIsModalOpenBlock(false);
+                queryGetAllAccounts.refetch();
+                setRowSelected(null);
+            } else {
+                Message.error(data.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error.message || "Đã có lỗi xảy ra");
+        }
+    });
     const mutationDeleteManyAccounts = useMutation({
         mutationKey: ["deleteManyAccounts"],
         mutationFn: AccountService.deleteManyAccounts,
@@ -209,7 +245,7 @@ const AccountPage = () => {
         key: item.accountId,
         index: index + 1,
         email: item.email,
-        username: item.userName,
+        userName: item.userName,
         phone: item.phone,
         role: item.role,
         isBlocked: item.isBlocked,
@@ -294,6 +330,10 @@ const AccountPage = () => {
                     { type: "divider" },
                     { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
                 ];
+                if(record.role !== 'admin'){
+                    itemActions.push({ type: "divider" });
+                    itemActions.push({ key: "block", label: <Text type={record.isBlocked ? "success" : "danger"}>{record.isBlocked ? "Mở khoá" : "Khoá"}</Text>, icon: <BlockOutlined style={{ fontSize: 16, color: record.isBlocked ? "green" : "red" }} /> });
+                }
 
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
@@ -301,6 +341,7 @@ const AccountPage = () => {
                     if (key === "detail") return handleViewAccount(record.key);
                     if (key === "edit") return handleEditAccount(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
+                    if (key === "block") return handleBlockAccount(record.key);
                 };
 
                 return (
@@ -330,11 +371,11 @@ const AccountPage = () => {
     // chỉnh sửa
     const handleEditAccount = (accountId) => {
         const account = data.find(acc => acc.accountId === accountId);
-        console.log(account);
         if(!account) return;
         formUpdate.setFieldsValue({
             email: account.email,
             phone: account.phone,
+            userName: account.userName,
             role: account.role,
             isBlocked: account.isBlocked,
             isVerified: account.isVerified,
@@ -363,8 +404,30 @@ const AccountPage = () => {
         mutationDeleteManyAccounts.mutate(selectedRowKeys);
     };
     const handleOnUpdateAccount = (values) => {
+        console.log('Received values of form: ', values);
         if (!rowSelected) return;
         mutationUpdateAccount.mutate({ id: rowSelected, accountData: values });
+    };
+    // chặn
+    const handleBlockAccount = (accountId) => {
+        setRowSelected(accountId);
+        setIsModalOpenBlock(true);
+    };
+    const handleOkBlock = () => {
+        if (!rowSelected) return;
+        const account = data.find(acc => acc.accountId === rowSelected);
+        if(!account) return;
+        if(account.isBlocked) {
+            // nếu đang bị khoá thì mở khoá
+            mutationUnblockAccount.mutate(account.accountId);
+        } else {
+            // nếu đang không bị khoá thì khoá
+            mutationBlockAccount.mutate(account.accountId);
+        }
+    };
+    const handleCancelBlock = () => {
+        setIsModalOpenBlock(false);
+        setRowSelected(null);
     };
     const menuProps = {
         items: [
@@ -472,6 +535,34 @@ const AccountPage = () => {
                     </div>
                 </LoadingComponent>
             </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Chặn tài khoản</span>
+                    </span>
+                }
+                open={isModalOpenBlock}
+                onOk={handleOkBlock}
+                onCancel={handleCancelBlock}
+                okText="Chặn"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDelete}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                chặn
+                            </Text>{" "}
+                            tài khoản này không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
             <DrawerComponent
                 title="Chi tiết tài khoản"
                 placement="right"
@@ -490,18 +581,7 @@ const AccountPage = () => {
                         autoComplete="off"
                         form={formUpdate}
                     >
-                        {/* <Form.Item
-                            label="Tên tài khoản"
-                            name="username"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên tài khoản!",
-                                },
-                            ]}
-                        >
-                            <Input name="username" />
-                        </Form.Item> */}
+                       
                         <Form.Item
                             label="Email"
                             name="email"
@@ -514,6 +594,18 @@ const AccountPage = () => {
                             ]}
                         >
                             <Input name="email" />
+                        </Form.Item>
+                         <Form.Item
+                            label="Tên tài khoản"
+                            name="userName"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng nhập tên tài khoản!",
+                                },
+                            ]}
+                        >
+                            <Input name="userName" />
                         </Form.Item>
                         <Form.Item
                             label="Số điện thoại"

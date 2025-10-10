@@ -40,5 +40,21 @@ export const AccountService = {
         } catch (error) {
             throw error.response.data;
         }
-    }
+    },
+    blockAccount: async (id) => {
+        try {
+            const response = await axiosInstance.put(`/account/block-account/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    unblockAccount: async (id) => {
+        try {
+            const response = await axiosInstance.put(`/account/unblock-account/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
 };
