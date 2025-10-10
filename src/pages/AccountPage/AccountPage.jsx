@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { AccountService } from '@/services/AccountService'
-import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown,Tag, Select } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown,Tag, Select, Row, Avatar,Col } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -10,7 +10,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
-// import defaultImage from "@/assets/default_image.png";
+import defaultImage from "@/assets/default_image.png";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -26,12 +26,12 @@ const { Text, Title } = Typography;
 const AccountPage = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
-    // const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [isModalOpenBlock, setIsModalOpenBlock] = useState(false);
-    // const [formCreate] = Form.useForm();
+    const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+    const [account, setAccount] = useState(null);
     const [formUpdate] = Form.useForm();
 
     const rowSelection = {
@@ -116,9 +116,8 @@ const AccountPage = () => {
                     autoEscape
                     textToHighlight={text ? text.toString() : ""}
                 />
-            ) : (
-                text
-            ),
+            ) : (text),
+               
     });
     // sửa lại để xóa cũng confirm luôn
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -238,6 +237,7 @@ const AccountPage = () => {
     const { data: dataAccounts, isLoading: isLoadingAccounts } = queryGetAllAccounts;
     const isPendingDelete = mutationDeleteAccount.isPending;
     const isPendingUpdate = mutationUpdateAccount.isPending;
+    const isPendingBlock = mutationBlockAccount.isPending || mutationUnblockAccount.isPending;
     const isPendingDeleteMany = mutationDeleteManyAccounts.isPending;
     const data = dataAccounts?.data?.accounts || [];
     // dữ liệu bảng
@@ -366,7 +366,9 @@ const AccountPage = () => {
     // xem chi tiết
     const handleViewAccount = (accountId) => {
         const account = data?.find(acc => acc.accountId === accountId);
-        console.log(account);
+        if(!account) return;
+        setAccount(account);
+        setIsModalDetailOpen(true);
     };
     // chỉnh sửa
     const handleEditAccount = (accountId) => {
@@ -510,6 +512,85 @@ const AccountPage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <span>Thông tin chi tiết</span>
+                    </span>
+                }
+                open={isModalDetailOpen}
+                onCancel={() => setIsModalDetailOpen(false)}
+                footer={null}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <div style={{ padding: "8px 0" }}>
+                    <Avatar
+                    size={100}
+                    src={account?.avatar?.startsWith("http") ? `${import.meta.env.VITE_APP_BACKEND_URL}/${account?.avatar}` : account?.avatar || defaultImage}
+                    style={{ marginBottom: 16 }}
+                    />
+                </div>
+
+                
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Email:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{account?.email || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Tên tài khoản:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{account?.userName || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>SĐT:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{account?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Vai trò:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{convertRole(account?.role) || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Trạng thái:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Tag color={account?.isBlocked ? "red" : "green"}>{account?.isBlocked ? "Bị khoá" : "Hoạt động"}</Tag>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Xác thực:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Tag color={account?.isVerified ? "green" : "red"}>{account?.isVerified ? "Đã xác thực" : "Chưa xác thực"}</Tag>
+                    </Col>
+                </Row>
+            
+            </ModalComponent>
+
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
                         <span>Xoá tài khoản</span>
                     </span>
@@ -551,7 +632,7 @@ const AccountPage = () => {
                 centered
                 style={{ borderRadius: 8 }}
             >
-                <LoadingComponent isLoading={isPendingDelete}>
+                <LoadingComponent isLoading={isPendingBlock}>
                     <div style={{ textAlign: "center", padding: "8px 0" }}>
                         <Text>
                             Bạn có chắc chắn muốn{" "}
@@ -576,6 +657,7 @@ const AccountPage = () => {
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
+                        labelAlign="left"
                         style={{ maxWidth: 600, padding: "20px" }}
                         onFinish={handleOnUpdateAccount}
                         autoComplete="off"

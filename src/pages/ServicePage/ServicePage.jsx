@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
 import { ServiceService } from '@/services/ServiceService'
-import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber } from "antd";
+import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber, Row, Col } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -30,6 +30,8 @@ const ServicePage = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+    const [serviceDetail, setServiceDetail] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
 
@@ -291,7 +293,6 @@ const ServicePage = () => {
                 const priceB = parseInt(b.price.replace(/[^0-9]/g, ''));
                 return priceA - priceB;
             },
-            defaultSortOrder: 'ascend',
             filters: [
                 { text: 'Dưới 200.000đ', value: 'under_200k' },
                 { text: '200.000đ - 500.000đ', value: '200k_500k' },
@@ -380,7 +381,11 @@ const ServicePage = () => {
         },
     ];
     const handleViewService = (serviceId) => {
-        console.log("View service:", serviceId);
+        const service = serviceData.find((item) => item.serviceId === serviceId);
+        if (service) {
+            setServiceDetail(service);
+            setIsModalDetailOpen(true);
+        }
     };
     const handleEditService = (serviceId) => {
         const service = serviceData.find((item) => item.serviceId === serviceId);
@@ -553,6 +558,7 @@ const ServicePage = () => {
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
+                        labelAlign="left"
                         style={{ maxWidth: 600, padding: "20px" }}
                         onFinish={handleOnUpdateService}
                         autoComplete="off"
@@ -671,6 +677,56 @@ const ServicePage = () => {
                         </Text>
                     </div>
                 </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <span>Thông tin chi tiết</span>
+                    </span>
+                }
+                open={isModalDetailOpen}
+                onCancel={() => setIsModalDetailOpen(false)}
+                footer={null}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Dịch vụ:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{serviceDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Mô tả:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{serviceDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Trạng thái:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        {serviceDetail?.status === "active" ? (
+                            <Tag
+                                color="green"
+                            >
+                                Đang hoạt động
+                            </Tag>
+                        ) : (
+                            <Tag color="red">Ngừng hoạt động</Tag>
+                        )}
+                    </Col>
+                </Row>
             </ModalComponent>
             <ModalComponent
                 title={

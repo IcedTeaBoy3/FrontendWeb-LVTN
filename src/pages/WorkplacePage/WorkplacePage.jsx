@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
+import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image, Row, Col } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -28,6 +28,8 @@ const WorkplacePage = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+    const [workplaceDetail, setWorkplaceDetail] = useState(null);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
     const [formCreate] = Form.useForm();
@@ -331,7 +333,9 @@ const WorkplacePage = () => {
         },
     ];
     const handleViewWorkplace = (key) => {
-        console.log("View workplace:", key);
+        const workplace = dataTable.find(item => item.key === key);
+        setWorkplaceDetail(workplace);
+        setIsModalDetailOpen(true);
     };
     const handleEditWorkplace = (key) => {
         const workplace = dataTable.find(item => item.key === key);
@@ -645,6 +649,66 @@ const WorkplacePage = () => {
                         </Text>
                     </div>
                 </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <span>Thông tin chi tiết</span>
+                    </span>
+                }
+                open={isModalDetailOpen}
+                onCancel={() => setIsModalDetailOpen(false)}
+                footer={null}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Tên cơ sở:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{workplaceDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Mô tả:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{workplaceDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Địa chỉ:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{workplaceDetail?.address || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>SĐT:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{workplaceDetail?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Loại cơ sở:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        {workplaceDetail?.type === "hospital" ? <Tag color="blue" style={{ borderRadius: "8px", padding: "0 8px" }}>Bệnh viện</Tag> : <Tag color="green" style={{ borderRadius: "8px", padding: "0 8px" }}>Phòng khám</Tag>}
+                    </Col>
+                </Row>
             </ModalComponent>
             <ModalComponent
                 title={

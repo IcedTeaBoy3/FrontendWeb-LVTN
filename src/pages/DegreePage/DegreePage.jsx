@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image } from "antd";
+import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image, Row, Col } from "antd";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -27,6 +27,8 @@ const DegreePage = () => {
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [rowSelected, setRowSelected] = useState(null);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+    const [degreeDetail, setDegreeDetail] = useState(null);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
@@ -220,8 +222,10 @@ const DegreePage = () => {
         };
     });
 
-    const handleViewDegree = () => {
-
+    const handleViewDegree = (degreeId) => {
+        const degree = dataTable.find(item => item.key === degreeId);
+        setDegreeDetail(degree);
+        setIsModalDetailOpen(true);
     }
     const handleEditDegree = (degreeId) => {
         const degree = dataTable.find(item => item.key === degreeId);
@@ -486,6 +490,7 @@ const DegreePage = () => {
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
+                        labelAlign="left"
                         style={{ maxWidth: 600, padding: "20px" }}
                         onFinish={handleOnUpdateDegree}
                         autoComplete="off"
@@ -565,6 +570,67 @@ const DegreePage = () => {
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <span>Thông tin chi tiết</span>
+                    </span>
+                }
+                open={isModalDetailOpen}
+                onCancel={() => setIsModalDetailOpen(false)}
+                footer={null}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+               
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Bằng cấp:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{degreeDetail?.title || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Viết tắt:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{degreeDetail?.abbreviation || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+                
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Mô tả:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{degreeDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Trạng thái:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        {degreeDetail?.status === "active" ? (
+                            <Tag
+                                color="green"
+                            >
+                                Đang hoạt động
+                            </Tag>
+                        ) : (
+                            <Tag color="red">Ngừng hoạt động</Tag>
+                        )}
+                    </Col>
+                </Row>
+            </ModalComponent>
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>

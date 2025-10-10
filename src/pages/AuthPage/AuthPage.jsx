@@ -23,7 +23,6 @@ const AuthPage = () => {
             if (data.status === "success") {
                 Message.success(data.message);
                 if (!isRegister) {
-                    console.log('data', data);
                     const { account, accessToken } = data.data;
                     // lưu thông tin đăng nhập vào redux
                     const newAccount = {
@@ -44,7 +43,6 @@ const AuthPage = () => {
         },
     });
     const isPending = mutationAuth.isPending;
-    console.log('mutationAuth', mutationAuth);
     const handleOnSubmit = (data) => {
         mutationAuth.mutate(data);
     };

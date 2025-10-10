@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
-import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col  } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -31,6 +31,8 @@ const SpecialtyPage = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+    const [specialtyDetail, setSpecialtyDetail] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
 
@@ -325,8 +327,10 @@ const SpecialtyPage = () => {
 
         },
     ];
-    const handleViewSpecialty = () => {
-        // Logic to view specialty details
+    const handleViewSpecialty = (specialtyId) => {
+        const specialty = data.find(item => item.specialtyId === specialtyId);
+        setSpecialtyDetail(specialty);
+        setIsModalDetailOpen(true);
     };
     const handleEditSpecialty = (specialtyId) => {
         const specialty = data.find(item => item.specialtyId === specialtyId);
@@ -501,6 +505,64 @@ const SpecialtyPage = () => {
                         </Text>
                     </div>
                 </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <span>Thông tin chi tiết</span>
+                    </span>
+                }
+                open={isModalDetailOpen}
+                onCancel={() => setIsModalDetailOpen(false)}
+                footer={null}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <div style={{ padding: "8px 0" }}>
+                    <Avatar
+                        size={100}
+                        src={specialtyDetail?.image?.startsWith("https") ? specialtyDetail?.image : `${import.meta.env.VITE_APP_BACKEND_URL}${specialtyDetail?.image}` || defaultImage}
+                        style={{ marginBottom: 16 }}
+                        alt={specialtyDetail?.name}
+                    />
+                </div> 
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Chuyên khoa:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{specialtyDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Mô tả:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        <Text>{specialtyDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                    </Col>
+                </Row>
+                <Divider style={{ margin: "8px 0" }} />
+
+                <Row style={{ marginBottom: 8 }}>
+                    <Col span={10}>
+                        <Text strong>Trạng thái:</Text>
+                    </Col>
+                    <Col span={14} style={{ textAlign: "right" }}>
+                        {specialtyDetail?.status === "active" ? (
+                            <Tag
+                                color="green"
+                            >
+                                Đang hoạt động
+                            </Tag>
+                        ) : (
+                            <Tag color="red">Ngừng hoạt động</Tag>
+                        )}
+                    </Col>
+                </Row>
             </ModalComponent>
             <LoadingComponent isLoading={isPendingCreate}>
                 <ModalComponent
