@@ -434,7 +434,6 @@ const SpecialtyPage = () => {
     };
     return (
         <>
-
             <Title level={4}>Danh sách chuyên khoa</Title>
             <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ButtonComponent

@@ -458,8 +458,7 @@ const AccountPage = () => {
     return (
         <>
             <Title level={4}>Danh sách tài khoản</Title>
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
-             <BulkActionBar
+            <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 handleSelectedAll={handleSelectedAll}
                 menuProps={menuProps}

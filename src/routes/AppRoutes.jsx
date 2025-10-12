@@ -6,6 +6,7 @@ import ProtectedRoute from "@/components/ProtectedRoute/ProtectedRoute";
 // các trang admin
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import PatientPage from "@/pages/PatientPage/PatientPage";
+import PatientProfilePage from "@/pages/PatientProfilePage/PatientProfilePage";
 import SpecialtyPage from "@/pages/SpecialtyPage/SpecialtyPage";
 import PositionPage from "@/pages/PositionPage/PositionPage";
 import DegreePage from "@/pages/DegreePage/DegreePage";
@@ -43,6 +44,7 @@ const AppRoutes = () => {
                     <Route path="degrees" element={<DegreePage />} />
                     <Route path="workplaces" element={<WorkplacePage />} />
                     <Route path="doctors" element={<DoctorPage />} />
+                    <Route path="patients" element={<PatientProfilePage />} />
                     <Route path="schedules" element={<SchedulePage />} />
                     <Route path="doctors/:id" element={<DoctorDetailPage />} />
                     <Route path="schedules/:id" element={<ScheduleDetailPage />} />
