@@ -14,7 +14,7 @@ import * as Message from "@/components/Message/Message";
 import ethnicGroups from '@/data/ethnicGroups.js'
 import dayjs from 'dayjs';
 import { convertGender} from '@/utils/gender_utils';
-import { StyledCard } from './style';
+import { StyledCard } from '../DoctorPage/style';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -423,9 +423,6 @@ const PatientProfilePage = () => {
                 validatedValues.ward ||
                 validatedValues.district ||
                 validatedValues.province;
-            console.log('province', validatedValues.province);
-            console.log('district', validatedValues.district);
-            console.log('ward', validatedValues.ward);
             const person = {
                 fullName: validatedValues.fullName,
                 dateOfBirth: validatedValues.dateOfBirth ? dayjs(validatedValues.dateOfBirth).toISOString() : null,

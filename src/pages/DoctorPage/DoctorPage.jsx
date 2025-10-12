@@ -13,6 +13,7 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
+import { StyledCard } from './style';
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -793,208 +794,213 @@ const DoctorPage = () => {
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "10px" }}
+                      
                         onFinish={handleOnUpdateDoctor}
                         autoComplete="off"
                         labelAlign="left"
                         scrollToFirstError
                         form={formUpdate}
                     >
-                        <Title level={5}>Thông tin tài khoản</Title>
-                        <Divider style={{ margin: "14px 0" }} />
-                        <Form.Item
-                            label="Email"
-                            name="email"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập email!",
-                                },
-                                {
-                                    type: "email",
-                                    message: "Email không hợp lệ!",
-                                }
-                            ]}
+                        <StyledCard
+                            title="Thông tin tài khoản"
+                            style={{ marginBottom: 16}}
                         >
-                            <Input
+                            <Form.Item
+                                label="Email"
                                 name="email"
-                                placeholder="Nhập vào email"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Số điện thoại"
-                            name="phone"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập số điện thoại!",
-                                },
-                                {
-                                    pattern: /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-4|6-9])[0-9]{7}$/,
-                                    message: "Số điện thoại không hợp lệ!",
-                                }
-                            ]}
-                        >
-                            <Input
-                                name="phone"
-                                placeholder="Nhập vào số điện thoại"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Mật khẩu"
-                            name="password"
-
-                        >
-                            <Input.Password
-                                name="password"
-                                placeholder="Nhập vào mật khẩu"
-                                autoComplete="new-password"
-                            />
-                        </Form.Item>
-                        <Title level={5}>Thông tin cá nhân</Title>
-                        <Divider style={{ margin: "14px 0" }} />
-                        <Form.Item
-                            label="Họ và tên"
-                            name="fullName"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập họ và tên!",
-                                }
-                            ]}
-                        >
-                            <Input
-                                name="fullName"
-                                placeholder="Nhập vào họ và tên"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Bằng cấp"
-                            name="degreeId"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn bằng cấp!",
-                                }
-                            ]}
-                        >
-                            <Select
-                                name="degreeId"
-                                placeholder="Chọn bằng cấp"
-                                showSearch
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                popupRender={menu => (
-                                    <LoadingComponent isLoading={isLoadingDegrees}>
-                                        {menu}
-                                        <Divider style={{ margin: '4px 0' }} />
-                                        <div
-                                            style={{
-                                                padding: '8px',
-                                                color: '#1890ff',
-                                                cursor: 'pointer',
-                                            }}
-                                            onClick={() => setIsOpenModelCreateDegree(true)}
-                                        >
-                                            <PlusOutlined /> Thêm bằng cấp mới
-                                        </div>
-                                    </LoadingComponent>
-                                )}
-                                options={degrees?.map(degree => ({
-                                    label: degree.title,
-                                    value: degree.degreeId
-                                }))}
-
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Ngày sinh"
-                            name="dateOfBirth"
-                            rules={[
-                                {
-                                    validator(_, value) {
-                                        if (!value || dayjs(value).isBefore(dayjs(), 'day')) {
-                                            return Promise.resolve();
-                                        }
-                                        return Promise.reject(new Error("Ngày sinh không hợp lệ!"));
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng nhập email!",
+                                    },
+                                    {
+                                        type: "email",
+                                        message: "Email không hợp lệ!",
                                     }
-                                }
-                            ]}
-                        >
-                            <DatePicker
-                                name="dateOfBirth"
-                                format="DD/MM/YYYY"
-                                placeholder="Chọn ngày sinh"
-                                style={{ width: '100%' }}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Giới tính"
-                            name="gender"
-                        >
-                            <Radio.Group name="gender">
-                                <Radio value="male">Nam</Radio>
-                                <Radio value="female">Nữ</Radio>
-                                <Radio value="other">Khác</Radio>
-                            </Radio.Group>
-                        </Form.Item>
-                        <Form.Item
-                            label="Địa chỉ"
-                            name="address"
-                        >
-                            <Input.TextArea
-                                name="address"
-                                placeholder="Nhập vào địa chỉ"
-                                autoSize={{ minRows: 2, maxRows: 4 }}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Ảnh đại diện"
-                            name="avatar"
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) =>
-                                Array.isArray(e) ? e : e && e.fileList
-                            }
-                            extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
-                        >
-                            <Upload
-                                name="file"
-                                beforeUpload={() => false}
-                                maxCount={1}
-                                accept=".jpg, .jpeg, .png, .gif, .webp"
-                                onRemove={() => formUpdate.setFieldsValue({ file: [] })}
-                                fileList={formUpdate.getFieldValue("file") || []}
-                                listType="picture-card"
+                                ]}
                             >
-                                <ButtonComponent icon={<UploadOutlined />}>
+                                <Input
+                                    name="email"
+                                    placeholder="Nhập vào email"
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Số điện thoại"
+                                name="phone"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng nhập số điện thoại!",
+                                    },
+                                    {
+                                        pattern: /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-4|6-9])[0-9]{7}$/,
+                                        message: "Số điện thoại không hợp lệ!",
+                                    }
+                                ]}
+                            >
+                                <Input
+                                    name="phone"
+                                    placeholder="Nhập vào số điện thoại"
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Mật khẩu"
+                                name="password"
 
-                                </ButtonComponent>
-                            </Upload>
-
-                        </Form.Item>
-
-
-                        <Form.Item
-                            label={null}
-                            wrapperCol={{ offset: 18, span: 6 }}
+                            >
+                                <Input.Password
+                                    name="password"
+                                    placeholder="Nhập vào mật khẩu"
+                                    autoComplete="new-password"
+                                />
+                            </Form.Item>
+                        </StyledCard>
+                         <StyledCard
+                            title="Thông tin cá nhân"
                         >
-                            <Space>
-                                <ButtonComponent
-                                    type="default"
-                                    onClick={() => setIsDrawerOpen(false)}
+                            <Form.Item
+                                label="Họ và tên"
+                                name="fullName"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng nhập họ và tên!",
+                                    }
+                                ]}
+                            >
+                                <Input
+                                    name="fullName"
+                                    placeholder="Nhập vào họ và tên"
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Bằng cấp"
+                                name="degreeId"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Vui lòng chọn bằng cấp!",
+                                    }
+                                ]}
+                            >
+                                <Select
+                                    name="degreeId"
+                                    placeholder="Chọn bằng cấp"
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                    }
+                                    popupRender={menu => (
+                                        <LoadingComponent isLoading={isLoadingDegrees}>
+                                            {menu}
+                                            <Divider style={{ margin: '4px 0' }} />
+                                            <div
+                                                style={{
+                                                    padding: '8px',
+                                                    color: '#1890ff',
+                                                    cursor: 'pointer',
+                                                }}
+                                                onClick={() => setIsOpenModelCreateDegree(true)}
+                                            >
+                                                <PlusOutlined /> Thêm bằng cấp mới
+                                            </div>
+                                        </LoadingComponent>
+                                    )}
+                                    options={degrees?.map(degree => ({
+                                        label: degree.title,
+                                        value: degree.degreeId
+                                    }))}
+
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Ngày sinh"
+                                name="dateOfBirth"
+                                rules={[
+                                    {
+                                        validator(_, value) {
+                                            if (!value || dayjs(value).isBefore(dayjs(), 'day')) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error("Ngày sinh không hợp lệ!"));
+                                        }
+                                    }
+                                ]}
+                            >
+                                <DatePicker
+                                    name="dateOfBirth"
+                                    format="DD/MM/YYYY"
+                                    placeholder="Chọn ngày sinh"
+                                    style={{ width: '100%' }}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Giới tính"
+                                name="gender"
+                            >
+                                <Radio.Group name="gender">
+                                    <Radio value="male">Nam</Radio>
+                                    <Radio value="female">Nữ</Radio>
+                                    <Radio value="other">Khác</Radio>
+                                </Radio.Group>
+                            </Form.Item>
+                            <Form.Item
+                                label="Địa chỉ"
+                                name="address"
+                            >
+                                <Input.TextArea
+                                    name="address"
+                                    placeholder="Nhập vào địa chỉ"
+                                    autoSize={{ minRows: 2, maxRows: 4 }}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Ảnh đại diện"
+                                name="avatar"
+                                valuePropName="fileList"
+                                getValueFromEvent={(e) =>
+                                    Array.isArray(e) ? e : e && e.fileList
+                                }
+                                extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
+                            >
+                                <Upload
+                                    name="file"
+                                    beforeUpload={() => false}
+                                    maxCount={1}
+                                    accept=".jpg, .jpeg, .png, .gif, .webp"
+                                    onRemove={() => formUpdate.setFieldsValue({ file: [] })}
+                                    fileList={formUpdate.getFieldValue("file") || []}
+                                    listType="picture-card"
                                 >
-                                    Huỷ
-                                </ButtonComponent>
-                                <ButtonComponent
-                                    type="primary"
-                                    htmlType="submit"
-                                >
-                                    Lưu
-                                </ButtonComponent>
-                            </Space>
-                        </Form.Item>
+                                    <ButtonComponent icon={<UploadOutlined />}>
+
+                                    </ButtonComponent>
+                                </Upload>
+
+                            </Form.Item>
+
+
+                            <Form.Item
+                                label={null}
+                                wrapperCol={{ offset: 18, span: 6 }}
+                            >
+                                <Space>
+                                    <ButtonComponent
+                                        type="default"
+                                        onClick={() => setIsDrawerOpen(false)}
+                                    >
+                                        Huỷ
+                                    </ButtonComponent>
+                                    <ButtonComponent
+                                        type="primary"
+                                        htmlType="submit"
+                                    >
+                                        Lưu
+                                    </ButtonComponent>
+                                </Space>
+                            </Form.Item>
+                        </StyledCard>
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>

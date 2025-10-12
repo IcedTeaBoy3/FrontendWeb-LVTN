@@ -13,7 +13,7 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import dayjs from 'dayjs';
-import viVN from "antd/locale/vi_VN";
+
 import {
     EditOutlined,
     DeleteOutlined,
@@ -35,6 +35,7 @@ const SchedulePage = () => {
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
+    
 
     const rowSelection = {
         selectedRowKeys,
@@ -220,6 +221,7 @@ const SchedulePage = () => {
             Message.error(error?.response.data.message || "Có lỗi xảy ra, vui lòng thử lại sau");
         }
     });
+    
     const { data: doctors, isLoading: isLoadingDoctors } = queryGetAllDoctors;
     const { data: schedules, isLoading: isLoadingSchedules } = queryGetAllSchedules;
     const { isPending: isPendingCreate } = mutationCreateSchedule;
@@ -251,13 +253,15 @@ const SchedulePage = () => {
             dataIndex: "workday",
             key: "workday",
             ...getColumnSearchProps("workday"),
+            filterMultiple: false,
+            sorter: (a, b) => dayjs(a.workday, "DD/MM/YYYY").unix() - dayjs(b.workday, "DD/MM/YYYY").unix(),
         },
         {
             title: "Bác sĩ",
             dataIndex: "doctor",
             key: "doctor",
             ...getColumnSearchProps("doctor"),
-            sorter: (a, b) => a.doctor.length - b.doctor.length,
+            sorter: (a, b) => a.doctor?.length - b.doctor?.length,
         },
         {
             title: "Thời gian khám (phút) / lượt",
