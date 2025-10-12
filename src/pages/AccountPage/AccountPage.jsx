@@ -19,7 +19,8 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     ExportOutlined,
-    BlockOutlined
+    BlockOutlined,
+    PlusOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -271,6 +272,7 @@ const AccountPage = () => {
             dataIndex: "userName",
             key: "userName",
             ...getColumnSearchProps("userName"),
+            sorter: (a, b) => a?.userName?.length - b?.userName?.length,
             render: (text) => text || <Text type="secondary">Chưa cập nhật</Text>,
         },
         {
@@ -290,7 +292,6 @@ const AccountPage = () => {
                 { text: 'Quản trị viên', value: 'admin' },
             ],
             onFilter: (value, record) => record.role === value,
-            sorter: (a, b) => a?.role.length - b?.role.length,
             render: (role) => convertRole(role),
         },
         {
@@ -458,12 +459,29 @@ const AccountPage = () => {
     return (
         <>
             <Title level={4}>Danh sách tài khoản</Title>
+            <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+                <ButtonComponent
+                    type="primary"
+                    // onClick={() => setIsModalOpenCreate(true)}
+                    icon={<PlusOutlined />}
+                    style={{ marginRight: 8 }}
+                >
+                    Thêm mới
+                </ButtonComponent>
+                <ButtonComponent    
+                    type="default"
+                
+                >
+                    Xuất file
+                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                </ButtonComponent>
+            </div>
+            
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 handleSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
             />
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <TableStyle
                 rowSelection={rowSelection}
                 columns={columns}

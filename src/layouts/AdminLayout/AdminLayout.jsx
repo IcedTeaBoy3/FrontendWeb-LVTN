@@ -78,7 +78,7 @@ const menuItems = [
     {
         key: "/admin/appointments",
         icon: <CalendarOutlined />,
-        label: "Lịch hẹn",
+        label: "Lịch khám",
     },
     {
         key: "/admin/medical-records",
@@ -122,10 +122,11 @@ const AdminLayout = () => {
         "/admin/positions": "Chức vụ",
         "/admin/degrees": "Học vị",
         "/admin/dashboard": "Thống kê",
-        "/admin/appointments": "Lịch hẹn",
+        "/admin/appointments": "Lịch khám",
         "/admin/doctors": "Bác sĩ",
         "/admin/doctors/:id": "Chi tiết bác sĩ",
         "/admin/schedules/:id": "Chi tiết lịch làm việc",
+        "/admin/appointments/:id": "Chi tiết lịch khám",
         "/admin/hospitals": "Bệnh viện",
         "/admin/specialties": "Chuyên khoa",
         "/admin/patients": "Bệnh nhân",
@@ -152,6 +153,9 @@ const AdminLayout = () => {
             }
             if (!title && /^\/admin\/schedules\/[^/]+$/.test(url)) {
                 title = breadcrumbNameMap["/admin/schedules/:id"];
+            }
+            if (!title && /^\/admin\/appointments\/[^/]+$/.test(url)) {
+                title = breadcrumbNameMap["/admin/appointments/:id"];
             }
 
             return {

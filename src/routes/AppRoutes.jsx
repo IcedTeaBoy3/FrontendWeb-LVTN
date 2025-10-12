@@ -5,7 +5,6 @@ import ProtectedRoute from "@/components/ProtectedRoute/ProtectedRoute";
 
 // các trang admin
 import Dashboard from "@/pages/Dashboard/Dashboard";
-import PatientPage from "@/pages/PatientPage/PatientPage";
 import PatientProfilePage from "@/pages/PatientProfilePage/PatientProfilePage";
 import SpecialtyPage from "@/pages/SpecialtyPage/SpecialtyPage";
 import PositionPage from "@/pages/PositionPage/PositionPage";
@@ -17,6 +16,7 @@ import ClinicPage from "@/pages/ClinicPage/ClinicPage";
 import ServicePage from "@/pages/ServicePage/ServicePage";
 import DoctorDetailPage from "@/pages/DoctorDetailPage/DoctorDetailPage";
 import ScheduleDetailPage from "@/pages/ScheduleDetailPage/ScheduleDetailPage";
+import DetailAppointmentPage from "@/pages/DetailAppointmentPage/DetailAppointmentPage";
 import AccountPage from "@/pages/AccountPage/AccountPage";
 import AppointmentPage from "@/pages/AppointmentPage/AppointmentPage";
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
@@ -49,6 +49,7 @@ const AppRoutes = () => {
                     <Route path="doctors/:id" element={<DoctorDetailPage />} />
                     <Route path="schedules/:id" element={<ScheduleDetailPage />} />
                     <Route path="appointments" element={<AppointmentPage />} />
+                    <Route path="appointments/:id" element={<DetailAppointmentPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
                 {/* Route không khớp */}

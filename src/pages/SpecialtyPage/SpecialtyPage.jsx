@@ -435,20 +435,31 @@ const SpecialtyPage = () => {
     return (
         <>
             <Title level={4}>Danh sách chuyên khoa</Title>
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
-            <ButtonComponent
-                type="primary"
-                onClick={() => setIsModalOpenCreate(true)}
-                icon={<PlusOutlined />}
-            >
-                Thêm mới
-            </ButtonComponent>
+            <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+
+
+                <ButtonComponent
+                    type="primary"
+                    onClick={() => setIsModalOpenCreate(true)}
+                    icon={<PlusOutlined />}
+                >
+                    Thêm mới
+                </ButtonComponent>
+                <ButtonComponent    
+                    type="default"
+                
+                >
+                    Xuất file
+                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                </ButtonComponent>
+            </div>
+           
+            
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 handleSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
             />
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>

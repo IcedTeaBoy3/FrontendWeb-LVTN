@@ -130,6 +130,7 @@ const ClinicPage = () => {
 
             // Mô tả
             setEditorData(clinicData.description || "");
+            formUpdate.setFieldsValue({ description: clinicData.description || "" });
         };
 
         fetchAndSetClinicData();
@@ -165,7 +166,7 @@ const ClinicPage = () => {
             <Title level={4} >
                 Thông tin phòng khám
             </Title>
-            <Divider style={{ margin: "20px 0" }} />
+            
             <LoadingComponent isLoading={isLoadingGetClinic || isPendingUpdate}>
 
                 <Form
@@ -202,7 +203,10 @@ const ClinicPage = () => {
                         >
                             <CKEditorComponent
                                 editorData={editorData}
-                                onChange={(data) => formUpdate.setFieldsValue({ description: data })}
+                                onChange={(data) => {
+                                    formUpdate.setFieldValue("description", data); // cập nhật giá trị
+                                    formUpdate.validateFields(["description"]); // báo Form validate lại
+                                }}
                             />
                         </Form.Item>
 
@@ -282,60 +286,70 @@ const ClinicPage = () => {
                     {/* Địa chỉ & Liên hệ */}
                     <StyledCard title="Địa chỉ & Liên hệ" style={{ marginBottom: 20 }} hoverable={true}>
                         <Title level={5}>Địa chỉ</Title>
-                        <Form.Item
-                            label="Tỉnh/Thành phố"
-                            name="province"
-                            rules={[{ required: true, message: "Vui lòng nhập tỉnh/thành phố" }]}
-                        >
-                            <Select
-                                placeholder="Chọn tỉnh/thành phố"
-                                showSearch
-                                options={provinces.map((province) => ({
-                                    label: province.name,
-                                    value: province.code,
-                                }))}
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                onChange={handleProvinceChange}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Quận/Huyện"
-                            name="district"
-                            rules={[{ required: true, message: "Vui lòng nhập quận/huyện" }]}
-                        >
-                            <Select
-                                placeholder="Chọn quận/huyện"
-                                showSearch
-                                options={districts.map((district) => ({
-                                    label: district.name,
-                                    value: district.code,
-                                }))}
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                onChange={handleDistrictChange}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Xã/Phường"
-                            name="ward"
-                            rules={[{ required: true, message: "Vui lòng nhập xã/phường" }]}
-                        >
-                            <Select
-                                placeholder="Chọn xã/phường"
-                                showSearch
-                                options={wards.map((ward) => ({
-                                    label: ward.name,
-                                    value: ward.code,
-                                }))}
-                                filterOption={(input, option) =>
-                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                }
-                                onChange={handleWardChange}
-                            />
-                        </Form.Item>
+                        <Row gutter={16}>
+                            <Col span={8}>
+                                
+                                <Form.Item
+                                    label="Tỉnh/Thành phố"
+                                    name="province"
+                                    rules={[{ required: true, message: "Vui lòng nhập tỉnh/thành phố" }]}
+                                >
+                                    <Select
+                                        placeholder="Chọn tỉnh/thành phố"
+                                        showSearch
+                                        options={provinces.map((province) => ({
+                                            label: province.name,
+                                            value: province.code,
+                                        }))}
+                                        filterOption={(input, option) =>
+                                            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                        }
+                                        onChange={handleProvinceChange}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={8}>
+                                <Form.Item
+                                    label="Quận/Huyện"
+                                    name="district"
+                                    rules={[{ required: true, message: "Vui lòng nhập quận/huyện" }]}
+                                >
+                                    <Select
+                                        placeholder="Chọn quận/huyện"
+                                        showSearch
+                                        options={districts.map((district) => ({
+                                            label: district.name,
+                                            value: district.code,
+                                        }))}
+                                        filterOption={(input, option) =>
+                                            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                        }
+                                        onChange={handleDistrictChange}
+                                    />
+                                </Form.Item>
+                            
+                            </Col>
+                            <Col span={8}>
+                                <Form.Item
+                                    label="Xã/Phường"
+                                    name="ward"
+                                    rules={[{ required: true, message: "Vui lòng nhập xã/phường" }]}
+                                >
+                                    <Select
+                                        placeholder="Chọn xã/phường"
+                                        showSearch
+                                        options={wards.map((ward) => ({
+                                            label: ward.name,
+                                            value: ward.code,
+                                        }))}
+                                        filterOption={(input, option) =>
+                                            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                        }
+                                        onChange={handleWardChange}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
                         <Form.Item
                             label="Địa chỉ cụ thể"
                             name="specificAddress"

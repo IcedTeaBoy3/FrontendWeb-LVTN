@@ -476,12 +476,31 @@ const PatientProfilePage = () => {
     return (
         <>
             <Title level={4}>Danh sách bệnh nhân</Title>
+            
+            <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+                <ButtonComponent
+                    type="primary"
+                    // onClick={() => setIsModalOpenCreate(true)}
+                    icon={<PlusOutlined />}
+                    style={{ marginRight: 8 }}
+                >
+                    Thêm mới
+                </ButtonComponent>
+                <ButtonComponent    
+                    type="default"
+                
+                >
+                    Xuất file
+                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                </ButtonComponent>
+            </div>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 handleSelectedAll={handleSelectedAll}
                 menuProps={menuProps}
             />
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
+
+            
             <TableStyle
                 rowSelection={rowSelection}
                 columns={columns}

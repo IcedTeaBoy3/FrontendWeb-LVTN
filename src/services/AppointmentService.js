@@ -33,4 +33,13 @@ export const AppointmentService = {
             throw error.response.data;
         }
     },
+    getDetailAppointment: async (appointmentId) => {
+        try {
+            const response = await axiosInstance.get(`/appointment/get-detail-appointment/${appointmentId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+
+        }
+    }
 };

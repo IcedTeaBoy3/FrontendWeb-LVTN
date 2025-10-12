@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { SpecialtyService } from '@/services/SpecialtyService'
+import { useNavigate } from 'react-router-dom';
 import { AppointmentService } from '@/services/AppointmentService'
 import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
@@ -8,10 +8,10 @@ import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
-import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import * as DatetimeUtils from '@/utils/datetime_utils';
+import { getStatusColor,convertStatusAppointment } from '@/utils/status_appointment_utils';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -26,12 +26,6 @@ import {
 } from "@ant-design/icons";
 const { Text,Title } = Typography;
 const AppointmentPage = () => {
-    // const listStatus = [
-    //     { label: "Chờ xác nhận", value: "pending" },
-    //     { label: "Đã xác nhận", value: "confirmed" },
-    //     { label: "Đã hoàn thành", value: "completed" },
-    //     { label: "Đã hủy", value: "cancelled" },
-    // ]
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
@@ -42,6 +36,7 @@ const AppointmentPage = () => {
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
+    const navigate = useNavigate();
 
     const rowSelection = {
         selectedRowKeys,
@@ -230,10 +225,25 @@ const AppointmentPage = () => {
             title: "Ngày khám",
             dataIndex: "appointmentDate",
             key: "appointmentDate",
-        
-            sorter: (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate),
+            filters: [
+                { text: "Tất cả", value: "all" },
+                { text: "Từ hôm nay", value: "fromToday" },
+                { text: "Đã qua", value: "utilToday"}
+            ],
+            onFilter: (value, record) => {
+                if (value === "all") return true;
+                const today = new Date().setHours(0, 0, 0, 0);
+                const date = new Date(record.appointmentDate).setHours(0, 0, 0, 0);
+                if (value === "fromToday") {
+                    return date >= today;
+                }
+                if (value === "untilToday") {
+                    return date < today;
+                }
+                return true;
+            },
            
-            onFilter: (value, record) => record.appointmentDate === value,
+        
             render: (text) => (
                 text ? (
                     DatetimeUtils.formatDate(text)
@@ -274,11 +284,8 @@ const AppointmentPage = () => {
             dataIndex: "status",
             key: "status",
            render: (text) => (
-                text === "pending" ? <Tag color="warning">Chờ xác nhận</Tag> :
-                text === "confirmed" ? <Tag color="success">Đã xác nhận</Tag> :
-                text === "completed" ? <Tag color="processing">Đã hoàn thành</Tag> :
-                text === "cancelled" ? <Tag color="error">Đã hủy</Tag> :
-                <Tag color="default">Không xác định</Tag>
+               <Tag color={getStatusColor(text)}>{convertStatusAppointment(text)}</Tag>
+                
             ),
             filters: [
                 { text: "Chờ xác nhận", value: "pending" },
@@ -297,8 +304,8 @@ const AppointmentPage = () => {
                 const itemActions = [
                     { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined style={{ fontSize: 16 }} /> },
                     { type: "divider" },
-                    { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined style={{ fontSize: 16 }} /> },
-                    { type: "divider" },
+                    // { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined style={{ fontSize: 16 }} /> },
+                    // { type: "divider" },
                     { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
                    
                     
@@ -312,7 +319,6 @@ const AppointmentPage = () => {
                     setRowSelected(record.key);
                     domEvent.stopPropagation(); // tránh chọn row khi bấm menu
                     if (key === "detail") return handleViewAppointment(record.key);
-                    if (key === "edit") return handleEditAppointment(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                     if (key === "confirm") return setIsModalConfirmOpen(true);
                 };
@@ -337,11 +343,8 @@ const AppointmentPage = () => {
         },
     ];
     const handleViewAppointment = (key) => {
-        const appointment = appointmentData.find((item) => item.id === key);
-        setRowSelected(appointment);
-        setIsDrawerOpen(true);
+        navigate(`/admin/appointments/${key}`);
     };
-    const handleEditAppointment = (key) => {};
     const handleShowConfirmDelete = () => {
         setIsModalOpenDelete(true);
     };
@@ -392,15 +395,13 @@ const AppointmentPage = () => {
     return (
         <>
             <Title level={4}>Danh sách lịch khám</Title>
-          
-           
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 setSelectedRowKeys={handleSelectedAll}
                 menuProps={menuProps}
                 handleSelectedAll={handleSelectedAll}
             />
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
+            
             <TableStyle
                 rowSelection={rowSelection}
                 emptyText="Không có dữ liệu lịch khám"

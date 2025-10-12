@@ -399,15 +399,26 @@ const DegreePage = () => {
     return (
         <>
             <Title level={4}>Danh sách học vị</Title>
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
-            <ButtonComponent
-                type="primary"
-                onClick={() => setIsModalOpenCreate(true)}
-                icon={<PlusOutlined />}
-            >
-                Thêm mới
-            </ButtonComponent>
-            <Divider type="horizontal" style={{ margin: "10px 0" }} />
+            <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+
+
+                <ButtonComponent
+                    type="primary"
+                    onClick={() => setIsModalOpenCreate(true)}
+                    icon={<PlusOutlined />}
+                >
+                    Thêm mới
+                </ButtonComponent>
+                <ButtonComponent    
+                    type="default"
+                
+                >
+                    Xuất file
+                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                </ButtonComponent>
+            </div>
+            
+           
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 handleSelectedAll={handleSelectAll}
