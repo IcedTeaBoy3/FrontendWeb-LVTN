@@ -1,4 +1,4 @@
-import { Typography, DatePicker, Card} from "antd";
+import { Typography, DatePicker, Card,Divider} from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardService } from "@/services/DashboardService";
@@ -7,8 +7,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import Overview from "./components/Overview";
 const { RangePicker } = DatePicker;
-const { Title } = Typography;
+const { Title,Text } = Typography;
 import { StyleTabs, Row, Col } from "./style";
+import dayjs from "dayjs";
 const COLORSSTATUS= ['#faad14', '#1890ff', '#52c41a', '#f5222d'];
 const COLORSVERIFICATION = ['#52c41a', '#f5222d']; 
  const statusNameMap = {
@@ -25,9 +26,16 @@ const COLORS = {
 };
 const Dashboard = () => {
     const [tabKey, setTabKey] = useState('range');
-    const [dateRange, setDateRange] = useState([]);
-    const [selectedMonth, setSelectedMonth] = useState(null);
-    const [selectedYear, setSelectedYear] = useState(null);
+    const [dateRange, setDateRange] = useState([
+        dayjs().startOf('month').toISOString(),
+        dayjs().endOf('month').toISOString()
+    ]);
+    const [selectedMonth, setSelectedMonth] = useState(
+        dayjs().month() + 1
+    );
+    const [selectedYear, setSelectedYear] = useState(
+        dayjs().year()
+    );
     const onChangeDateRange = (values) => {
         if(values && values.length === 2) {
             const startDate = values[0].startOf('day').toISOString();
@@ -113,18 +121,51 @@ const Dashboard = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
+    const queryGetAdminAppointment= useQuery({
+        queryKey: ['getAdminAppointmentPerDay', tabKey, dateRange, selectedMonth, selectedYear],
+        queryFn: async () => {
+            if (tabKey === 'range' && dateRange.length === 2) {
+                return await DashboardService.getAdminAppointment({
+                    type: 'range',
+                    start: dateRange[0],
+                    end: dateRange[1],
+                });
+            }
+            if (tabKey === 'month' && selectedMonth && selectedYear) {
+                return await DashboardService.getAdminAppointment({
+                    type: 'month',
+                    month: selectedMonth,
+                    year: selectedYear,
+                });
+            }
+            if (tabKey === 'year' && selectedYear) {
+                return await DashboardService.getAdminAppointment({
+                    type: 'year',
+                    year: selectedYear,
+                });
+            }
+        },
+        enabled: Boolean(
+            (tabKey === 'range' && dateRange.length === 2) ||
+            (tabKey === 'month' && selectedMonth && selectedYear) ||
+            (tabKey === 'year' && selectedYear)
+        ),
+        retry: 1,
+        refetchOnWindowFocus: false,
+    });
     const { data: overview, isLoading: isLoadingOverview } = queryGetAdminDashboard;
     const { data: revenue, isLoading: isLoadingRevenue} = queryGetAdminRevenue;
     const { data: appointmentStatus, isLoading: isLoadingAppointmentStatus } = queryGetAdminAppointmentStatus;
     const { data: accountVerification, isLoading: isLoadingAccountVerification } = queryGetAdminAccountVerification;
     const { data: appointmentPerDoctor, isLoading: isLoadingAppointmentPerDoctor } = queryGetAdminAppointmentPerDoctor;
+    const { data: appointment, isLoading: isLoadingAppointment } = queryGetAdminAppointment;
 
     const overviewData = overview?.data || {};
     const revenueData = revenue?.data || [];
     const appointmentStatusData = appointmentStatus?.data || {};
     const accountVerificationData = accountVerification?.data || {};
     const appointmentPerDoctorData = appointmentPerDoctor?.data || [];
-    // Đổi tên trạng thái
+    const appointmentData = appointment?.data || [];
    
     // Chuyển sang array
     const pieChartData = Object.entries(appointmentStatusData).map(([key, value]) => ({
@@ -141,76 +182,100 @@ const Dashboard = () => {
         <>
             <Title level={4}>Thống kê tổng quan</Title>
             <Overview isLoadingOverview={isLoadingOverview} overviewData={overviewData} />
-            <Title level={4} style={{ marginTop: '24px' }}>Các biểu đồ</Title>
-            <StyleTabs
-                activeKey={tabKey}
-                onChange={setTabKey}
-                items={[
-                    // ====== THEO KHOẢNG NGÀY ======
-                    {
-                        key: 'range',
-                        label: 'Theo khoảng ngày',
-                        children: (
-                            <>
-                            
-                            <RangePicker
-                                onChange={onChangeDateRange}
-                                format="DD/MM/YYYY"
-                                placeholder={['Từ ngày', 'Đến ngày']}
-                                size="large"
-                                style={{ marginBottom: 20 }}
-                            />
-                            <Card style={{ borderRadius: 16 }}>
-                                <LoadingComponent isLoading={isLoadingRevenue}>
-                                    <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                        Biểu đồ doanh thu theo khoảng ngày {dateRange.length === 2 ? `từ ${new Date(dateRange[0]).toLocaleDateString('vi-VN')} đến ${new Date(dateRange[1]).toLocaleDateString('vi-VN')}` : ''}
-                                    </Title>
-                                    <ResponsiveContainer width="100%" height={350}>
-                                        <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                                            <defs>
-                                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
-                                            <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
-                                            <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
-                                            <Tooltip
-                                                formatter={(value) =>
-                                                    new Intl.NumberFormat('vi-VN', {
-                                                        style: 'currency',
-                                                        currency: 'VND',
-                                                }).format(value)
-                                                }
-                                            />
-                                            <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
-                                        </LineChart>
-                                    </ResponsiveContainer>
-                                
-                                </LoadingComponent>
-                            </Card>
-                            </>
-                        ),
-                    },
 
-                    // ====== THEO THÁNG ======
-                    {
-                        key: 'month',
-                        label: 'Theo tháng',
-                        children: (
-                            <>
-                                <DatePicker
-                                    picker="month"
-                                    onChange={onChangeMonth}
-                                    placeholder="Chọn tháng"
+            <Card style={{ borderRadius: 16, marginTop: 30 }}>
+                <StyleTabs
+                    activeKey={tabKey}
+                    onChange={setTabKey}
+                    items={[
+                        // ====== THEO KHOẢNG NGÀY ======
+                        {
+                            key: 'range',
+                            label: 'Theo khoảng ngày',
+                            children: (
+                                <>
+                                
+                                <RangePicker
+                                    onChange={onChangeDateRange}
+                                    format="DD/MM/YYYY"
+                                    value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : []}
+                                    placeholder={['Từ ngày', 'Đến ngày']}
                                     size="large"
                                     style={{ marginBottom: 20 }}
                                 />
-                                <LoadingComponent isLoading={isLoadingRevenue}>
-                                    <Card style={{ borderRadius: 16 }}>
+                                
+                                    <LoadingComponent isLoading={isLoadingRevenue || isLoadingAppointment}>
                                         <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                            Biểu đồ doanh thu theo tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
+                                            Biểu đồ doanh thu theo khoảng ngày {dateRange.length === 2 ? `từ ${new Date(dateRange[0]).toLocaleDateString('vi-VN')} đến ${new Date(dateRange[1]).toLocaleDateString('vi-VN')}` : ''}
+                                        </Title>
+                                        <ResponsiveContainer width="100%" height={350}>
+                                            <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                                <defs>
+                                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
+                                                <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
+                                                <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
+                                                <Tooltip
+                                                    formatter={(value) =>
+                                                        new Intl.NumberFormat('vi-VN', {
+                                                            style: 'currency',
+                                                            currency: 'VND',
+                                                    }).format(value)
+                                                    }
+                                                />
+                                                <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                        <Divider />
+                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                            Biểu đồ số lịch khám theo khoảng ngày {dateRange.length === 2 ? `từ ${new Date(dateRange[0]).toLocaleDateString('vi-VN')} đến ${new Date(dateRange[1]).toLocaleDateString('vi-VN')}` : ''}
+                                        </Title>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                                <defs>
+                                                    <linearGradient id="colorAppointment" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
+                                                <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
+                                                <YAxis label={{ value: 'Số lịch khám', angle: -90, position: 'insideLeft' }} />
+                                                <Tooltip
+                                                    formatter={(value) => value.toLocaleString('vi-VN')}
+                                                />
+                                                <Line type="monotone" dataKey="totalAppointments" stroke={lineColor} strokeWidth={2} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </LoadingComponent>
+
+                                </>
+                            ),
+                        },
+
+                        // ====== THEO THÁNG ======
+                        {
+                            key: 'month',
+                            label: 'Theo tháng',
+                            children: (
+                                <>
+                                    <DatePicker
+                                        picker="month"
+                                        onChange={onChangeMonth}
+                                        format="MM/YYYY"
+                                        value={selectedMonth && selectedYear ? dayjs().month(selectedMonth - 1).year(selectedYear) : null}
+                                        placeholder="Chọn tháng"
+                                        size="large"
+                                        style={{ marginBottom: 20 }}
+                                    />
+                                    <LoadingComponent isLoading={isLoadingRevenue || isLoadingAppointment}>
+                                    
+                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                            Biểu đồ doanh thu tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
                                         </Title>
                                         <ResponsiveContainer width="100%" height={300}>
                                             <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
@@ -227,33 +292,56 @@ const Dashboard = () => {
                                                 <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
                                             </LineChart>
                                         </ResponsiveContainer>
-                                    </Card>
-                                </LoadingComponent>
-                            </>
-                        ),
-                    },
+                                        <Divider />
+                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                            Biểu đồ số lịch khám tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
+                                        </Title>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                                <defs>
+                                                    <linearGradient id="colorAppointment" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
+                                                <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
+                                                <YAxis label={{ value: 'Số lịch khám', angle: -90, position: 'insideLeft' }} />
+                                                <Tooltip
+                                                    formatter={(value) => value.toLocaleString('vi-VN')}
+                                                />
+                                                <Line type="monotone" dataKey="totalAppointments" stroke={lineColor} strokeWidth={2} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    
+                                    </LoadingComponent>
+                                </>
+                            ),
+                        },
 
-                    // ====== THEO NĂM ======
-                    {
-                        key: 'year',
-                        label: 'Theo năm',
-                        children: (
-                            <>
-                                <DatePicker
-                                    picker="year"
-                                    onChange={onChangeYear}
-                                    placeholder="Chọn năm"
-                                    size="large"
-                                    style={{ marginBottom: 20 }}
-                                />
-                                <LoadingComponent isLoading={isLoadingRevenue}>
-                                    <Card style={{ borderRadius: 16}}>
+                        // ====== THEO NĂM ======
+                        {
+                            key: 'year',
+                            label: 'Theo năm',
+                            children: (
+                                <>
+                                    <DatePicker
+                                        picker="year"
+                                        onChange={onChangeYear}
+                                        format="YYYY"
+                                        value={selectedYear ? dayjs().year(selectedYear) : null}
+                                        placeholder="Chọn năm"
+                                        size="large"
+                                        style={{ marginBottom: 20 }}
+                                    />
+                                    <LoadingComponent isLoading={isLoadingRevenue}>
+                                    
                                         <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
                                             Biểu đồ doanh thu năm {selectedYear || ''}
                                         </Title>
                                         <ResponsiveContainer width="100%" height={300}>
                                             <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                                               <defs>
+                                                <defs>
                                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
                                                         <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
@@ -265,14 +353,33 @@ const Dashboard = () => {
                                                 <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
                                             </LineChart>
                                         </ResponsiveContainer>
-                                    </Card>
-                                </LoadingComponent>
-                            </>
-                        ),
-                    },
-                ]}
-            />
-            <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
+                                        <Divider />
+                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                            Biểu đồ số lịch khám năm {selectedYear || ''}
+                                        </Title>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                                <defs>
+                                                    <linearGradient id="colorAppointment" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
+                                                <XAxis dataKey="month" label={{ value: 'Tháng', position: 'insideBottomRight', offset: 0 }} />
+                                                <YAxis label={{ value: 'Số lịch khám', angle: -90, position: 'insideLeft' }} />
+                                                <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
+                                                <Line type="monotone" dataKey="totalAppointments" stroke={lineColor} strokeWidth={2} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </LoadingComponent>
+                                </>
+                            ),
+                        },
+                    ]}
+                />
+            </Card>
+            <Row gutter={[16, 16]} style={{ marginTop: 30 }}>
 
                 <Col span={12}>
                     <Card style={{ borderRadius: 16}}>
@@ -288,7 +395,7 @@ const Dashboard = () => {
                                     nameKey="name"
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={100}
+                                    outerRadius={130}
                                     fill="#8884d8"
                                     label
                                 >
@@ -300,6 +407,10 @@ const Dashboard = () => {
                                 <Legend verticalAlign="bottom" />
                                 </PieChart>
                             </ResponsiveContainer>
+                            <Divider />
+                            <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Tổng số lịch hẹn: {Object.values(appointmentStatusData).reduce((sum, val) => sum + val, 0)}</div>
+                            <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Hoàn thành: {appointmentStatusData['completed'] || 0}</div>
+
                         </LoadingComponent>
                     </Card>
                 </Col>
@@ -329,13 +440,16 @@ const Dashboard = () => {
                             <Legend verticalAlign="bottom" />
                             </PieChart>
                         </ResponsiveContainer>
+                        <Divider />
+                        <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Tổng số tài khoản: {Object.values(accountVerificationData).reduce((sum, val) => sum + val, 0)}</div>
+                        <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Đã xác thực: {accountVerificationData['verified'] || 0}</div>
                         </LoadingComponent>
                     </Card>
                 </Col>
             </Row>
             <LoadingComponent isLoading={isLoadingAppointmentPerDoctor}>
 
-                <Card title="Biểu đồ số lịch khám của mỗi bác sĩ theo trạng thái" style={{ borderRadius: 16, marginTop: 16 }}>
+                <Card title="Biểu đồ số lịch khám của mỗi bác sĩ theo trạng thái" style={{ borderRadius: 16, marginTop: 30 }}>
                     <ResponsiveContainer width="100%" height={400}>
                         <BarChart data={appointmentPerDoctorData || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
@@ -357,7 +471,7 @@ const Dashboard = () => {
                     </ResponsiveContainer>
                 </Card>
             </LoadingComponent>
-           
+            
         </>
     )
 }

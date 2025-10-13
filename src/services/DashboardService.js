@@ -41,5 +41,15 @@ export const DashboardService = {
         } catch (error) {
             throw error.response.data;
         }
+    },
+    getAdminAppointment: async ({type, start, end, month, year}) => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-appointment', {
+                params: { type, start, end, month, year }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
     }
 }
