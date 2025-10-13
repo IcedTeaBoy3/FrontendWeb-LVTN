@@ -1,11 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Divider } from "antd";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import TabsComponent from '@/components/TabsComponent/TabsComponent';
-import InfoDoctor from '@/components/InfoDoctor/InfoDoctor';
-import DoctorWorkplace from '@/components/DoctorWorkplace/DoctorWorkplace';
-import DoctorSpecialty from '@/components/DoctorSpecialty/DoctorSpecialty';
-import DoctorService from './compoents/DoctorService';
+import InfoDoctor from './components/InfoDoctor';
+import DoctorWorkplace from './components/DoctorWorkplace';
+import DoctorSpecialty from './components/DoctorSpecialty';
+import DoctorService from './components/DoctorService';
+import DoctorSchedule from './components/DoctorSchedule';
 import {
     ArrowLeftOutlined,
     UserOutlined,
@@ -50,7 +50,7 @@ const DoctorDetailPage = () => {
         {
             key: "5",
             label: `Lịch làm việc`,
-            children: `Lịch làm việc`,
+            children: <DoctorSchedule id={id} />,
             icon: <CalendarOutlined style={{ fontSize: 18 }} />
         }
     ];

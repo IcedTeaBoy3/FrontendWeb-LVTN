@@ -17,5 +17,29 @@ export const DashboardService = {
         } catch (error) {
             throw error.response.data;
         }
+    },
+    getAdminAppointmentStatus: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-appointment-status');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    getAdminAccountVerification: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-account-verification');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    getAdminAppointmentPerDoctor: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-appointment-per-doctor');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
     }
 }

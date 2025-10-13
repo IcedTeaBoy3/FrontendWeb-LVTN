@@ -1,66 +1,27 @@
-import { Form, Input, Button, Upload, Card as AntCard, Row as AntRow, Col as AntCol, Select, Typography, Divider, DatePicker,Statistic } from "antd";
+import { Typography, DatePicker, Card} from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardService } from "@/services/DashboardService";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
-import styled from "styled-components";
-import { UserOutlined, UserSwitchOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,Legend } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import Overview from "./components/Overview";
 const { RangePicker } = DatePicker;
 const { Title } = Typography;
-import { StyleTabs } from "./style";
-const Row = styled(AntRow)`
-  margin-top: 24px;
-`;
-
-const Col = styled(AntCol)`
-  @media (max-width: 768px) {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-`;
-
-const Card = styled(AntCard)`
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  text-align: center;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    border-color: 1px solid #1890ff;
-  }
-
-  .ant-card-body {
-    padding: 24px 16px;
-  }
-
-  .icon-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-bottom: 12px;
-    color: white;
-    font-size: 22px;
-  }
-
-  .stat-title {
-    font-weight: 500;
-    color: #4a4a4a;
-    margin-bottom: 4px;
-  }
-`;
-
-// Màu riêng cho từng thẻ
-const colorMap = {
-  users: "#1890ff",
-  doctors: "#52c41a",
-  appointments: "#faad14",
-  revenue: "#f5222d",
+import { StyleTabs, Row, Col } from "./style";
+const COLORSSTATUS= ['#faad14', '#1890ff', '#52c41a', '#f5222d'];
+const COLORSVERIFICATION = ['#52c41a', '#f5222d']; 
+ const statusNameMap = {
+    pending: 'Chờ xác nhận',
+    confirmed: 'Đã xác nhận',
+    completed: 'Đã hoàn thành',
+    cancelled: 'Đã huỷ',
+};
+const COLORS = {
+    pending: '#faad14',    // chờ xác nhận
+    confirmed: '#1890ff',  // đã xác nhận
+    completed: '#52c41a',  // đã hoàn thành
+    cancelled: '#f5222d',  // đã huỷ
 };
 const Dashboard = () => {
     const [tabKey, setTabKey] = useState('range');
@@ -85,7 +46,6 @@ const Dashboard = () => {
             setSelectedYear(null);
         }
     };
-
     const onChangeYear = (date) => {
         if (date) {
             setSelectedYear(date.year());
@@ -135,76 +95,53 @@ const Dashboard = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
+    const queryGetAdminAppointmentStatus = useQuery({
+        queryKey: ['getAdminAppointmentStatus'],
+        queryFn: () => DashboardService.getAdminAppointmentStatus(),
+        retry: 1,
+        refetchOnWindowFocus: false,
+    });
+    const queryGetAdminAccountVerification = useQuery({
+        queryKey: ['getAdminAccountVerification'],
+        queryFn: () => DashboardService.getAdminAccountVerification(),
+        retry: 1,
+        refetchOnWindowFocus: false,
+    });
+    const queryGetAdminAppointmentPerDoctor = useQuery({
+        queryKey: ['getAdminAppointmentPerDoctor'],
+        queryFn: () => DashboardService.getAdminAppointmentPerDoctor(),
+        retry: 1,
+        refetchOnWindowFocus: false,
+    });
     const { data: overview, isLoading: isLoadingOverview } = queryGetAdminDashboard;
     const { data: revenue, isLoading: isLoadingRevenue} = queryGetAdminRevenue;
-    
+    const { data: appointmentStatus, isLoading: isLoadingAppointmentStatus } = queryGetAdminAppointmentStatus;
+    const { data: accountVerification, isLoading: isLoadingAccountVerification } = queryGetAdminAccountVerification;
+    const { data: appointmentPerDoctor, isLoading: isLoadingAppointmentPerDoctor } = queryGetAdminAppointmentPerDoctor;
+
     const overviewData = overview?.data || {};
     const revenueData = revenue?.data || [];
+    const appointmentStatusData = appointmentStatus?.data || {};
+    const accountVerificationData = accountVerification?.data || {};
+    const appointmentPerDoctorData = appointmentPerDoctor?.data || [];
+    // Đổi tên trạng thái
+   
+    // Chuyển sang array
+    const pieChartData = Object.entries(appointmentStatusData).map(([key, value]) => ({
+        name: statusNameMap[key] || key,
+        value: value,
+    }));
+    const donutChartData = Object.keys(accountVerificationData).map((key) => ({
+        name: key === 'verified' ? 'Đã xác thực' : 'Chưa xác thực',
+        value: accountVerificationData[key],
+    }));
     const lineColor =
     tabKey === 'range' ? '#1890ff' : tabKey === 'month' ? '#52c41a' : '#faad14';
     return (
         <>
-           <Title level={4}>Thống kê tổng quan</Title>
-           <LoadingComponent isLoading={isLoadingOverview} >
-                <Row gutter={[16, 16]}>
-                    <Col span={6}>
-                        <Card>
-                            <div className="icon-wrapper" style={{ background: colorMap.users }}>
-                                <UserOutlined />
-                            </div>
-                            <Statistic
-                                title="Tổng số người dùng"
-                                value={overviewData.totalUsers || 0}
-                                valueStyle={{ color: colorMap.users, fontWeight: 700 }}
-                            />
-                        </Card>
-                    </Col>
-
-                    <Col span={6}>
-                        <Card>
-                            <div className="icon-wrapper" style={{ background: colorMap.doctors }}>
-                                <UserSwitchOutlined />
-                            </div>
-                            <Statistic
-                                title="Tổng số bác sĩ"
-                                value={overviewData.totalDoctors || 0}
-                                valueStyle={{ color: colorMap.doctors, fontWeight: 700 }}
-                            />
-                        </Card>
-                    </Col>
-
-                    <Col span={6}>
-                        <Card>
-                            <div className="icon-wrapper" style={{ background: colorMap.appointments }}>
-                                <CalendarOutlined />
-                            </div>
-                            <Statistic
-                                title="Lịch khám hôm nay"
-                                value={overviewData.appointmentsToday || 0}
-                                valueStyle={{ color: colorMap.appointments, fontWeight: 700 }}
-                            />
-                        </Card>
-                    </Col>
-
-                    <Col span={6}>
-                        <Card>
-                            <div className="icon-wrapper" style={{ background: colorMap.revenue }}>
-                                <DollarOutlined />
-                            </div>
-                            <Statistic
-                                title="Doanh thu hôm nay (VNĐ)"
-                                value={overviewData.revenueToday || 0}
-                                precision={0}
-                                valueStyle={{ color: colorMap.revenue, fontWeight: 700 }}
-                                formatter={(value) =>
-                                    value.toLocaleString("vi-VN", { minimumFractionDigits: 0 })
-                                }
-                            />
-                        </Card>
-                    </Col>
-                </Row>
-            </LoadingComponent>
-            <Title level={4} style={{ marginTop: '24px' }}>Thống kê doanh thu</Title>
+            <Title level={4}>Thống kê tổng quan</Title>
+            <Overview isLoadingOverview={isLoadingOverview} overviewData={overviewData} />
+            <Title level={4} style={{ marginTop: '24px' }}>Các biểu đồ</Title>
             <StyleTabs
                 activeKey={tabKey}
                 onChange={setTabKey}
@@ -223,7 +160,7 @@ const Dashboard = () => {
                                 size="large"
                                 style={{ marginBottom: 20 }}
                             />
-                            <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                            <Card style={{ borderRadius: 16 }}>
                                 <LoadingComponent isLoading={isLoadingRevenue}>
                                     <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
                                         Biểu đồ doanh thu theo khoảng ngày {dateRange.length === 2 ? `từ ${new Date(dateRange[0]).toLocaleDateString('vi-VN')} đến ${new Date(dateRange[1]).toLocaleDateString('vi-VN')}` : ''}
@@ -271,7 +208,7 @@ const Dashboard = () => {
                                     style={{ marginBottom: 20 }}
                                 />
                                 <LoadingComponent isLoading={isLoadingRevenue}>
-                                    <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                                    <Card style={{ borderRadius: 16 }}>
                                         <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
                                             Biểu đồ doanh thu theo tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
                                         </Title>
@@ -310,7 +247,7 @@ const Dashboard = () => {
                                     style={{ marginBottom: 20 }}
                                 />
                                 <LoadingComponent isLoading={isLoadingRevenue}>
-                                    <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                                    <Card style={{ borderRadius: 16}}>
                                         <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
                                             Biểu đồ doanh thu năm {selectedYear || ''}
                                         </Title>
@@ -335,8 +272,91 @@ const Dashboard = () => {
                     },
                 ]}
             />
+            <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
 
-            
+                <Col span={12}>
+                    <Card style={{ borderRadius: 16}}>
+                        <LoadingComponent isLoading={isLoadingAppointmentStatus}>
+                            <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                Biểu đồ trạng thái lịch hẹn
+                            </Title>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                <Pie
+                                    data={pieChartData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={100}
+                                    fill="#8884d8"
+                                    label
+                                >
+                                    {pieChartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORSSTATUS[index % COLORSSTATUS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                                <Legend verticalAlign="bottom" />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </LoadingComponent>
+                    </Card>
+                </Col>
+                <Col span={12}>
+                    <Card style={{ borderRadius: 16 }}>
+                        <LoadingComponent isLoading={isLoadingAccountVerification}>
+                            <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                Biểu đồ xác thực tài khoản người dùng
+                            </Title>
+                            <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                            <Pie
+                                data={donutChartData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={70} // tạo donut chart
+                                outerRadius={120}
+                                label
+                            >
+                                {donutChartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORSVERIFICATION[index % COLORSVERIFICATION.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend verticalAlign="bottom" />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        </LoadingComponent>
+                    </Card>
+                </Col>
+            </Row>
+            <LoadingComponent isLoading={isLoadingAppointmentPerDoctor}>
+
+                <Card title="Biểu đồ số lịch khám của mỗi bác sĩ theo trạng thái" style={{ borderRadius: 16, marginTop: 16 }}>
+                    <ResponsiveContainer width="100%" height={400}>
+                        <BarChart data={appointmentPerDoctorData || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="doctorName" />
+                        <YAxis label={{ value: 'Số lịch', angle: -90, position: 'insideLeft' }} />
+                        <Tooltip 
+                            formatter={(value, name) => [value, statusNameMap[name]]} // đổi tên tooltip
+                        />
+                        <Legend 
+                            verticalAlign="bottom" 
+                            formatter={(value) => statusNameMap[value] || value} // đổi tên legend
+                        />
+                        <Bar dataKey="pending" stackId="a" fill={COLORS.pending} />
+                        <Bar dataKey="confirmed" stackId="a" fill={COLORS.confirmed} />
+                        <Bar dataKey="completed" stackId="a" fill={COLORS.completed} />
+                        <Bar dataKey="cancelled" stackId="a" fill={COLORS.cancelled} />
+                    
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Card>
+            </LoadingComponent>
            
         </>
     )

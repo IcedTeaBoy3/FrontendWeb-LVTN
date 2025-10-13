@@ -203,7 +203,7 @@ const DoctorService = ({id}) => {
     }
     return (
         <Card
-            title={<Title level={4} style={{ margin: 0 }}>Dịch vụ</Title>}
+            title="Dịch vụ"
             extra={
                 <ButtonComponent
                     type="primary"

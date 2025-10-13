@@ -20,11 +20,13 @@ const DetailSchedulePage = () => {
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
   const [isModalOpenDetail, setIsModalOpenDetail] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [rowSelected, setRowSelected] = useState(null);
   const [shiftSelected, setShiftSelected] = useState(null);
   const [formCreate] = Form.useForm();
+  const [formUpdate] = Form.useForm();
   const navigate = useNavigate();
   const { id } = useParams();
   const rowSelection = {
@@ -144,6 +146,23 @@ const DetailSchedulePage = () => {
       Message.error(error?.response?.data?.message || "Error creating shift");
     }
   });
+  const mutationUpdateShift = useMutation({
+    mutationKey: ['updateShift'],
+    mutationFn: ({id, data}) => ShiftService.updateShift(id, data),
+    onSuccess: (data) => {
+      if(data?.status === "success") {
+        Message.success(data?.message);
+        setIsDrawerOpen(false);
+        queryGetAllShiftBySchedule.refetch();
+        setRowSelected(null);
+      }else{
+        Message.error(data?.message || "Error update shift");
+      }
+    },
+    onError: (error) => {
+      Message.error(error?.response?.data?.message || "Error update shift");
+    }
+  });
   const mutationDeleteShift = useMutation({
     mutationKey: ['deleteShift'],
     mutationFn: ShiftService.deleteShift,
@@ -192,6 +211,7 @@ const DetailSchedulePage = () => {
     setIsModalOpenCreate(false);
   };
   const isPendingCreate = mutationCreateShift.isPending;
+  const isPendingUpdate = mutationUpdateShift.isPending;
   const isPendingDelete = mutationDeleteShift.isPending;
   const {data: shifts , isLoading: isLoadingShifts} = queryGetAllShiftBySchedule;
   const {data: slots , isLoading: isLoadingSlots} = queryGetAllSlotByShift;
@@ -280,8 +300,29 @@ const DetailSchedulePage = () => {
     setIsModalOpenDetail(true);
   };
   const handleEditShift = (shiftId) => {
-    Message.info("Chức năng đang phát triển" + shiftId);
+    const shift = shiftData.find(item => item.shiftId === shiftId);
+    if(shift) {
+      formUpdate.setFieldsValue({
+        name: shift.name,
+        startTime: dayjs(shift.startTime),
+        endTime: dayjs(shift.endTime),
+      });
+      setIsDrawerOpen(true);
+    }
   };
+  const handleOnUpdateShift = () => {
+    formUpdate.validateFields().then((values) => {
+      const { name, startTime, endTime } = values;
+      mutationUpdateShift.mutate({
+        id: rowSelected,
+        data: {
+          name,
+          startTime,
+          endTime,
+        }
+      });
+    })
+  }
   const handleShowConfirmDelete = () => {
     setIsModalOpenDelete(true);
   };
@@ -292,23 +333,43 @@ const DetailSchedulePage = () => {
     setIsModalOpenDelete(false);
   };
   const handleOnchange = (value) => {
-    if(value === 'Ca sáng') {
-      formCreate.setFieldsValue({
-        startTime: dayjs('08:00', 'HH:mm'),
-        endTime: dayjs('12:00', 'HH:mm'),
-      });
-    } else if(value === 'Ca chiều') {
-      formCreate.setFieldsValue({
-        startTime: dayjs('13:00', 'HH:mm'),
-        endTime: dayjs('17:00', 'HH:mm'),
-      });
-    } else if(value === 'Ca tối') {
-      formCreate.setFieldsValue({
-        startTime: dayjs('18:00', 'HH:mm'),
-        endTime: dayjs('22:00', 'HH:mm'),
-      });
+    if(isDrawerOpen) {
+      if(value === 'Ca sáng') {
+        formUpdate.setFieldsValue({
+          startTime: dayjs('08:00', 'HH:mm'),
+          endTime: dayjs('12:00', 'HH:mm'),
+        });
+      } else if(value === 'Ca chiều') {
+        formUpdate.setFieldsValue({
+          startTime: dayjs('13:00', 'HH:mm'),
+          endTime: dayjs('17:00', 'HH:mm'),
+        });
+      } else if(value === 'Ca tối') {
+        formUpdate.setFieldsValue({
+          startTime: dayjs('18:00', 'HH:mm'),
+          endTime: dayjs('22:00', 'HH:mm'),
+        });
+      }
+    } else {
+      if(value === 'Ca sáng') {
+        formCreate.setFieldsValue({
+          startTime: dayjs('08:00', 'HH:mm'),
+          endTime: dayjs('12:00', 'HH:mm'),
+        });
+      } else if(value === 'Ca chiều') {
+        formCreate.setFieldsValue({
+          startTime: dayjs('13:00', 'HH:mm'),
+          endTime: dayjs('17:00', 'HH:mm'),
+        });
+      } else if(value === 'Ca tối') {
+        formCreate.setFieldsValue({
+          startTime: dayjs('18:00', 'HH:mm'),
+          endTime: dayjs('22:00', 'HH:mm'),
+        });
+      }
     }
   }
+
   return (
     <>
       <ButtonComponent
@@ -549,16 +610,22 @@ const DetailSchedulePage = () => {
                 dataIndex: "index",
                 key: "index",
                 sorter: (a, b) => a.index - b.index,
+                width: 80,
               },
               {
                 title: "Thời gian bắt đầu",
                 dataIndex: "startTime",
                 key: "startTime",
+                center: true,
+                ...getColumnSearchProps("startTime"),
               },
               {
                 title: "Thời gian kết thúc",
                 dataIndex: "endTime",
                 key: "endTime",
+                center: true,
+                
+                ...getColumnSearchProps("endTime"),
               },
               {
                 title: "Trạng thái",
@@ -581,7 +648,7 @@ const DetailSchedulePage = () => {
                 onFilter: (value, record) => record?.status === value,
                 filterSearch: true,
                 filterMultiple: false,
-                defaultFilteredValue: ['available']
+                width: 150,
               }
             ]}
             loading={isLoadingSlots}
@@ -598,6 +665,121 @@ const DetailSchedulePage = () => {
           />
         </LoadingComponent>
 
+      </DrawerComponent>
+      <DrawerComponent
+          title="Chi tiết ca làm việc"
+          placement="right"
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          width={window.innerWidth < 768 ? "100%" : 700}
+          forceRender
+      >
+          <LoadingComponent isLoading={isPendingUpdate}>
+            <Form
+              name="formUpdate"
+              labelCol={{ span: 6 }}
+              labelAlign="left"
+              wrapperCol={{ span: 18 }}
+              style={{ maxWidth: 600 }}
+              onFinish={handleOnUpdateShift}
+              autoComplete="off"
+              form={formUpdate}
+            >
+              <Form.Item
+                  label="Ca làm việc"
+                  name="name"
+                  rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn ca làm việc!",
+                      },
+                  ]}
+                >
+                  <Select
+                    placeholder="Chọn ca làm việc"
+                    style={{ width: "100%" }}
+                    onChange={handleOnchange}
+                    options={[
+                      { value: 'Ca sáng', label: 'Ca sáng' },
+                      { value: 'Ca chiều', label: 'Ca chiều' },
+                      { value: 'Ca tối', label: 'Ca tối' },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item
+                    label="Thời gian bắt đầu"
+                    name="startTime"
+                    rules={[
+                        {
+                            required: true,
+                            message: "Vui lòng chọn thời gian bắt đầu!",
+                        },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                const startTime = getFieldValue('startTime');
+                                const endTime = getFieldValue('endTime');
+                                if (startTime && endTime && startTime.isAfter(endTime)) {
+                                    return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
+                                }
+                                return Promise.resolve();
+                            }
+                        })
+                    ]}
+                >
+                    <TimePicker
+                        format="HH:mm"
+                        style={{ width: "100%" }}
+                        placeholder="Chọn giờ bắt đầu"
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    label="Thời gian kết thúc"
+                    name="endTime"
+                    rules={[
+                        {
+                            required: true,
+                            message: "Vui lòng chọn thời gian kết thúc!",
+                        },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                const startTime = getFieldValue('startTime');
+                                const endTime = getFieldValue('endTime');
+                                if (startTime && endTime && startTime.isAfter(endTime)) {
+                                    return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
+                                }
+                                return Promise.resolve();
+                            }
+                        })
+                    ]}
+                >
+                  <TimePicker
+                    format="HH:mm"
+                    style={{ width: "100%" }}
+                    placeholder="Chọn giờ kết thúc"
+                  />
+                </Form.Item>
+                <Form.Item
+                  label={null}
+                  wrapperCol={{ offset: 18, span: 6 }}
+                >
+                  <Space>
+                    <ButtonComponent
+                      type="default"
+                      onClick={() => setIsDrawerOpen(false)}
+                    >
+                      Huỷ
+                    </ButtonComponent>
+                    <ButtonComponent
+                      type="primary"
+                      htmlType="submit"
+                    >
+                      Lưu
+                    </ButtonComponent>
+                  </Space>
+                </Form.Item>
+            </Form>
+          </LoadingComponent>
       </DrawerComponent>
       <TableStyle
         rowSelection={rowSelection}

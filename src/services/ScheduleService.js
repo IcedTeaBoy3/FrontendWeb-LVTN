@@ -5,10 +5,6 @@ export const ScheduleService = {
         const response = await axiosInstance.get('/schedule/get-all-schedules');
         return response.data;
     },
-    getSchedulesByDoctor: async (doctorId) => {
-        const response = await axiosInstance.get(`/schedule/get-schedules-by-doctor/${doctorId}`);
-        return response.data;
-    },
     getSchedule: async (id) => {
         const response = await axiosInstance.get(`/schedule/get-schedule/${id}`);
         return response.data;
@@ -27,6 +23,12 @@ export const ScheduleService = {
     },
     deleteManySchedules: async (ids) => {
         const response = await axiosInstance.post('/schedule/delete-many-schedules', { ids });
+        return response.data;
+    },
+    getSchedulesByDoctor: async (doctorId, month, year) => {
+        const response = await axiosInstance.get(`/schedule/get-all-doctor-schedules/${doctorId}`, {
+            params: { month, year }
+        });
         return response.data;
     }
 }
