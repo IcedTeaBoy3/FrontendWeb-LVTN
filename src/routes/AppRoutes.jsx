@@ -19,6 +19,7 @@ import ScheduleDetailPage from "@/pages/ScheduleDetailPage/ScheduleDetailPage";
 import DetailAppointmentPage from "@/pages/DetailAppointmentPage/DetailAppointmentPage";
 import AccountPage from "@/pages/AccountPage/AccountPage";
 import AppointmentPage from "@/pages/AppointmentPage/AppointmentPage";
+import PersonInfo from "../pages/PersonInfo/PersonInfo";
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 const AppRoutes = () => {
     return (
@@ -36,6 +37,7 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 >
+                    <Route path="personinfo" element={<PersonInfo />} />
                     <Route path="services" element={<ServicePage />} />
                     <Route path="clinics" element={<ClinicPage />} />
                     <Route path="accounts" element={<AccountPage />} />

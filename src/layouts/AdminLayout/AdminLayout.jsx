@@ -15,8 +15,6 @@ import {
     Badge,
     Popover,
     Grid,
-    Image,
-    Typography,
 } from "antd";
 import {
     DashboardOutlined,
@@ -26,11 +24,10 @@ import {
     UserOutlined,
     BellOutlined,
     InfoCircleFilled,
-    SettingFilled,
     MedicineBoxOutlined,
     SolutionOutlined,
     FileTextOutlined,
-    AppstoreOutlined
+    AppstoreOutlined,
 } from "@ant-design/icons";
 const menuItems = [
     {
@@ -85,17 +82,19 @@ const menuItems = [
         icon: <FileTextOutlined />,
         label: "Hồ sơ bệnh án",
     },
-    {
-        key: "/logout",
-        icon: <LogoutOutlined />,
-        label: "Đăng xuất",
-    },
+    
 ];
-
-
-const { Header, Sider, Content, Footer } = Layout;
-const { Text, Paragraph } = Typography;
-
+import {
+    StyledLayout,
+    StyledSider,
+    LogoContainer,
+    LogoText,
+    StyledImage,
+    StyledHeader,
+    StyledContent,
+    ContentContainer,
+    StyledFooter,
+} from "./style";
 const AdminLayout = () => {
     const [collapsed, setCollapsed] = useState(false);
     const { useBreakpoint } = Grid;
@@ -134,15 +133,13 @@ const AdminLayout = () => {
         "/admin/medical-records": "Hồ sơ bệnh án",
         "/admin/clinics": "Phòng khám",
         "/admin/services": "Dịch vụ",
+        "/admin/personinfo": "Thông tin cá nhân",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);
 
     const breadcrumbItems = [
-        {
-            title: "Trang chủ",
-            key: "home",
-        },
+       
         ...pathSnippets.map((_, index) => {
             const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
 
@@ -171,23 +168,13 @@ const AdminLayout = () => {
     const content = useMemo(
         () => (
             <>
-                <PopupItem onClick={() => navigate("/profile")}>
+                <PopupItem onClick={() => navigate("/admin/personinfo")}>
                     <InfoCircleFilled
                         style={{ fontSize: "15px", marginRight: "8px" }}
                     />
-                    Thông tin người dùng
+                    Thông tin cá nhân
                 </PopupItem>
-                {user?.role === "admin" && (
-                    <PopupItem
-                        $isSelected={location.pathname.includes("admin")}
-                        onClick={() => navigate("/admin")}
-                    >
-                        <SettingFilled
-                            style={{ fontSize: "15px", marginRight: "8px" }}
-                        />
-                        Quản lý hệ thống
-                    </PopupItem>
-                )}
+                
                 <PopupItem onClick={handleLogoutUser}>
                     <LogoutOutlined
                         style={{ fontSize: "15px", marginRight: "8px" }}
@@ -202,50 +189,24 @@ const AdminLayout = () => {
         navigate(key);
     };
     return (
-        <Layout style={{ minHeight: "100vh" }}>
-            <Sider
+        <StyledLayout>
+            <StyledSider
                 breakpoint="lg"
                 collapsible
                 collapsed={collapsed}
-                collapsedWidth={0} // Ẩn hoàn toàn khi nhỏ hơn lg
+                collapsedWidth={80} // 👈 giữ trigger hiển thị
                 onCollapse={(collapsed) => setCollapsed(collapsed)}
-                style={{
-                    backgroundColor: "#fff",
-                }}
+                
             >
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 16, // Khoảng cách giữa logo và tên
-                        padding: "5px 0px",
-                        borderRadius: 8,
-                        cursor: "pointer",
-                    }}
-                    onClick={() => navigate("/")}
-                >
-                    <Image
+                <LogoContainer onClick={() => navigate("/")}>
+                    <StyledImage
                         width={55}
                         src={`${import.meta.env.VITE_APP_FRONTEND_URL}/mylogo.webp`}
                         preview={false}
-                        style={{
-                            borderRadius: "50%",
-                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                        }}
                         alt="Logo Medicare"
                     />
-                    <Paragraph
-                        style={{
-                            margin: 0,
-                            fontSize: 22,
-                            fontWeight: 'bolder',
-                            color: "#1890ff",
-                        }}
-                    >
-                        Medicare
-                    </Paragraph>
-                </div>
+                    {!collapsed && <LogoText>Medicare</LogoText>}
+                </LogoContainer>
                 <Menu
                     theme="light"
                     mode="inline"
@@ -253,21 +214,12 @@ const AdminLayout = () => {
                     defaultSelectedKeys={["/admin/dashboard"]}
                     items={menuItems}
                 />
-            </Sider>
+                
+            </StyledSider>
+         
+           
             <Layout>
-                <Header
-                    style={{
-                        background: "rgb(25 117 220)",
-                        padding: 0,
-                        textAlign: "right",
-                        paddingRight: 20,
-                        borderBottom: "1px solid #e8e8e8",
-                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                        position: "sticky",
-                        top: 0,
-                        zIndex: 1000,
-                    }}
-                >
+                <StyledHeader>
                     {screens.md && (
                         <ButtonComponent
                             type="default"
@@ -297,11 +249,10 @@ const AdminLayout = () => {
                                 type="default"
                                 size="middle"
                                 styleButton={{
-
                                     marginRight: "16px",
                                 }}
                                 icon={<UserOutlined />}
-                                onClick={() => navigate("/profile")}
+                                onClick={() => navigate("/admin/personinfo")}
                             >
                                 {user?.name ||
                                     user?.email ||
@@ -309,29 +260,27 @@ const AdminLayout = () => {
                             </ButtonComponent>
                         </Popover>
                     )}
-                </Header>
-                <Content style={{ margin: 16, overflow: "auto" }}>
+                </StyledHeader>
+                <StyledContent>
                     <Breadcrumb
-                        style={{ margin: "16px 0" }}
+                        style={{ margin: "20px 0" }}
                         items={breadcrumbItems}
                     ></Breadcrumb>
-                    <div
+                    <ContentContainer
                         style={{
-                            padding: 24,
-                            minHeight: 360,
-                            background: colorBgContainer,
-                            borderRadius: borderRadiusLG,
+                        background: colorBgContainer,
+                        borderRadius: borderRadiusLG,
                         }}
                     >
                         <Outlet />
-                    </div>
-                </Content>
-                <Footer style={{ textAlign: "center" }}>
+                    </ContentContainer>
+                </StyledContent>
+                <StyledFooter>
                     © {new Date().getFullYear()} Hệ thống đặt lịch khám bệnh |
                     Admin Dashboard
-                </Footer>
+                </StyledFooter>
             </Layout>
-        </Layout>
+        </StyledLayout>
     )
 }
 

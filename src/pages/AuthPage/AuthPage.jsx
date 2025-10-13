@@ -30,7 +30,7 @@ const AuthPage = () => {
                         accessToken
                     };
                     dispatch(setUser(newAccount));
-                    navigate('/admin');
+                    navigate('/admin/dashboard');
                 } else {
                     setIsRegister(!isRegister);
                 }
