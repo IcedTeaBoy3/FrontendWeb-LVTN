@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
 import { PopupItem } from "./style";
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent';
+import NotificationBell from "@/components/NotificationBell/NotificationBell";
 import * as Message from '@/components/Message/Message';
 import { AuthService } from '@/services/AuthService';
 import {
@@ -12,9 +13,9 @@ import {
     Menu,
     Breadcrumb,
     theme,
-    Badge,
     Popover,
     Grid,
+    Divider,
 } from "antd";
 import {
     DashboardOutlined,
@@ -97,8 +98,8 @@ import {
 } from "./style";
 const AdminLayout = () => {
     const [collapsed, setCollapsed] = useState(false);
-    const { useBreakpoint } = Grid;
-    const screens = useBreakpoint();
+    // const { useBreakpoint } = Grid;
+    // const screens = useBreakpoint();
     const user = useSelector((state) => state.auth.user);
     const [isOpenPopupUser, setIsOpenPopupUser] = useState(false);
     const navigate = useNavigate();
@@ -220,22 +221,8 @@ const AdminLayout = () => {
            
             <Layout>
                 <StyledHeader>
-                    {screens.md && (
-                        <ButtonComponent
-                            type="default"
-                            icon={
-                                <Badge count={1}>
-                                    <BellOutlined
-                                        style={{ fontSize: "20px" }}
-                                    />
-                                </Badge>
-                            }
-                            styleButton={{
-                                marginRight: "16px",
-                            }}
-                        />
-                    )}
-
+                    <NotificationBell />
+                    <Divider type="vertical" />
                     {user?.accessToken && (
                         <Popover
                             content={content}

@@ -9,12 +9,16 @@ import { Provider } from "react-redux";
 import { store, persistor } from "@/redux/store";
 // Redux Persist - LocalStorage
 import { PersistGate } from "redux-persist/integration/react";
+import { NotificationProvider } from "@/contexts/NotificationContext";
+
 const queryClient = new QueryClient();
 createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
+        <NotificationProvider>
+          <App />
+        </NotificationProvider>
       </PersistGate>
     </Provider>
   </QueryClientProvider>,

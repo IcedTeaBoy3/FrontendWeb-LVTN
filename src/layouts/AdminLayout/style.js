@@ -71,13 +71,13 @@ export const StyledContent = styled(Content)`
     overflow: auto;
 `;
 
-const ContentContainer = styled.div`
+export const ContentContainer = styled.div`
     padding: 24px;
     min-height: 360px;
     background: ${({ theme }) => theme?.token?.colorBgContainer || "#fff"};
     border-radius: ${({ theme }) => theme?.token?.borderRadiusLG || "8px"};
 `;
 
-const StyledFooter = styled(Footer)`
+export const StyledFooter = styled(Footer)`
     text-align: center;
 `;
