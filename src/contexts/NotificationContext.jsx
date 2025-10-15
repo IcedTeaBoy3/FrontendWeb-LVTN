@@ -11,10 +11,10 @@ export const NotificationProvider = ({ children }) => {
     const user = useSelector((state) => state.auth.user);
     const [unreadCount, setUnreadCount] = useState(0);
     const loadNotifications = async () => {
-        const res = await NotificationService.getNotificationsForAdmin();
-        if (res.status === "success") {
-            setNotifications(res.data);
-            setUnreadCount(res.data.filter((n) => !n.isRead).length);
+        const res = await NotificationService.getAllNotifications();
+        if (res.status == "success") {
+            setNotifications(res?.data?.notifications);
+            setUnreadCount(res?.data?.notifications?.filter((n) => !n.isRead).length);
         }
     };
     useEffect(() => {
@@ -34,20 +34,20 @@ export const NotificationProvider = ({ children }) => {
         };
         
     }, []);
-    // const markAllAsRead = async () => {
-    //     await NotificationService.markAllAsRead();
-    //     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    //     setUnreadCount(0);
-    // };
+    const markAllAsRead = async () => {
+        await NotificationService.markAllAsRead();
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+        setUnreadCount(0);
+    };
 
-    // const clearNotifications = async () => {
-    //     await NotificationService.clearAll();
-    //     setNotifications([]);
-    //     setUnreadCount(0);
-    // };
+    const clearNotifications = async () => {
+        await NotificationService.clearAllNotifications();
+        setNotifications([]);
+        setUnreadCount(0);
+    };
     return (
         <NotificationContext.Provider
-            value={{ notifications, unreadCount, setNotifications }}
+            value={{ notifications, unreadCount, setNotifications, markAllAsRead, clearNotifications, loadNotifications }}
         >
         {children}
         </NotificationContext.Provider>

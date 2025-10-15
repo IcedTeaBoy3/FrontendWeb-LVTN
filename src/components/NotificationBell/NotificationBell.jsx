@@ -1,57 +1,82 @@
-import { Badge, Button, Dropdown, List, Typography, Empty } from "antd";
+import { Badge, Button, Dropdown, List, Typography, Empty, Divider, Space } from "antd";
 import { BellOutlined, CheckOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useNotifications } from "@/contexts/NotificationContext";
-
 import { useNavigate } from "react-router-dom";
+
 const { Text, Title } = Typography;
 
 const NotificationBell = () => {
-  const { notifications, unreadCount, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAllAsRead, clearNotifications } = useNotifications();
   const navigate = useNavigate();
+
   const handleNotificationClick = (notification) => {
-    // Xử lý khi người dùng nhấp vào thông báo
-    if(notification.type == "appointment"){
-      navigate(`/admin/appointments/`);
+    if (notification.type === "appointment") {
+      navigate(`/admin/appointments`);
     }
-  }
+  };
 
   const hasNotifications = notifications.length > 0;
 
-  const menuItems = hasNotifications
-    ? [
-        {
-          key: "header",
-          label: (
-            <div
-              style={{
-                fontWeight: 600,
-                fontSize: 14,
-                padding: "6px 12px",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-              
-            >
-              <span>Thông báo</span>  
-            
-            </div>
-          ),
-        },
-        ...notifications.map((item) => ({
-          key: item._id || item.notificationId,
-          label: (
-            <div
-              style={{
-                padding: "8px 12px",
-                borderBottom: "1px solid #f0f0f0",
-              }}
-              onClick={() => handleNotificationClick(item)}
-            >
-                <Title level={5} style={{ marginBottom: 4, fontSize: 14 }}>
+  const menuContent = hasNotifications ? (
+    <div style={{ width: 340, maxHeight: 420, overflowY: "auto" }}>
+      {/* Header */}
+      <div
+        style={{
+          padding: "10px 12px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: "#f0f0f0",
+        }}
+      >
+        <Title level={5} style={{ margin: 0 }}>
+          Thông báo
+        </Title>
+        <Space size="small">
+          <Button
+            type="text"
+            icon={<CheckOutlined />}
+            size="small"
+            onClick={markAllAsRead}
+          >
+            Đã đọc hết
+          </Button>
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            size="small"
+            onClick={clearNotifications}
+          >
+            Xoá
+          </Button>
+        </Space>
+      </div>
+
+      <Divider style={{ margin: "4px 0" }} />
+
+      {/* Danh sách thông báo */}
+      <List
+        dataSource={notifications}
+        renderItem={(item) => (
+          <List.Item
+            onClick={() => handleNotificationClick(item)}
+            style={{
+              cursor: "pointer",
+              backgroundColor: item.isRead ? "#fff" : "#e6f4ff",
+              padding: "10px 14px",
+              borderLeft: item.isRead ? "4px solid transparent" : "4px solid #1677ff",
+            }}
+          >
+            <List.Item.Meta
+              title={
+                <Text strong style={{ fontSize: 14 }}>
                   {item.title}
-                </Title>
-                <Text 
-                  type="secondary" 
+                </Text>
+              }
+              description={
+                <Text
+                  type="secondary"
                   style={{
                     fontSize: 13,
                     display: "-webkit-box",
@@ -61,30 +86,24 @@ const NotificationBell = () => {
                     textOverflow: "ellipsis",
                   }}
                 >
-                {item.message}
-              </Text>
-            </div>
-          ),
-        })),
-      ]
-    : [
-        {
-          key: "empty",
-          label: (
-            <div style={{ padding: "16px 24px", textAlign: "center" }}>
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="Không có thông báo"
-              />
-            </div>
-          ),
-        },
-      ];
-
+                  {item.message}
+                </Text>
+              }
+            />
+          </List.Item>
+        )}
+      />
+    </div>
+  ) : (
+    <div style={{ padding: "24px 16px", textAlign: "center" ,backgroundColor: "#fff", width: 340, height: 100 }}>
+      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có thông báo" />
+    </div>
+  );
 
   return (
     <Dropdown
-      menu={{ items: menuItems }}
+      menu={null} // ✅ fix warning overlay deprecated
+      popupRender={() => menuContent}
       trigger={["click"]}
       placement="bottomRight"
       arrow
@@ -92,7 +111,6 @@ const NotificationBell = () => {
       <Button
         type="default"
         shape="circle"
-        onClick={markAllAsRead}
         icon={
           <Badge
             count={unreadCount}
