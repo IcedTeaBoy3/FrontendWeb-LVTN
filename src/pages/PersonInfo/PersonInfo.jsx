@@ -2,14 +2,17 @@
 import { Card, Form, Input, Button, Upload,Avatar, Row, Col } from "antd";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { useSelector,useDispatch } from "react-redux";
-import { updateUser} from "@/redux/slices/authSlice";
+import { updateUser, logout} from "@/redux/slices/authSlice";
 import { UploadOutlined, UserOutlined,LockOutlined  } from "@ant-design/icons";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import * as Message from "@/components/Message/Message";
-import { AccountService } from "../../services/AccountService";
+import { AccountService } from "@/services/AccountService";
+import { AuthService } from "@/services/AuthService";
 const PersonInfo = () => {
     const [form] = Form.useForm();
+    const navigate = useNavigate();
     const [formPassword] = Form.useForm();
     const user = useSelector((state) => state.auth.user);
     const [avatarUrl, setAvatarUrl] = useState(`${import.meta.env.VITE_APP_BACKEND_URL}${user?.avatar}` || null);
@@ -58,11 +61,12 @@ const PersonInfo = () => {
     });
     const mutationChangePassword = useMutation({
         mutationKey: ["change-password"],
-        mutationFn: (data) => AccountService.changePassword(user.accountId, data),
+        mutationFn: (data) => AuthService.changePassword(data),
         onSuccess: (data) => {
             if(data?.status === 'success') {
                 Message.success(data?.message || "Cập nhật mật khẩu thành công");
                 formPassword.resetFields();
+                handleLogoutUser();
             }else {
                 Message.error(data?.message || "Cập nhật mật khẩu thất bại");
             }
@@ -71,6 +75,16 @@ const PersonInfo = () => {
             Message.error(error?.message || "Cập nhật mật khẩu thất bại");
         }
     });
+    const handleLogoutUser = async () => {
+        // Xử lý đăng xuất ở đây
+        const res = await AuthService.logout();
+        if (res?.status == "success") {
+            dispatch(logout());
+            navigate("/");
+        } else {
+            Message.error("Đăng xuất thất bại");
+        }
+    };
     return (
         <Row gutter={[16, 16]}>
             <Col span={12}>

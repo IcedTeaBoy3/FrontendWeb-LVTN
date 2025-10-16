@@ -57,12 +57,4 @@ export const AccountService = {
             throw error.response.data;
         }
     },
-    changePassword: async (id, { currentPassword, newPassword }) => {
-        try {
-            const response = await axiosInstance.put(`/account/change-password/${id}`, { currentPassword, newPassword });
-            return response.data;
-        } catch (error) {
-            throw error.response.data;
-        }
-    },
 };

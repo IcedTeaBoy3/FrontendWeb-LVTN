@@ -32,4 +32,12 @@ export const AuthService = {
             throw error.response.data;
         }
     },
+    changePassword: async ({ currentPassword, newPassword }) => {
+        try {
+            const response = await axiosInstance.put('/auth/change-password', { currentPassword, newPassword });
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    }
 }

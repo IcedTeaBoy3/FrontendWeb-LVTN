@@ -7,7 +7,7 @@ export const convertStatusAppointment = (status) => {
             return "Đã xác nhận";
         case "completed":
             return "Đã hoàn thành";
-        case "canceled":
+        case "cancelled":
             return "Đã hủy";
         default:
             return "Không xác định";
@@ -21,7 +21,7 @@ export const getStatusColor = (status) => {
             return "blue";
         case "completed":
             return "green";
-        case "canceled":
+        case "cancelled":
             return "red";
         default:
             return "gray";
