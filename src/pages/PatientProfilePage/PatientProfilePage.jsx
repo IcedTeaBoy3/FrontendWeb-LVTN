@@ -228,6 +228,12 @@ const PatientProfilePage = () => {
             Message.error(error?.message || "Cập nhật hồ sơ bệnh nhân thất bại");
         }
     });
+    function findEthnic(ethnicGroups, value) {
+        if (!value) return null;
+        return ethnicGroups.find(
+            (item) => item.name === value || item.code === value
+        )?.name || null;
+    }
 
     const { data: patientProfiles, isLoading: isLoadingPatientProfiles } = queryGetAllPatientProfiles;
     const { isPending: isPendingDelete } = mutationDeletePatientProfile;
@@ -944,7 +950,7 @@ const PatientProfilePage = () => {
                         <Text strong>Dân tộc:</Text>
                     </Col>
                     <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{ethnicGroups.find((item) => item.code === patientProfile?.person?.ethnic)?.name || <Text type="secondary">Chưa cập nhật</Text>}</Text>
+                        <Text>{findEthnic(ethnicGroups, patientProfile?.person?.ethnic) || <Text type="secondary">Chưa cập nhật</Text>}</Text>
                     </Col>
                 </Row>
                 <Divider style={{ margin: "8px 0" }} />
