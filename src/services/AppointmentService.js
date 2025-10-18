@@ -41,5 +41,13 @@ export const AppointmentService = {
             throw error.response.data;
 
         }
-    }
+    },
+    getDoctorAppointments: async ({accountId ,page, limit}) => {
+        try {
+            const response = await axiosInstance.get(`/appointment/get-doctor-appointments/${accountId}`, { params: { page, limit } });
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
 };

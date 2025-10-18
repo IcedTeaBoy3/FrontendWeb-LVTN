@@ -14,7 +14,7 @@ const NotFoundPage = () => {
                 extra={
                     <ButtonComponent
                         type="primary"
-                        onClick={() => navigate("/admin")}
+                        onClick={() => navigate("/")}
                     >
                         Quay về Trang chủ
                     </ButtonComponent>

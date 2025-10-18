@@ -15,7 +15,15 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     }
 
     if (!allowedRoles.includes(user.role)) {
-        return <Navigate to="/unauthorized" replace />;
+        return <Navigate 
+            to="/unauthorized" 
+                state={{
+                message: "bạn cần không có quyền truy cập trang này",
+                status: "warning",
+                from: location
+            }}
+            replace 
+        />;
     }
 
     return children;

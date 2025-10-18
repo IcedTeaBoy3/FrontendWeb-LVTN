@@ -18,7 +18,7 @@ export const NotificationProvider = ({ children }) => {
         }
     };
     useEffect(() => {
-        connectSocket("admin", user.accountId);
+        connectSocket("admin", user?.accountId);
         loadNotifications();
         socket.on("new_notification", (newNotification) => {
             setNotifications((prev) => [newNotification, ...prev]);

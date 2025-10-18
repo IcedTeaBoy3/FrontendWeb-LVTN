@@ -1,17 +1,25 @@
 
 import { BackgroundContainer } from './style.js'
-import { useNavigate} from 'react-router-dom'
+import { useNavigate, useLocation} from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { setUser } from '@/redux/slices/authSlice'
 import FormAuth from '@/components/FormAuth/FormAuth'
 import * as Message from '@/components/Message/Message'
 import { AuthService } from '@/services/AuthService'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 const AuthPage = () => {
     const [isRegister, setIsRegister] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const location = useLocation();
+    // lấy state từ location để kiểm tra nếu có chuyển từ trang khác đến
+    const state = location.state || {};
+    useEffect(() => {
+        if (state.message) {
+            Message.info(state.message);
+        }
+    }, [state.message]);
     const mutationAuth = useMutation({
         mutationFn: async (data) => {
             if (isRegister) {
@@ -21,7 +29,6 @@ const AuthPage = () => {
         },
         onSuccess: (data) => {
             if (data.status === "success") {
-                Message.success(data.message);
                 if (!isRegister) {
                     const { account, accessToken } = data.data;
                     // lưu thông tin đăng nhập vào redux
@@ -30,10 +37,16 @@ const AuthPage = () => {
                         accessToken
                     };
                     dispatch(setUser(newAccount));
-                    navigate('/admin/dashboard');
+                    console.log('account.role',account.role);
+                    if(account.role =='admin'){
+                        navigate("/admin/dashboard");
+                        return;
+                    }
+                    navigate("/doctor/dashboard");
                 } else {
                     setIsRegister(!isRegister);
                 }
+                Message.success(data.message);
             } else {
                 Message.error(data.message);
             }

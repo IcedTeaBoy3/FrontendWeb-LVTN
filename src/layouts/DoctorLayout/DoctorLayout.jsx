@@ -32,54 +32,28 @@ import {
 } from "@ant-design/icons";
 const menuItems = [
     {
-        key: "/admin/dashboard",
+        key: "/doctor/dashboard",
         icon: <DashboardOutlined />,
         label: "Thống kê",
     },
     {
-        key: "/admin/accounts",
-        icon: <UserOutlined />,
-        label: "Tài khoản",
-    },
-    {
-        key: "/admin/patients",
+        key: "/doctor/patients",
         icon: <TeamOutlined />,
         label: "Bệnh nhân",
     },
     {
-        icon: <SolutionOutlined />,
-        label: "Bác sĩ",
-        children: [
-            { key: "/admin/doctors", label: "Danh sách bác sĩ" },
-            { key: "/admin/schedules", label: "Lịch làm việc" },
-            {
-                label: "Danh mục dùng chung",
-                children: [
-                    { key: "/admin/specialties", label: "Chuyên khoa" },
-                    { key: "/admin/degrees", label: "Học vị" },
-                    { key: "/admin/positions", label: "Chức vụ" },
-                    { key: "/admin/workplaces", label: "Nơi làm việc" },
-                ],
-            },
-        ],
-    },
-    {
-        key: "/admin/clinics",
+        key: "/doctor/schedules",
         icon: <MedicineBoxOutlined />,
-        label: "Phòng khám",
+        label: "Lịch làm việc",
     },
+ 
     {
-        key: "/admin/services",
-        icon: <AppstoreOutlined />,
-        label: "Dịch vụ",
-    },
-    {
-        key: "/admin/appointments",
+        key: "/doctor/appointments",
         icon: <CalendarOutlined />,
         label: "Lịch khám",
     },
     {
-        key: "/admin/medical-records",
+        key: "/doctor/medical-records",
         icon: <FileTextOutlined />,
         label: "Hồ sơ bệnh án",
     },
@@ -116,25 +90,13 @@ const AdminLayout = () => {
         }
     };
     const breadcrumbNameMap = {
-        "/admin": "Quản trị",
-        "/admin/accounts": "Tài khoản",
-        "/admin/workplaces": "Nơi làm việc",
-        "/admin/positions": "Chức vụ",
-        "/admin/degrees": "Học vị",
-        "/admin/dashboard": "Thống kê",
-        "/admin/appointments": "Lịch khám",
-        "/admin/doctors": "Bác sĩ",
-        "/admin/doctors/:id": "Chi tiết bác sĩ",
-        "/admin/schedules/:id": "Chi tiết lịch làm việc",
-        "/admin/appointments/:id": "Chi tiết lịch khám",
-        "/admin/hospitals": "Bệnh viện",
-        "/admin/specialties": "Chuyên khoa",
-        "/admin/patients": "Bệnh nhân",
-        "/admin/schedules": "Lịch làm việc",
-        "/admin/medical-records": "Hồ sơ bệnh án",
-        "/admin/clinics": "Phòng khám",
-        "/admin/services": "Dịch vụ",
-        "/admin/personinfo": "Thông tin cá nhân",
+        "/doctor": "Bác sĩ",
+        "/doctor/dashboard": "Thống kê",
+        "/doctor/patients": "Bệnh nhân",
+        "/doctor/schedules": "Lịch làm việc",
+        "/doctor/appointments": "Lịch khám",
+        "/doctor/appointments/date": "Ngày khám",
+        "/doctor/medical-records": "Hồ sơ bệnh án",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);
@@ -144,18 +106,7 @@ const AdminLayout = () => {
         ...pathSnippets.map((_, index) => {
             const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
 
-            // Nếu URL match với pattern /admin/doctor/:id
-            let title = breadcrumbNameMap[url];
-            if (!title && /^\/admin\/doctors\/[^/]+$/.test(url)) {
-                title = breadcrumbNameMap["/admin/doctors/:id"];
-            }
-            if (!title && /^\/admin\/schedules\/[^/]+$/.test(url)) {
-                title = breadcrumbNameMap["/admin/schedules/:id"];
-            }
-            if (!title && /^\/admin\/appointments\/[^/]+$/.test(url)) {
-                title = breadcrumbNameMap["/admin/appointments/:id"];
-            }
-
+            const title = breadcrumbNameMap[url];
             return {
                 title: title || url,
                 key: url,
@@ -169,7 +120,7 @@ const AdminLayout = () => {
     const content = useMemo(
         () => (
             <>
-                <PopupItem onClick={() => navigate("/admin/personinfo")}>
+                <PopupItem onClick={() => navigate("/doctor/personinfo")}>
                     <InfoCircleFilled
                         style={{ fontSize: "15px", marginRight: "8px" }}
                     />
@@ -212,7 +163,7 @@ const AdminLayout = () => {
                     theme="light"
                     mode="inline"
                     onClick={handleMenuClick}
-                    defaultSelectedKeys={["/admin/dashboard"]}
+                    defaultSelectedKeys={["/doctor/dashboard"]}
                     items={menuItems}
                 />
                 
@@ -239,11 +190,11 @@ const AdminLayout = () => {
                                     marginRight: "16px",
                                 }}
                                 icon={<UserOutlined />}
-                                onClick={() => navigate("/admin/personinfo")}
+                                onClick={() => navigate("/doctor/personinfo")}
                             >
                                 {user?.userName ||
                                     user?.email ||
-                                    "Xin chào, Admin!"}
+                                    "Xin chào, Bác sĩ!"}
                             </ButtonComponent>
                         </Popover>
                     )}
@@ -264,7 +215,7 @@ const AdminLayout = () => {
                 </StyledContent>
                 <StyledFooter>
                     © {new Date().getFullYear()} Hệ thống đặt lịch khám bệnh |
-                    Admin Dashboard
+                    Doctor
                 </StyledFooter>
             </Layout>
         </StyledLayout>
