@@ -1,0 +1,245 @@
+import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
+import {convertStatusPayment, getStatusPaymentColor} from '@/utils/status_payment_utils';
+import { convertPaymentType } from '@/utils/paymentType_utils';
+import { convertMethodPayment } from '@/utils/method_utils';
+import { Descriptions, Image, Space, Tag,Button, Divider, Typography  } from 'antd';
+import dayjs from 'dayjs';
+import {StyledCard} from './style';
+const { Text,Title } = Typography;
+const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplete}) => {
+    const {
+        appointmentNumber,
+        appointmentCode,
+        patientProfile,
+        doctorService,
+        schedule,
+        slot,
+        status,
+        symptoms,
+        symptomsImage,
+        payment,
+        medicalResult,
+        createdAt,
+    } = appointmentDetail || {};
+    return (
+        <DrawerComponent
+            title="Chi tiết lịch khám"
+            placement="right"
+            isOpen={visible}
+            onClose={onClose}
+            width={window.innerWidth < 768 ? "100%" : 800}
+            forceRender
+        >
+            <Descriptions
+                bordered
+                column={1}
+                size="middle"
+                styles={{
+                    label: { width: '30%', fontWeight: 'bold'},
+                    content: { width: '70%', fontSize: 16}
+                }}
+            >
+               
+                <Descriptions.Item label="STT"><Text style={{color:'green',fontSize:18,fontWeight:'bold'}}> 
+                    {appointmentNumber || "Chưa cập nhật"}
+                </Text></Descriptions.Item>
+                <Descriptions.Item label="Mã lịch hẹn">{appointmentCode}</Descriptions.Item>
+                <Descriptions.Item label="Ngày tạo">
+                {dayjs(createdAt).format("HH:mm DD/MM/YYYY")}
+                </Descriptions.Item>
+                 <Descriptions.Item label="Ngày khám">
+                {schedule?.workday ? dayjs(schedule.workday).format("DD/MM/YYYY") : "—"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Khung giờ">
+                    {slot ? `${dayjs(slot.startTime).format("HH:mm")} - ${dayjs(slot.endTime).format("HH:mm")} (${slot?.shift?.name})` : "—"}
+                </Descriptions.Item>
+                 <Descriptions.Item label="Triệu chứng" span={2}>
+                {symptoms || "Không có"}
+                </Descriptions.Item>
+
+                {symptomsImage && (
+                    <Descriptions.Item label="Ảnh triệu chứng" span={2}>
+                    <Image
+                        src={symptomsImage}
+                        alt="Triệu chứng"
+                        width={150}
+                        style={{ borderRadius: 8 }}
+                    />
+                    </Descriptions.Item>
+                )}
+
+            {/* <Descriptions.Item label="Bệnh nhân">
+                {patientProfile?.person?.fullName || "—"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Liên hệ">
+                {patientProfile?.person?.phone || "—"}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Giới tính">
+                {patientProfile?.person?.gender === "male" ? "Nam" : "Nữ"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày sinh">
+                {patientProfile?.person?.dateOfBirth
+                ? dayjs(patientProfile.person.dateOfBirth).format("DD/MM/YYYY")
+                : "—"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Dịch vụ">
+                {doctorService?.service?.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Bác sĩ phụ trách">
+                {doctorService?.doctor?.person?.fullName}
+            </Descriptions.Item>
+
+           
+
+           
+
+            <Descriptions.Item label="Thanh toán" span={2}>
+                {payment ? (
+                <>
+                    <Tag color={getStatusPaymentColor(payment.status)}>{convertStatusPayment(payment.status)}</Tag>
+                    <div>Mã giao dịch: {payment.paymentCode}</div>
+                    <div>Số tiền: {payment.amount.toLocaleString()} đ</div>
+                </>
+                ) : (
+                <Tag color="orange">Chưa thanh toán</Tag>
+                )}
+            </Descriptions.Item>
+
+            {medicalResult && (
+                <Descriptions.Item label="Kết quả khám" span={2}>
+                <div>
+                    <strong>Chẩn đoán:</strong> {medicalResult.diagnosis || "—"}
+                </div>
+                <div>
+                    <strong>Toa thuốc:</strong> {medicalResult.prescription || "—"}
+                </div>
+                <div>
+                    <strong>Ghi chú:</strong> {medicalResult.notes || "—"}
+                </div>
+                </Descriptions.Item>
+            )} */}
+            </Descriptions>
+            <Divider />
+            <Title level={5}>Thông tin bệnh nhân</Title>
+            <Descriptions
+                bordered
+                column={1}
+                size="middle"
+                styles={{
+                    label: { width: '30%', fontWeight: 'bold'},
+                    content: { width: '70%', fontSize: 16}
+                }}
+            >
+                <Descriptions.Item label="Bệnh nhân">
+                    {patientProfile?.person?.fullName || "—"}
+                </Descriptions.Item>
+                <Descriptions.Item label="SĐT">
+                    {patientProfile?.person?.phone || "—"}
+                </Descriptions.Item>
+
+                <Descriptions.Item label="Giới tính">
+                    {patientProfile?.person?.gender === "male" ? "Nam" : "Nữ"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Ngày sinh">
+                    {patientProfile?.person?.dateOfBirth
+                    ? dayjs(patientProfile.person.dateOfBirth).format("DD/MM/YYYY")
+                    : "—"}
+                </Descriptions.Item>
+
+            </Descriptions>
+            <Divider />
+            <Title level={5}>Thông tin bác sĩ</Title>
+            <Descriptions
+                bordered
+                column={1}
+                size="middle"
+                styles={{
+                    label: { width: '30%', fontWeight: 'bold'},
+                    content: { width: '70%', fontSize: 16}
+                }}
+            >
+                <Descriptions.Item label="Bác sĩ phụ trách">
+                    {doctorService?.doctor?.person?.fullName}
+                </Descriptions.Item>
+                <Descriptions.Item label="Chuyên khoa">
+                    {doctorService?.service?.specialty?.name || "—"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Dịch vụ">
+                    {doctorService?.service?.name}
+                </Descriptions.Item>
+                
+            </Descriptions>
+            <Divider />
+            <Title level={5}>Thông tin thanh toán</Title>
+            {payment ? (
+                <Descriptions
+                    bordered
+                    column={1}
+                    size="middle"
+                    styles={{
+                        label: { width: '30%', fontWeight: 'bold'},
+                        content: { width: '70%', fontSize: 16}
+                    }}
+                >
+                <Descriptions.Item label="Trạng thái thanh toán" span={2}>
+                    <Tag color={getStatusPaymentColor(payment.status)}>{convertStatusPayment(payment.status)}</Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Hình thức khám">
+                {convertPaymentType(payment?.paymentType) || "Chưa cập nhật"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Phương thức thanh toán">
+                {convertMethodPayment(payment?.method) || "Chưa cập nhật"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Số tiền">
+                {payment?.amount
+                    ? `${payment.amount.toLocaleString()} VND`
+                    : "Chưa cập nhật"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Ngày thanh toán">
+                {payment?.payAt
+                    ? dayjs(payment.payAt).format("DD/MM/YYYY HH:mm")
+                    : "Chưa cập nhật"}
+                </Descriptions.Item>
+            </Descriptions>
+            ) : (
+                <Tag color="orange">Chưa có thông tin</Tag>
+            )}
+            <Divider />
+            <Title level={5}>Thông tin kết quả khám</Title>
+            {medicalResult ? (
+                <Descriptions
+                    bordered
+                    column={1}
+                    size="middle"
+                    styles={{
+                        label: { width: '30%', fontWeight: 'bold'},
+                        content: { width: '70%', fontSize: 16}
+                    }}
+                >
+                <Descriptions.Item label="Chẩn đoán">{medicalResult.diagnosis || "—"}</Descriptions.Item>
+               
+                <Descriptions.Item label="Toa thuốc">{medicalResult.prescription || "—"}</Descriptions.Item>
+                <Descriptions.Item label="Ghi chú">{medicalResult.notes || "—"}</Descriptions.Item>
+                
+                   
+                
+            </Descriptions>
+            ) : (
+                <Tag color="orange">Chưa có kết quả khám</Tag>
+            )}
+            <div style={{ textAlign: "right" }}>
+            <Space>
+                {status !== "completed" && (
+                    <Button type="primary" onClick={() => onComplete(appointment)}>
+                    Hoàn thành & Nhập kết quả khám
+                    </Button>
+                )}
+                <Button onClick={onClose}>Đóng</Button>
+                </Space>
+            </div>
+        </DrawerComponent>
+    )
+}
+
+export default DrawerDetailAppointment
