@@ -19,13 +19,14 @@ import ScheduleDetailPage from "@/pages/ScheduleDetailPage/ScheduleDetailPage";
 import DetailAppointmentPage from "@/pages/DetailAppointmentPage/DetailAppointmentPage";
 import AccountPage from "@/pages/AccountPage/AccountPage";
 import AppointmentPage from "@/pages/AppointmentPage/AppointmentPage";
-import DoctorDashboard from "../pages/DoctorDashboard/DoctorDashboard";
-import PersonInfo from "../pages/PersonInfo/PersonInfo";
-import UnauthorizedPage from "../pages/UnauthorizedPage/UnauthorizedPage";
-import DoctorSchedule from "../pages/DoctorSchedule/DoctorSchedule";
-import DoctorPatient from "../pages/DoctorPatient/DoctorPatient";
-import DoctorAppointmentPage from "../pages/DoctorAppointmentPage/DoctorAppointmentPage";
-import DoctorAppointmentDate from "../pages/DoctorAppointmentDate/DoctorAppointmentDate";
+import DoctorDashboard from "@/pages/DoctorDashboard/DoctorDashboard";
+import PersonInfo from "@/pages/PersonInfo/PersonInfo";
+import UnauthorizedPage from "@/pages/UnauthorizedPage/UnauthorizedPage";
+import DoctorSchedulePage from "@/pages/DoctorSchedulePage/DoctorSchedulePage";
+import DoctorPatient from "@/pages/DoctorPatient/DoctorPatient";
+import DoctorAppointmentPage from "@/pages/DoctorAppointmentPage/DoctorAppointmentPage";
+import DoctorAppointmentDate from "@/pages/DoctorAppointmentDate/DoctorAppointmentDate";
+import DetailDoctorSchedulePage from "@/pages/DetailDoctorSchedulePage/DetailDoctorSchedulePage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 import DoctorLayout from "@/layouts/DoctorLayout/DoctorLayout";
@@ -68,7 +69,8 @@ const AppRoutes = () => {
                     path="/doctor"
                     element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorLayout /></ProtectedRoute>}
                 >
-                    <Route path="schedules" element={<DoctorSchedule />} />
+                    <Route path="schedules" element={<DoctorSchedulePage />} />
+                    <Route path="schedules/:id" element={<DetailDoctorSchedulePage />} />
                     <Route path="patients" element={<DoctorPatient />} />
                     <Route path="appointments" element={<DoctorAppointmentPage />} />
                     <Route path="appointments/date" element={<DoctorAppointmentDate />} />

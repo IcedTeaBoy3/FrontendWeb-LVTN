@@ -97,6 +97,7 @@ const AdminLayout = () => {
         "/doctor/appointments": "Lịch khám",
         "/doctor/appointments/date": "Ngày khám",
         "/doctor/medical-records": "Hồ sơ bệnh án",
+        "/doctor/schedules/:id": "Chi tiết lịch làm việc",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);
@@ -106,7 +107,10 @@ const AdminLayout = () => {
         ...pathSnippets.map((_, index) => {
             const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
 
-            const title = breadcrumbNameMap[url];
+            let title = breadcrumbNameMap[url];
+            if(!title && /^\/doctor\/schedules\/[^/]+$/.test(url)){
+                title = breadcrumbNameMap["/doctor/schedules/:id"];
+            }
             return {
                 title: title || url,
                 key: url,

@@ -5,6 +5,12 @@ export const ScheduleService = {
         const response = await axiosInstance.get('/schedule/get-all-schedules');
         return response.data;
     },
+    getDoctorSchedules: async ({ month, year }) => {
+        const response = await axiosInstance.get(`/schedule/get-doctor-schedule`, {
+            params: { month, year }
+        });
+        return response.data;
+    },
     getSchedule: async (id) => {
         const response = await axiosInstance.get(`/schedule/get-schedule/${id}`);
         return response.data;

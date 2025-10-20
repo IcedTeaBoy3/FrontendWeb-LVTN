@@ -56,13 +56,15 @@ const DoctorAppointmentPage = () => {
   };
    // ✅ Khi click vào 1 ngày trong calendar
   const onSelect = (value) => {
+    setIsModalOpen(true);
     const listData = calenderData.filter((item) =>
       item.date === value.format('DD/MM/YYYY')
     );
-    setSelectedDate({ date: dayjs(value), list: listData });
-    setIsModalOpen(true);
+    console.log('listData', listData);
+    setSelectedDate({ date: value, list: listData });
   };
   const handleViewDetails = () => {
+    if(selectedDate.list.length == 0 ) return;
     navigate('/doctor/appointments/date', { state: selectedDate });
     
   }

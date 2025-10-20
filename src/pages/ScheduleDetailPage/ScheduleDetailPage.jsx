@@ -22,7 +22,6 @@ const DetailSchedulePage = () => {
   const [isModalOpenDetail, setIsModalOpenDetail] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
   const [rowSelected, setRowSelected] = useState(null);
   const [shiftSelected, setShiftSelected] = useState(null);
   const [formCreate] = Form.useForm();
@@ -42,9 +41,9 @@ const DetailSchedulePage = () => {
   const searchInput = useRef(null);
   // phân trang
   const [pagination, setPagination] = useState({
-      current: 1,
-      pageSize: 5,
-      total: 0,
+    current: 1,
+    pageSize: 5,
+    total: 0,
   });
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -251,7 +250,7 @@ const DetailSchedulePage = () => {
     },
    
     {
-      title: "Số slot",
+      title: "Số khung giờ",
       dataIndex: "slotCount",
       sorter: (a, b) => a?.slotCount - b?.slotCount,
     },
@@ -260,19 +259,19 @@ const DetailSchedulePage = () => {
       key: "action",
       render: (_, record) => {
           const itemActions = [
-              { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined style={{ fontSize: 16 }} /> },
-              { type: "divider" },
-              { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined style={{ fontSize: 16 }} /> },
-              { type: "divider" },
-              { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
+            { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined style={{ fontSize: 16 }} /> },
+            { type: "divider" },
+            { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined style={{ fontSize: 16 }} /> },
+            { type: "divider" },
+            { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
           ];
 
           const onMenuClick = ({ key, domEvent }) => {
-              setRowSelected(record.key);
-              domEvent.stopPropagation(); // tránh chọn row khi bấm menu
-              if (key === "detail") return handleViewShift(record.key);
-              if (key === "edit") return handleEditShift(record.key);
-              if (key === "delete") return handleShowConfirmDelete();
+            setRowSelected(record.key);
+            domEvent.stopPropagation(); // tránh chọn row khi bấm menu
+            if (key === "detail") return handleViewShift(record.key);
+            if (key === "edit") return handleEditShift(record.key);
+            if (key === "delete") return handleShowConfirmDelete();
           };
 
           return (
@@ -322,7 +321,7 @@ const DetailSchedulePage = () => {
         }
       });
     })
-  }
+  };
   const handleShowConfirmDelete = () => {
     setIsModalOpenDelete(true);
   };
@@ -527,32 +526,32 @@ const DetailSchedulePage = () => {
           </ModalComponent>
       </LoadingComponent >
       <ModalComponent
-          title={
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                <span>Xoá ca</span>
-            </span>
-          }
-          open={isModalOpenDelete}
-          onOk={handleOkDelete}
-          onCancel={handleCancelDelete}
-          okText="Xóa"
-          cancelText="Hủy"
-          okButtonProps={{ danger: true }}
-          centered
-          style={{ borderRadius: 8 }}
+        title={
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+            <span>Xoá ca</span>
+          </span>
+        }
+        open={isModalOpenDelete}
+        onOk={handleOkDelete}
+        onCancel={handleCancelDelete}
+        okText="Xóa"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true }}
+        centered
+        style={{ borderRadius: 8 }}
       >
-          <LoadingComponent isLoading={isPendingDelete}>
-              <div style={{ textAlign: "center", padding: "8px 0" }}>
-                  <Text>
-                      Bạn có chắc chắn muốn{" "}
-                      <Text strong type="danger">
-                          xoá
-                      </Text>{" "}
-                      ca này không?
-                  </Text>
-              </div>
-          </LoadingComponent>
+        <LoadingComponent isLoading={isPendingDelete}>
+          <div style={{ textAlign: "center", padding: "8px 0" }}>
+            <Text>
+              Bạn có chắc chắn muốn{" "}
+              <Text strong type="danger">
+                xoá
+              </Text>{" "}
+              ca này không?
+            </Text>
+          </div>
+        </LoadingComponent>
       </ModalComponent>
       <DrawerComponent
         title="Chi tiết ca làm việc"

@@ -281,22 +281,23 @@ const DoctorAppointmentDate = () => {
         Lịch khám ngày{" "}
         {state?.list[0] ? state?.list[0]?.date : "Chưa chọn ngày"}
       </Title>
-      <LoadingComponent isLoading={isLoadingDoctorAppointments} >
-        <TableStyle
-          rowSelection={rowSelection}
-          emptyText="Không có lịch khám nào"
-          columns={columns}
-          dataSource={dataTable}
-          pagination={pagination}
-          onChange={(page, pageSize) => {
-            setPagination((prev) => ({
-              ...prev,
-              current: page,
-              pageSize: pageSize,
-            }));
-          }}
-        />
-      </LoadingComponent> 
+    
+      <TableStyle
+        rowSelection={rowSelection}
+        emptyText="Không có lịch khám nào"
+        columns={columns}
+        loading={isLoadingDoctorAppointments}
+        dataSource={dataTable}
+        pagination={pagination}
+        onChange={(page, pageSize) => {
+          setPagination((prev) => ({
+            ...prev,
+            current: page,
+            pageSize: pageSize,
+          }));
+        }}
+      />
+      
       <ModalComponent
         title="Hoàn thành cuộc hẹn"
         open={isOpenModal}
