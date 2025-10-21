@@ -4,10 +4,10 @@ import { Form, Input, Row, Col, Typography, Select, DatePicker, Radio, Space, Di
 import { DegreeService } from '@/services/DegreeService'
 import { DoctorService } from '@/services/DoctorService'
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
-import ModalComponent from '@/components/ModalComponent/ModalComponent'
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent'
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent'
 import CKEditorComponent from '@/components/CKEditorComponent/CKEditorComponent';
+import ModalCreateDegree from '@/components/ModalCreateDegree/ModalCreateDegree';
 import * as Message from '@/components/Message/Message'
 import dayjs from 'dayjs';
 
@@ -137,13 +137,12 @@ const InfoDoctor = ({ id }) => {
     };
     const handleCancelUpdateDoctor = () => {
         formUpdateDoctor.resetFields();
+        setEditorData("");
     };
     return (
         <>
             <Card>
-
                 <LoadingComponent isLoading={isLoadingDoctor}>
-
                     <Form
                         form={formUpdateDoctor}
                         layout='vertical'
@@ -293,68 +292,13 @@ const InfoDoctor = ({ id }) => {
                     </Form>
                 </LoadingComponent>
             </Card>
-            <LoadingComponent isLoading={isPendingCreateDegree}>
-                <ModalComponent
-                    title="Thêm mới bằng cấp"
-                    open={isOpenModalCreateDegree}
-                    onOk={handleCreateDegree}
-                    onCancel={handleCloseCreateDegree}
-                    width={600}
-                    cancelText="Huỷ"
-                    okText="Thêm"
-                >
-                    <Form
-                        name="formCreateDegree"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "10px" }}
-                        autoComplete="off"
-                        form={formCreateDegree}
-                        labelAlign="left"
-                    >
-                        <Form.Item
-                            label="Tên bằng cấp"
-                            name="title"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên!",
-                                },
-                            ]}
-                        >
-                            <Input
-                                name="title"
-                                placeholder="Nhập vào tên bằng cấp"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Viết tắt"
-                            name="abbreviation"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên viết tắt!",
-                                },
-                            ]}
-                        >
-                            <Input
-                                name="abbreviation"
-                                placeholder="Nhập vào tên viết tắt"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Mô tả"
-                            name="description"
-
-                        >
-                            <Input.TextArea
-                                rows={4}
-                                placeholder="Nhập mô tả chi tiết tại đây..."
-                            />
-                        </Form.Item>
-                    </Form>
-                </ModalComponent>
-            </LoadingComponent>
+            <ModalCreateDegree
+                formCreate={formCreateDegree}
+                isPendingCreate={isPendingCreateDegree}
+                isModalOpenCreate={isOpenModalCreateDegree}
+                handleCreateDegree={handleCreateDegree}
+                handleCloseCreateDegree={handleCloseCreateDegree}
+            />
         </>
     )
 }

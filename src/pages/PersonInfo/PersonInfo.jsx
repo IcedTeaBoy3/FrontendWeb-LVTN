@@ -90,7 +90,7 @@ const PersonInfo = () => {
             <Col span={12}>
                 <LoadingComponent isLoading={mutationUpdateAccount.isPending}>
                     <Card
-                        title="Cập nhật thông tin cá nhân"
+                        title="Cập nhật thông tin tài khoản"
                         style={{ margin: "0 auto", borderRadius: 12 }}
                     >
                         <Form

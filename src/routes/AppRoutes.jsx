@@ -27,6 +27,7 @@ import DoctorPatient from "@/pages/DoctorPatient/DoctorPatient";
 import DoctorAppointmentPage from "@/pages/DoctorAppointmentPage/DoctorAppointmentPage";
 import DoctorAppointmentDate from "@/pages/DoctorAppointmentDate/DoctorAppointmentDate";
 import DetailDoctorSchedulePage from "@/pages/DetailDoctorSchedulePage/DetailDoctorSchedulePage";
+import DoctorInfo from "@/pages/DoctorInfo/DoctorInfo";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 import DoctorLayout from "@/layouts/DoctorLayout/DoctorLayout";
@@ -75,6 +76,7 @@ const AppRoutes = () => {
                     <Route path="appointments" element={<DoctorAppointmentPage />} />
                     <Route path="appointments/date" element={<DoctorAppointmentDate />} />
                     <Route path="personinfo" element={<PersonInfo />} />
+                    <Route path="doctorinfo" element={<DoctorInfo />} />
                     <Route index path="dashboard" element={<DoctorDashboard />} />
                     
                 </Route>

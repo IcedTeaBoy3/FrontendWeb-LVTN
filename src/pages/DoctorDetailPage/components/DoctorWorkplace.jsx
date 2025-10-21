@@ -215,7 +215,9 @@ const DoctorWorkplace = ({ id }) => {
     };
     return (
         <Card
-            title="Nơi làm việc"
+            title={
+                <Title level={4} style={{margin:0}}>Nơi làm việc</Title>
+            }
             extra={
                 <ButtonComponent
                     type="primary"

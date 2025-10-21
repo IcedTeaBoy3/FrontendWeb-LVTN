@@ -208,7 +208,9 @@ const DoctorSpecialty = ({ id }) => {
     };
     return (
         <Card
-            title="Chuyên khoa"
+            title={
+                <Title level={4} style={{margin:0}}>Chuyên khoa</Title>
+            }
             extra={
                 <ButtonComponent
                     type="primary"

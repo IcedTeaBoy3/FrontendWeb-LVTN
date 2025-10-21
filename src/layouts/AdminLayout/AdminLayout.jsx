@@ -173,7 +173,7 @@ const AdminLayout = () => {
                     <InfoCircleFilled
                         style={{ fontSize: "15px", marginRight: "8px" }}
                     />
-                    Thông tin cá nhân
+                    Thông tin tài khoản
                 </PopupItem>
                 
                 <PopupItem onClick={handleLogoutUser}>

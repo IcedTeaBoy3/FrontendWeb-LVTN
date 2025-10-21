@@ -283,7 +283,7 @@ const SchedulePage = () => {
             sorter: (a, b) => a?.shiftCount - b?.shiftCount,
         },
         {
-            title: "Số slot / ngày",
+            title: "Số khung giờ / ngày",
             dataIndex: "slotCount",
             key: "slotCount",
             sorter: (a, b) => a?.slotCount - b?.slotCount,

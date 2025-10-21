@@ -20,6 +20,7 @@ import {
     PlusOutlined,
     ExportOutlined
 } from "@ant-design/icons";
+import ModalCreateDegree from '@/components/ModalCreateDegree/ModalCreateDegree';
 const { Text, Title } = Typography;
 const DegreePage = () => {
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
@@ -425,7 +426,7 @@ const DegreePage = () => {
                 menuProps={menuProps}
             />
 
-            <LoadingComponent isLoading={isPendingCreate}>
+            {/* <LoadingComponent isLoading={isPendingCreate}>
                 <ModalComponent
                     title="Thêm mới học vị"
                     open={isModalOpenCreate}
@@ -487,7 +488,14 @@ const DegreePage = () => {
                         </Form.Item>
                     </Form>
                 </ModalComponent>
-            </LoadingComponent>
+            </LoadingComponent> */}
+            <ModalCreateDegree
+                formCreate={formCreate}
+                isPendingCreate={isPendingCreate}
+                isModalOpenCreate={isModalOpenCreate}
+                handleCreateDegree={handleCreateDegree}
+                handleCloseCreateDegree={handleCloseCreateDegree}
+            />
             <DrawerComponent
                 title="Chi tiết chức vụ"
                 placement="right"

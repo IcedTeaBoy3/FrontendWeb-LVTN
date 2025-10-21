@@ -37,6 +37,11 @@ const menuItems = [
         label: "Thống kê",
     },
     {
+        key: "/doctor/doctorinfo",
+        icon: <FileTextOutlined />,
+        label: "Thông tin bác sĩ",
+    },
+    {
         key: "/doctor/patients",
         icon: <TeamOutlined />,
         label: "Bệnh nhân",
@@ -51,13 +56,7 @@ const menuItems = [
         key: "/doctor/appointments",
         icon: <CalendarOutlined />,
         label: "Lịch khám",
-    },
-    {
-        key: "/doctor/medical-records",
-        icon: <FileTextOutlined />,
-        label: "Hồ sơ bệnh án",
-    },
-    
+    }
 ];
 import {
     StyledLayout,
@@ -92,11 +91,11 @@ const AdminLayout = () => {
     const breadcrumbNameMap = {
         "/doctor": "Bác sĩ",
         "/doctor/dashboard": "Thống kê",
+        "/doctor/doctorinfo": "Thông tin bác sĩ",
         "/doctor/patients": "Bệnh nhân",
         "/doctor/schedules": "Lịch làm việc",
         "/doctor/appointments": "Lịch khám",
         "/doctor/appointments/date": "Ngày khám",
-        "/doctor/medical-records": "Hồ sơ bệnh án",
         "/doctor/schedules/:id": "Chi tiết lịch làm việc",
     };
 
@@ -128,7 +127,7 @@ const AdminLayout = () => {
                     <InfoCircleFilled
                         style={{ fontSize: "15px", marginRight: "8px" }}
                     />
-                    Thông tin cá nhân
+                    Thông tin tài khoản
                 </PopupItem>
                 
                 <PopupItem onClick={handleLogoutUser}>

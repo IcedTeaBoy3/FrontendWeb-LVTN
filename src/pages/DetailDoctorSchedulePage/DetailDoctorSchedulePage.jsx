@@ -10,7 +10,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import * as Message from "@/components/Message/Message";
 import dayjs from 'dayjs';
-import { Divider, Typography, Dropdown, Form, Select, TimePicker, Input, Button,Space,Card, Row ,Col,Tag   } from 'antd';
+import { Divider, Typography, Dropdown, Form, Select, TimePicker, Input, Button,Space,Card, Row ,Col,Tag, DatePicker   } from 'antd';
 import { ArrowLeftOutlined, ClockCircleOutlined, CalendarOutlined, AppstoreOutlined ,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined, SearchOutlined,ExclamationCircleOutlined    } from '@ant-design/icons';
 import { useState, useRef } from 'react';
 
@@ -192,7 +192,6 @@ const DetailDoctorSchedulePage = () => {
   const isPendingDelete = mutationDeleteShift.isPending;
   const shiftsData = shifts?.data?.shifts || [];
   const slotsData = slots?.data|| [];
-  console.log(slotsData);
   const columns = [
     {
       title: "STT",
@@ -378,6 +377,7 @@ const DetailDoctorSchedulePage = () => {
         icon={<PlusOutlined />}
         onClick={() => setIsModalOpenCreate(true)}
       >Thêm ca làm việc</ButtonComponent>
+      
       <Divider style={{ margin: "12px 0" }} />
       <LoadingComponent isLoading={isPendingCreate}>
         <ModalComponent

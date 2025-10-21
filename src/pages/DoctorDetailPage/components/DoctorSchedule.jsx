@@ -12,7 +12,7 @@ import { EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined,PlusOutlined,Ex
 import dayjs from 'dayjs';
 import Highlighter from 'react-highlight-words';
 import { useNavigate } from 'react-router-dom';
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 const DoctorSchedule = ({id}) => {
     const [rowSelected, setRowSelected] = useState(null);
@@ -325,7 +325,9 @@ const DoctorSchedule = ({id}) => {
     return (
         <>
             <Card 
-                title="Lịch làm việc" 
+                title={
+                    <Title level={4} style={{margin:0}}>Lịch làm việc</Title>
+                }
                 style={{ marginBottom: 20 }}
                 extra={
                     <ButtonComponent
