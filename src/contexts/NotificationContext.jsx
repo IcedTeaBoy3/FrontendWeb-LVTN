@@ -33,7 +33,7 @@ export const NotificationProvider = ({ children }) => {
             socket.off("new_notification");
         };
         
-    }, []);
+    }, [user]);
     const markAllAsRead = async () => {
         await NotificationService.markAllAsRead();
         setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));

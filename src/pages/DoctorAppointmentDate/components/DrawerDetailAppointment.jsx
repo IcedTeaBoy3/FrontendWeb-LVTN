@@ -60,65 +60,14 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                 {symptomsImage && (
                     <Descriptions.Item label="Ảnh triệu chứng" span={2}>
                     <Image
-                        src={symptomsImage}
+                        src={`${import.meta.env.VITE_APP_BACKEND_URL}${symptomsImage}`}
                         alt="Triệu chứng"
                         width={150}
+                        fit="cover"
                         style={{ borderRadius: 8 }}
                     />
                     </Descriptions.Item>
                 )}
-
-            {/* <Descriptions.Item label="Bệnh nhân">
-                {patientProfile?.person?.fullName || "—"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Liên hệ">
-                {patientProfile?.person?.phone || "—"}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Giới tính">
-                {patientProfile?.person?.gender === "male" ? "Nam" : "Nữ"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Ngày sinh">
-                {patientProfile?.person?.dateOfBirth
-                ? dayjs(patientProfile.person.dateOfBirth).format("DD/MM/YYYY")
-                : "—"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Dịch vụ">
-                {doctorService?.service?.name}
-            </Descriptions.Item>
-            <Descriptions.Item label="Bác sĩ phụ trách">
-                {doctorService?.doctor?.person?.fullName}
-            </Descriptions.Item>
-
-           
-
-           
-
-            <Descriptions.Item label="Thanh toán" span={2}>
-                {payment ? (
-                <>
-                    <Tag color={getStatusPaymentColor(payment.status)}>{convertStatusPayment(payment.status)}</Tag>
-                    <div>Mã giao dịch: {payment.paymentCode}</div>
-                    <div>Số tiền: {payment.amount.toLocaleString()} đ</div>
-                </>
-                ) : (
-                <Tag color="orange">Chưa thanh toán</Tag>
-                )}
-            </Descriptions.Item>
-
-            {medicalResult && (
-                <Descriptions.Item label="Kết quả khám" span={2}>
-                <div>
-                    <strong>Chẩn đoán:</strong> {medicalResult.diagnosis || "—"}
-                </div>
-                <div>
-                    <strong>Toa thuốc:</strong> {medicalResult.prescription || "—"}
-                </div>
-                <div>
-                    <strong>Ghi chú:</strong> {medicalResult.notes || "—"}
-                </div>
-                </Descriptions.Item>
-            )} */}
             </Descriptions>
             <Divider />
             <Title level={5}>Thông tin bệnh nhân</Title>

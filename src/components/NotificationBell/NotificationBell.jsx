@@ -2,17 +2,21 @@ import { Badge, Button, Dropdown, List, Typography, Empty, Divider, Space } from
 import { BellOutlined, CheckOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const { Text, Title } = Typography;
 
 const NotificationBell = () => {
   const { notifications, unreadCount, markAllAsRead, clearNotifications } = useNotifications();
   const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
 
   const handleNotificationClick = (notification) => {
-    if (notification.type === "appointment") {
-      navigate(`/admin/appointments`);
-    }
+    if(user?.role === 'admin'){
+      navigate('/admin/appointments');
+    } else if(user?.role === 'doctor'){
+      navigate('/doctor/appointments');
+    } 
   };
 
   const hasNotifications = notifications.length > 0;

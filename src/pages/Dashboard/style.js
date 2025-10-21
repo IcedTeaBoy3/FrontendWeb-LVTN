@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Tabs, Card as AntCard, Col as AntCol, Row as AntRow } from "antd";
 export const StyleTabs = styled(Tabs)`
     & .ant-tabs-nav-list {
-        margin: 0;
+       margin: 0;
     }
     & .ant-tabs-tab {
         font-size: 15px;
