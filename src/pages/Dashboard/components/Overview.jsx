@@ -27,8 +27,8 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                         <UserOutlined />
                     </div>
                     <Statistic
-                        title="Tổng số người dùng"
-                        value={overviewData.totalUsers || 0}
+                        title="Tổng số bệnh nhân"
+                        value={overviewData.totalPatients || 0}
                         valueStyle={{ color: colorMap.users, fontWeight: 700 }}
                     />
                 </Card>
@@ -53,8 +53,8 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                         <CalendarOutlined />
                     </div>
                     <Statistic
-                        title="Lịch khám hôm nay"
-                        value={overviewData.appointmentsToday || 0}
+                        title="Tổng số lịch khám"
+                        value={overviewData.totalAppointments || 0}
                         valueStyle={{ color: colorMap.appointments, fontWeight: 700 }}
                     />
                 </Card>
@@ -66,8 +66,8 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                         <DollarOutlined />
                     </div>
                     <Statistic
-                        title="Doanh thu hôm nay (VNĐ)"
-                        value={overviewData.revenueToday || 0}
+                        title="Doanh thu"
+                        value={overviewData.totalRevenue || 0}
                         precision={0}
                         valueStyle={{ color: colorMap.revenue, fontWeight: 700 }}
                         formatter={(value) =>

@@ -1,5 +1,5 @@
-import { DatePicker, Divider, Typography } from "antd";
-import { StyleTabs,Card } from "@/pages/Dashboard/style";
+import { DatePicker, Divider, Typography, Row,Card} from "antd";
+import { StyleTabs } from "@/pages/Dashboard/style";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import dayjs from "dayjs";
@@ -22,7 +22,7 @@ const StatisticByTime = ({
     const lineColor =
     tabKey === 'range' ? '#1890ff' : tabKey === 'month' ? '#52c41a' : '#faad14';
     return (
-        <Card style={{ borderRadius: 16, marginTop: 30 }}>
+        <Card style={{ borderRadius: 16}}>
             <StyleTabs
                 activeKey={tabKey}
                 onChange={setTabKey}
@@ -33,15 +33,20 @@ const StatisticByTime = ({
                         label: 'Theo khoảng ngày',
                         children: (
                             <>
-                            
-                                <RangePicker
-                                    onChange={onChangeDateRange}
-                                    format="DD/MM/YYYY"
-                                    value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : []}
-                                    placeholder={['Từ ngày', 'Đến ngày']}
-                                    size="large"
-                                    style={{ marginBottom: 20 }}
-                                />
+                                
+                                <Row justify={'start'} style={{ marginBottom: 30 }}>
+
+
+                                    <RangePicker
+                                        onChange={onChangeDateRange}
+                                        format="DD/MM/YYYY"
+                                        value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : []}
+                                        placeholder={['Từ ngày', 'Đến ngày']}
+                                        size="large"
+                                        style={{ marginBottom: 20 }}
+                                    />
+                                </Row>
+                               
                             
                                 <LoadingComponent isLoading={isLoading}>
                                     <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
@@ -102,15 +107,19 @@ const StatisticByTime = ({
                         label: 'Theo tháng',
                         children: (
                             <>
-                                <DatePicker
-                                    picker="month"
-                                    onChange={onChangeMonth}
-                                    format="MM/YYYY"
-                                    value={selectedMonth && selectedYear ? dayjs().month(selectedMonth - 1).year(selectedYear) : null}
-                                    placeholder="Chọn tháng"
-                                    size="large"
-                                    style={{ marginBottom: 20 }}
-                                />
+                                <Row justify={'start'} style={{ marginBottom: 30 }}>
+
+
+                                    <DatePicker
+                                        picker="month"
+                                        onChange={onChangeMonth}
+                                        format="MM/YYYY"
+                                        value={selectedMonth && selectedYear ? dayjs().month(selectedMonth - 1).year(selectedYear) : null}
+                                        placeholder="Chọn tháng"
+                                        size="large"
+                                        style={{ marginBottom: 20 }}
+                                    />
+                                </Row>
                                 <LoadingComponent isLoading={isLoading}>
                                 
                                     <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
@@ -164,15 +173,19 @@ const StatisticByTime = ({
                         label: 'Theo năm',
                         children: (
                             <>
-                                <DatePicker
-                                    picker="year"
-                                    onChange={onChangeYear}
-                                    format="YYYY"
-                                    value={selectedYear ? dayjs().year(selectedYear) : null}
-                                    placeholder="Chọn năm"
-                                    size="large"
-                                    style={{ marginBottom: 20 }}
-                                />
+                                <Row justify={'start'} style={{ marginBottom: 30 }}>
+                                    
+                                    <DatePicker
+                                        picker="year"
+                                        onChange={onChangeYear}
+                                        format="YYYY"
+                                        value={selectedYear ? dayjs().year(selectedYear) : null}
+                                        placeholder="Chọn năm"
+                                        size="large"
+                                        style={{ marginBottom: 20 }}
+                                    />
+                                </Row>
+
                                 <LoadingComponent isLoading={isLoading}>
                                 
                                     <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>

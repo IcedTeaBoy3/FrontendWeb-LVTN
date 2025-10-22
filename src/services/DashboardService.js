@@ -1,8 +1,10 @@
 import axiosInstance from '@/config/axiosInstance';
 export const DashboardService = {
-    getAdminOverview: async () => {
+    getAdminOverview: async (filter) => {
         try {
-            const response = await axiosInstance.get('/dashboard/admin-overview');
+            const response = await axiosInstance.get('/dashboard/admin-overview', {
+                params: { filter }
+            });
             return response.data;
         } catch (error) {
             throw error.response.data;
@@ -82,4 +84,20 @@ export const DashboardService = {
             throw error.response.data;
         }
     },
+    getDoctorStatisticPatient: async (doctorId) => {
+        try {
+            const response = await axiosInstance.get(`/dashboard/doctor-statistic-patient/${doctorId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    getAdminStatisticPatient: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-statistic-patient');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    }
 }

@@ -13,7 +13,6 @@ export const StyleTabs = styled(Tabs)`
     & .ant-tabs-tab-active {
         font-weight: 500;
     }
-
 `;
 
 export const Row = styled(AntRow)`
