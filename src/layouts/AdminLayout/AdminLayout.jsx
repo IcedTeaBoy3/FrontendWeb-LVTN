@@ -78,11 +78,7 @@ const menuItems = [
         icon: <CalendarOutlined />,
         label: "Lịch khám",
     },
-    {
-        key: "/admin/medical-records",
-        icon: <FileTextOutlined />,
-        label: "Hồ sơ bệnh án",
-    },
+   
     
 ];
 import {
@@ -131,7 +127,6 @@ const AdminLayout = () => {
         "/admin/specialties": "Chuyên khoa",
         "/admin/patients": "Bệnh nhân",
         "/admin/schedules": "Lịch làm việc",
-        "/admin/medical-records": "Hồ sơ bệnh án",
         "/admin/clinics": "Phòng khám",
         "/admin/services": "Dịch vụ",
         "/admin/personinfo": "Thông tin cá nhân",

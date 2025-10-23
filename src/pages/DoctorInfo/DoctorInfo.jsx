@@ -43,9 +43,6 @@ const DoctorInfo = () => {
     onSuccess: (data) => {
       if (data?.status == "success") {
         Message.success(data?.message);
-        formUpdateDoctor.setFieldValues({
-
-        })
         queryGetDoctor.refetch();
       } else {
         Message.error(data?.message);

@@ -66,7 +66,7 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                         <DollarOutlined />
                     </div>
                     <Statistic
-                        title="Doanh thu"
+                        title="Doanh thu (VND)"
                         value={overviewData.totalRevenue || 0}
                         precision={0}
                         valueStyle={{ color: colorMap.revenue, fontWeight: 700 }}

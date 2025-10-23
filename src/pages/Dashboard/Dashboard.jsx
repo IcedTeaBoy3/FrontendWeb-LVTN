@@ -206,6 +206,7 @@ const Dashboard = () => {
                 onChange={(key) => setTabKeyDetails(key)}
                 style={{ marginBottom: 16 }}
                 items={[
+              
                 {
                     key: 'revenue',
                     label: 'Doanh thu',
@@ -236,6 +237,14 @@ const Dashboard = () => {
                         />
                     </>
                     ),
+                },
+                {
+                    key: "doctors",
+                    label: "Bác sĩ",
+                },
+                {
+                    key: "appointments",
+                    label: "Lịch khám",
                 }
                 
                 

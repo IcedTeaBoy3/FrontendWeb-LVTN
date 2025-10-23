@@ -50,4 +50,20 @@ export const AppointmentService = {
             throw error.response.data;
         }
     },
+    getDoctorPatients: async (doctorId) => {
+        try {
+            const response = await axiosInstance.get(`/appointment/doctor/${doctorId}/patients`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    getDoctorPatientHistory: async (doctorId, patientProfileId) => {
+        try {
+            const response = await axiosInstance.get(`/appointment/doctor/${doctorId}/patient-history/${patientProfileId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
 };

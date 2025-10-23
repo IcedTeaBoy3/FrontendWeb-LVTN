@@ -23,7 +23,7 @@ import DoctorDashboard from "@/pages/DoctorDashboard/DoctorDashboard";
 import PersonInfo from "@/pages/PersonInfo/PersonInfo";
 import UnauthorizedPage from "@/pages/UnauthorizedPage/UnauthorizedPage";
 import DoctorSchedulePage from "@/pages/DoctorSchedulePage/DoctorSchedulePage";
-import DoctorPatient from "@/pages/DoctorPatient/DoctorPatient";
+import DoctorPatientPage from "@/pages/DoctorPatientPage/DoctorPatientPage";
 import DoctorAppointmentPage from "@/pages/DoctorAppointmentPage/DoctorAppointmentPage";
 import DoctorAppointmentDate from "@/pages/DoctorAppointmentDate/DoctorAppointmentDate";
 import DetailDoctorSchedulePage from "@/pages/DetailDoctorSchedulePage/DetailDoctorSchedulePage";
@@ -72,7 +72,7 @@ const AppRoutes = () => {
                 >
                     <Route path="schedules" element={<DoctorSchedulePage />} />
                     <Route path="schedules/:id" element={<DetailDoctorSchedulePage />} />
-                    <Route path="patients" element={<DoctorPatient />} />
+                    <Route path="patients" element={<DoctorPatientPage />} />
                     <Route path="appointments" element={<DoctorAppointmentPage />} />
                     <Route path="appointments/date" element={<DoctorAppointmentDate />} />
                     <Route path="personinfo" element={<PersonInfo />} />
