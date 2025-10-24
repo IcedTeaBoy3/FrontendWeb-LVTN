@@ -56,9 +56,6 @@ const NotificationBell = () => {
           </Button>
         </Space>
       </div>
-
-      <Divider style={{ margin: "4px 0" }} />
-
       {/* Danh sách thông báo */}
       <List
         dataSource={notifications}

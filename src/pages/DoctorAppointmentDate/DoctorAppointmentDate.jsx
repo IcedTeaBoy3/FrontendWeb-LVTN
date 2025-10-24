@@ -411,7 +411,7 @@ const DoctorAppointmentDate = () => {
         visible={isDrawerOpen}
         appointmentDetail={appointmentDetail}
         onClose={() => setIsDrawerOpen(false)}
-        onComplete={() => {}}
+        onComplete={() => setIsOpenModal(true)}
       />
     </>
   )

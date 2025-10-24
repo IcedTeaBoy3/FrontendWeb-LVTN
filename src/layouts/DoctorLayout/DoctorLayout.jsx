@@ -97,6 +97,7 @@ const AdminLayout = () => {
         "/doctor/appointments": "Lịch khám",
         "/doctor/appointments/date": "Ngày khám",
         "/doctor/schedules/:id": "Chi tiết lịch làm việc",
+        "/doctor/personinfo": "Thông tin tài khoản",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);

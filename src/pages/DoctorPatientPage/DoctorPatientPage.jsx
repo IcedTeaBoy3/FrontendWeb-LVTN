@@ -5,7 +5,7 @@ import { useState } from "react";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
-import ModalDetailPatient from "./components/ModalDetailPatient";
+import ModalDetailPatient from "@/components/ModalDetailPatient/ModalDetailPatient";
 import { EyeOutlined, EditOutlined, MoreOutlined } from "@ant-design/icons";
 import { Dropdown, Typography, Timeline, Tag} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";

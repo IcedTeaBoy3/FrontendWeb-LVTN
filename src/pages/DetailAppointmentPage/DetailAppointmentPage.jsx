@@ -5,22 +5,24 @@ import { PaymentService } from '@/services/PaymentService';
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent';
 import * as Message from "@/components/Message/Message";
-import {Row, Col, Typography, Divider, Tag, Descriptions} from 'antd';
+import {Row, Col, Typography, Divider, Tag, Descriptions, Space, Image} from 'antd';
 import { getStatusColor,convertStatusAppointment } from '@/utils/status_appointment_utils';
 import { StyledCard } from './style';
+import { useState } from 'react';
 import dayjs from 'dayjs';
 import * as DatetimeUtils from '@/utils/datetime_utils';
 import {convertStatusPayment,getStatusPaymentColor} from '@/utils/status_payment_utils';
 import { convertPaymentType } from '@/utils/paymentType_utils';
-import { convertMethodPayment } from '../../utils/method_utils';
+import { convertGender } from '@/utils/gender_utils';
+import { convertMethodPayment } from '@/utils/method_utils';
 import {
     ArrowLeftOutlined,
-    UserOutlined,
-    MedicineBoxOutlined,
-    CheckOutlined 
+    CheckOutlined,
 } from "@ant-design/icons";
+import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
 const { Title,Text,Paragraph } = Typography;
 const DetailAppointmentPage = () => {
+    const [isOpenModalDetailPatient, setIsOpenModalDetailPatient] = useState(false);
     const navigate = useNavigate();
     const { id } = useParams();
     const handleBack = () => {
@@ -72,6 +74,7 @@ const DetailAppointmentPage = () => {
     const handleConfirmAppointment = (appointmentId) => {
         mutationConfirmAppointment.mutate(appointmentId);
     };
+    const { patientProfile, medicalResult, doctorService } = appointmentData;
 
     
     return (
@@ -82,7 +85,7 @@ const DetailAppointmentPage = () => {
                 onClick={handleBack}
                 style={{ fontSize: 18, padding: 0 }}
             >Chi tiết lịch khám</ButtonComponent>
-            <Divider />
+            <Divider style={{margin:"12px 0"}}/>
             <LoadingComponent isLoading={isLoadingAppointment}>
                 <Row gutter={[16, 16]}>
                     {/* THÔNG TIN LỊCH KHÁM */}
@@ -98,6 +101,8 @@ const DetailAppointmentPage = () => {
                             actions={[
                                 <ButtonComponent
                                     type="primary"
+                                    ghost
+                                    shape="round"
                                     icon={<CheckOutlined />}
                                     onClick={() => handleConfirmAppointment(appointmentData.appointmentId)}
                                     disabled={appointmentData.status === "confirmed"} // tránh xác nhận lại
@@ -106,10 +111,14 @@ const DetailAppointmentPage = () => {
                                 </ButtonComponent>,
                             ]}
                         >
-                        <Descriptions column={1} size="small" bordered>
+                        <Descriptions 
+                            column={1} 
+                            size="middle" 
+                            bordered
+                            styles={{ labelStyle: { fontWeight: 'bold' } }}
+                        >
                             <Descriptions.Item label="STT">
                                 <Text style={{color:'green',fontSize:18,fontWeight:'bold'}}>
-
                                     {appointmentData.appointmentNumber || "Chưa cập nhật"}
                                 </Text>
                             </Descriptions.Item>
@@ -128,33 +137,78 @@ const DetailAppointmentPage = () => {
                                 : "Chưa cập nhật"}
                                 </Text>
                             </Descriptions.Item>
+                            <Descriptions.Item label="Triệu chứng">
+                            {appointmentData.symptoms || "Không có"}
+                            
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Ảnh triệu chứng, đơn thuốc">
+                                {appointmentData.symptomImage ? (
+                                    <Image
+                                        width={100}
+                                        src={`${import.meta.env.VITE_APP_BACKEND_URL}${appointmentData.symptomImage}`}
+                                        alt="Ảnh triệu chứng"
+                                    />
+                                ) : (
+                                    "Không có"
+                                )}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Ngày đặt lịch khám">
+                                {appointmentData.createdAt
+                                    ? dayjs(appointmentData.createdAt).format("DD/MM/YYYY HH:mm")
+                                    : "Chưa cập nhật"}
+                            </Descriptions.Item>
                         </Descriptions>
-
-                        <Divider style={{ margin: "16px 0" }} />
-
-                        <Title level={5} style={{ marginBottom: 8 }}>
-                            <UserOutlined style={{ marginRight: 8 }} />
+                        <Title level={5} style={{ margin: "16px 0 8px 0" }}>
                             Thông tin bệnh nhân
                         </Title>
-                        <Descriptions column={1} size="small" bordered>
-                            <Descriptions.Item label="Mã bệnh nhân">
-                            {appointmentData.patientProfile?.patientProfileCode || "Chưa cập nhật"}
+                        <Descriptions
+                            column={1}
+                            bordered
+                            size="middle"
+                            styles={{ labelStyle: { fontWeight: 'bold' } }}
+                        >
+                            <Descriptions.Item label={<>Mã bệnh nhân</>}>
+                                {patientProfile?.patientProfileCode || <Text type="secondary">Chưa cập nhật</Text>}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Họ và tên">
-                            {appointmentData.patientProfile?.person?.fullName || "Chưa cập nhật"}
+
+                            <Descriptions.Item label={<>Họ và tên</>}>
+                                {patientProfile?.person?.fullName || <Text type="secondary">Chưa cập nhật</Text>}
                             </Descriptions.Item>
-                            <Descriptions.Item label="SĐT">
-                            {appointmentData.patientProfile?.person?.phone || "Chưa cập nhật"}
+
+                            <Descriptions.Item label={<>Số điện thoại</>}>
+                                {patientProfile?.person?.phone || <Text type="secondary">Chưa cập nhật</Text>}
                             </Descriptions.Item>
+                            <Descriptions.Item label={<>Giới tính</>}>
+                                {convertGender(patientProfile?.person?.gender) || <Text type="secondary">Chưa cập nhật</Text>}
+                            </Descriptions.Item>
+                            <Descriptions.Item label={<>Ngày sinh</>}>
+                                {patientProfile?.person?.dateOfBirth
+                                    ? dayjs(patientProfile?.person?.dateOfBirth).format("DD/MM/YYYY")
+                                    : <Text type="secondary">Chưa cập nhật</Text>}
+                            </Descriptions.Item>    
+                            <Space style={{ marginTop: 8 }} >
+                                <ButtonComponent 
+                                    type="primary" 
+                                    ghost
+                                    onClick={() => setIsOpenModalDetailPatient(true)}
+                                >
+                                    Xem chi tiết
+                                </ButtonComponent>
+                            </Space>
                         </Descriptions>
+                            
+                        <ModalDetailPatient
+                            patientProfile={patientProfile}
+                            isOpenModalDetailPatient={isOpenModalDetailPatient}
+                            handleCloseModalDetailPatient={() => setIsOpenModalDetailPatient(false)}
+                        >
 
-                        <Divider style={{ margin: "16px 0" }} />
+                        </ModalDetailPatient>
 
-                        <Title level={5} style={{ marginBottom: 8 }}>
-                            <MedicineBoxOutlined style={{ marginRight: 8 }} />
+                        <Title level={5} style={{ margin: "16px 0 8px 0" }}>
                             Thông tin bác sĩ
                         </Title>
-                        <Descriptions column={1} size="small" bordered>
+                        <Descriptions column={1} size="medium" bordered>
                             <Descriptions.Item label="Họ và tên">
                             {appointmentData.doctorService?.doctor?.person?.fullName || "Chưa cập nhật"}
                             </Descriptions.Item>
@@ -167,48 +221,81 @@ const DetailAppointmentPage = () => {
                         </Descriptions>
                         </StyledCard>
                     </Col>
-                    {/* THÔNG TIN THANH TOÁN */}
                     <Col span={12}>
                         <LoadingComponent isLoading={mutationUpdatePaymentStatus.isPending}>
                             <StyledCard
                                 title="Thông tin thanh toán"
                                 extra={
                                     <Tag color={getStatusPaymentColor(appointmentData?.payment?.status)}>
-                                    {convertStatusPayment(appointmentData?.payment?.status)}
+                                        {convertStatusPayment(appointmentData?.payment?.status)}
                                     </Tag>
                                 }
                                 actions={[
                                     <ButtonComponent
                                         type="primary"
+                                        shape="round"
+                                        ghost
                                         icon={<CheckOutlined />}
-                                        onClick={() => handleUpdatePaymentStatus(appointmentData?.payment?.id)}
-                                        disabled={appointmentData?.payment?.status === "paid"}
+                                        onClick={() => handleUpdatePaymentStatus(appointmentData.payment.paymentId)}
+                                        disabled={appointmentData?.payment?.status === "paid"} // tránh thanh toán lại
                                     >
-                                        Xác nhận đã thanh toán
+                                        Xác nhận thanh toán
                                     </ButtonComponent>,
+
                                 ]}
                                 style={{ borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
                             >
-                            <Descriptions column={1} size="small" bordered>
-                                <Descriptions.Item label="Hình thức khám">
-                                {convertPaymentType(appointmentData?.payment?.paymentType) || "Chưa cập nhật"}
-                                </Descriptions.Item>
-                                <Descriptions.Item label="Phương thức thanh toán">
-                                {convertMethodPayment(appointmentData?.payment?.method) || "Chưa cập nhật"}
-                                </Descriptions.Item>
-                                <Descriptions.Item label="Số tiền">
-                                {appointmentData?.payment?.amount
-                                    ? `${appointmentData.payment.amount.toLocaleString()} VND`
-                                    : "Chưa cập nhật"}
-                                </Descriptions.Item>
-                                <Descriptions.Item label="Ngày thanh toán">
-                                {appointmentData?.payment?.payAt
-                                    ? dayjs(appointmentData.payment.payAt).format("DD/MM/YYYY HH:mm")
-                                    : "Chưa cập nhật"}
-                                </Descriptions.Item>
-                            </Descriptions>
+                                <Descriptions column={1} size="middle" bordered>
+                                    <Descriptions.Item label="Hình thức khám">
+                                    {convertPaymentType(appointmentData?.payment?.paymentType) || "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Phương thức thanh toán">
+                                    {convertMethodPayment(appointmentData?.payment?.method) || "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Số tiền">
+                                    {appointmentData?.payment?.amount
+                                        ? `${appointmentData.payment.amount.toLocaleString()} VND`
+                                        : "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Ngày thanh toán">
+                                    {appointmentData?.payment?.payAt
+                                        ? dayjs(appointmentData.payment.payAt).format("DD/MM/YYYY HH:mm")
+                                        : "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                </Descriptions>
                             </StyledCard>
                         </LoadingComponent>
+                        <br />
+                        {medicalResult &&
+                            <StyledCard
+                                title="Kết quả khám bệnh"
+                            >
+                                <Descriptions column={1} size="middle" bordered>
+                                    <Descriptions.Item label="Chuẩn đoán">
+                                        {medicalResult?.diagnosis || "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Đơn thuốc">
+                                        {medicalResult?.prescription || "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Ghi chú">
+                                        {medicalResult?.note || "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="File đính kèm">
+
+                                        {medicalResult?.attachments.map((file, index) => 
+                                            <Image
+                                                key={index}
+                                                width={100}
+                                                src={`${import.meta.env.VITE_APP_BACKEND_URL}${file}`}
+                                            />
+                                        
+                                        ) || "Chưa cập nhật"}
+                                    </Descriptions.Item>
+                                </Descriptions>
+                            </StyledCard>
+                        }
+
+                        
                     </Col>
                 </Row>
             </LoadingComponent>

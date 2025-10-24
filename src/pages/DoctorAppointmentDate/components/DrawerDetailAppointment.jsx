@@ -36,25 +36,25 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                 size="middle"
                 styles={{
                     label: { width: '30%', fontWeight: 'bold'},
-                    content: { width: '70%', fontSize: 16}
+                    content: { width: '70%', fontSize: 15}
                 }}
             >
                
                 <Descriptions.Item label="STT"><Text style={{color:'green',fontSize:18,fontWeight:'bold'}}> 
                     {appointmentNumber || "Chưa cập nhật"}
                 </Text></Descriptions.Item>
-                <Descriptions.Item label="Mã lịch hẹn">{appointmentCode}</Descriptions.Item>
-                <Descriptions.Item label="Ngày tạo">
-                {dayjs(createdAt).format("HH:mm DD/MM/YYYY")}
-                </Descriptions.Item>
+                <Descriptions.Item label="Mã lịch khám">{appointmentCode}</Descriptions.Item>
                  <Descriptions.Item label="Ngày khám">
                 {schedule?.workday ? dayjs(schedule.workday).format("DD/MM/YYYY") : "—"}
                 </Descriptions.Item>
-                <Descriptions.Item label="Khung giờ">
+                <Descriptions.Item label="Giờ khám">
                     {slot ? `${dayjs(slot.startTime).format("HH:mm")} - ${dayjs(slot.endTime).format("HH:mm")} (${slot?.shift?.name})` : "—"}
                 </Descriptions.Item>
-                 <Descriptions.Item label="Triệu chứng" span={2}>
-                {symptoms || "Không có"}
+                <Descriptions.Item label="Triệu chứng" span={2}>
+                    <Text>{symptoms || "Không có"}</Text>
+                </Descriptions.Item>
+                <Descriptions.Item label="Ngày tạo">
+                {dayjs(createdAt).format("DD/MM/YYYY HH:mm")}
                 </Descriptions.Item>
 
                 {symptomsImage && (
@@ -69,36 +69,37 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                     </Descriptions.Item>
                 )}
             </Descriptions>
-            <Divider />
-            <Title level={5}>Thông tin bệnh nhân</Title>
+         
+            <Title level={5} style={{margin:'12px 0'}}>Thông tin bệnh nhân</Title>
             <Descriptions
                 bordered
                 column={1}
                 size="middle"
                 styles={{
                     label: { width: '30%', fontWeight: 'bold'},
-                    content: { width: '70%', fontSize: 16}
+                    content: { width: '70%', fontSize: 15}
                 }}
             >
-                <Descriptions.Item label="Bệnh nhân">
+                <Descriptions.Item label="Mã bệnh nhân">
+                    {patientProfile?.patientProfileCode || "—"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Họ và tên">
                     {patientProfile?.person?.fullName || "—"}
                 </Descriptions.Item>
                 <Descriptions.Item label="SĐT">
                     {patientProfile?.person?.phone || "—"}
-                </Descriptions.Item>
-
-                <Descriptions.Item label="Giới tính">
-                    {patientProfile?.person?.gender === "male" ? "Nam" : "Nữ"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Ngày sinh">
                     {patientProfile?.person?.dateOfBirth
                     ? dayjs(patientProfile.person.dateOfBirth).format("DD/MM/YYYY")
                     : "—"}
                 </Descriptions.Item>
+                <Descriptions.Item label="Giới tính">
+                    {patientProfile?.person?.gender === "male" ? "Nam" : "Nữ"}
+                </Descriptions.Item>
 
             </Descriptions>
-            <Divider />
-            <Title level={5}>Thông tin bác sĩ</Title>
+            <Title level={5} style={{margin:'12px 0'}}>Thông tin bác sĩ</Title>
             <Descriptions
                 bordered
                 column={1}
@@ -119,8 +120,8 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                 </Descriptions.Item>
                 
             </Descriptions>
-            <Divider />
-            <Title level={5}>Thông tin thanh toán</Title>
+            
+            <Title level={5} style={{margin:"12px 0"}}>Thông tin thanh toán</Title>
             {payment ? (
                 <Descriptions
                     bordered
@@ -128,7 +129,7 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                     size="middle"
                     styles={{
                         label: { width: '30%', fontWeight: 'bold'},
-                        content: { width: '70%', fontSize: 16}
+                        content: { width: '70%', fontSize: 15}
                     }}
                 >
                 <Descriptions.Item label="Trạng thái thanh toán" span={2}>
@@ -163,28 +164,40 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                     size="middle"
                     styles={{
                         label: { width: '30%', fontWeight: 'bold'},
-                        content: { width: '70%', fontSize: 16}
+                        content: { width: '70%', fontSize: 15}
                     }}
                 >
                 <Descriptions.Item label="Chẩn đoán">{medicalResult.diagnosis || "—"}</Descriptions.Item>
-               
                 <Descriptions.Item label="Toa thuốc">{medicalResult.prescription || "—"}</Descriptions.Item>
                 <Descriptions.Item label="Ghi chú">{medicalResult.notes || "—"}</Descriptions.Item>
-                
-                   
+                {medicalResult.attachments && (
+                    <Descriptions.Item label="Tài liệu đính kèm" span={2}>
+                    <Image.PreviewGroup>
+                        {medicalResult.attachments.map((attachment, index) => (
+                            <Image
+                                key={index}
+                                src={`${import.meta.env.VITE_APP_BACKEND_URL}${attachment}`}
+                                alt={`Attachment ${index + 1}`}
+                                width={150}
+                                style={{ borderRadius: 8, marginRight: 8 }}
+                            />
+                        ))}
+                    </Image.PreviewGroup>
+                    </Descriptions.Item>
+                )}
                 
             </Descriptions>
             ) : (
                 <Tag color="orange">Chưa có kết quả khám</Tag>
             )}
-            <div style={{ textAlign: "right" }}>
-            <Space>
-                {status !== "completed" && (
-                    <Button type="primary" onClick={() => onComplete(appointment)}>
-                    Hoàn thành & Nhập kết quả khám
-                    </Button>
-                )}
-                <Button onClick={onClose}>Đóng</Button>
+            <div style={{ textAlign: "right", marginTop: 24 }}>
+                <Space>
+                    {status !== "completed" && (
+                        <Button type="primary" onClick={onComplete}>
+                        Hoàn thành & Nhập kết quả khám
+                        </Button>
+                    )}
+                    <Button onClick={onClose}>Đóng</Button>
                 </Space>
             </div>
         </DrawerComponent>
