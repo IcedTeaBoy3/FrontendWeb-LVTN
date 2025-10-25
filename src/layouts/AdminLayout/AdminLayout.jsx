@@ -16,6 +16,8 @@ import {
     Popover,
     Grid,
     Divider,
+    Avatar,
+    Row
 } from "antd";
 import {
     DashboardOutlined,
@@ -52,8 +54,10 @@ const menuItems = [
         children: [
             { key: "/admin/doctors", label: "Danh sách bác sĩ" },
             { key: "/admin/schedules", label: "Lịch làm việc" },
+            { key: "/admin/doctorreviews", label: "Đánh giá bác sĩ" },
             {
                 label: "Danh mục dùng chung",
+                key: "common-categories",
                 children: [
                     { key: "/admin/specialties", label: "Chuyên khoa" },
                     { key: "/admin/degrees", label: "Học vị" },
@@ -120,6 +124,7 @@ const AdminLayout = () => {
         "/admin/dashboard": "Thống kê",
         "/admin/appointments": "Lịch khám",
         "/admin/doctors": "Bác sĩ",
+        "/admin/doctorreviews": "Đánh giá bác sĩ",
         "/admin/doctors/:id": "Chi tiết bác sĩ",
         "/admin/schedules/:id": "Chi tiết lịch làm việc",
         "/admin/appointments/:id": "Chi tiết lịch khám",
@@ -164,6 +169,13 @@ const AdminLayout = () => {
     const content = useMemo(
         () => (
             <>
+                <Row justify="center" style={{ marginBottom: "16px" }}>
+                    <Avatar
+                        size={90}
+                        src={`${import.meta.env.VITE_APP_BACKEND_URL}${user?.avatar}`}
+                    />
+                </Row>
+                <Divider style={{ margin: 0 }} />
                 <PopupItem onClick={() => navigate("/admin/personinfo")}>
                     <InfoCircleFilled
                         style={{ fontSize: "15px", marginRight: "8px" }}

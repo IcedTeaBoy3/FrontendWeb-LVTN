@@ -284,12 +284,18 @@ const DoctorPage = () => {
             dataIndex: "email",
             key: "email",
             ...getColumnSearchProps("email"),
+            render: (email) => {
+                return email ? <Text>{email}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
+            }
         },
         {
             title: "Số điện thoại",
             dataIndex: "phone",
             key: "phone",
             ...getColumnSearchProps("phone"),
+            render: (phone) => {
+                return phone ? <Text>{phone}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
+            }
         },
         {
             title: "Chuyên khoa",
@@ -373,6 +379,7 @@ const DoctorPage = () => {
             },
         },
     ].filter(Boolean);
+    console.log('data', data);
     const dataTable = data?.map((item, index) => {
         return {
             key: item.doctorId || item.id,

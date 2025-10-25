@@ -389,7 +389,7 @@ const PositionPage = () => {
             const allKeys = dataTable.map((item) => item.key);
             setSelectedRowKeys(allKeys);
         }
-    }
+    };
     return (
         <>
             <Title level={4}>Danh sách chức vụ</Title>

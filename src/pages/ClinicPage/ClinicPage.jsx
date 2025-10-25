@@ -115,7 +115,7 @@ const ClinicPage = () => {
                 email: clinicData.email,
                 website: clinicData.website,
                 workHours: clinicData.workHours,
-                services: clinicData.services,
+                services: clinicData.services.map((service) => service.serviceId),
                 specificAddress: specificAddress || '',
                 province: provinceCode || undefined,
                 district: districtCode || undefined,

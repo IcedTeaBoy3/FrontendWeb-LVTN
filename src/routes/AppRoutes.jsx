@@ -27,6 +27,7 @@ import DoctorPatientPage from "@/pages/DoctorPatientPage/DoctorPatientPage";
 import DoctorAppointmentPage from "@/pages/DoctorAppointmentPage/DoctorAppointmentPage";
 import DoctorAppointmentDate from "@/pages/DoctorAppointmentDate/DoctorAppointmentDate";
 import DetailDoctorSchedulePage from "@/pages/DetailDoctorSchedulePage/DetailDoctorSchedulePage";
+import DoctorReviewPage from "@/pages/DoctorReviewPage/DoctorReviewPage";
 import DoctorInfo from "@/pages/DoctorInfo/DoctorInfo";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
@@ -62,6 +63,7 @@ const AppRoutes = () => {
                     <Route path="schedules/:id" element={<ScheduleDetailPage />} />
                     <Route path="appointments" element={<AppointmentPage />} />
                     <Route path="appointments/:id" element={<DetailAppointmentPage />} />
+                    <Route path="doctorreviews" element={<DoctorReviewPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
 
