@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
-import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col  } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col, Descriptions  } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -221,7 +221,6 @@ const SpecialtyPage = () => {
             dataIndex: "name",
             key: "name",
             ...getColumnSearchProps("name"),
-            sorter: (a, b) => a.name.length - b.name.length,
         },
         {
             title: "Mô tả",
@@ -529,50 +528,39 @@ const SpecialtyPage = () => {
                 centered
                 style={{ borderRadius: 8 }}
             >
-                <div style={{ padding: "8px 0" }}>
-                    <Avatar
-                        size={100}
-                        src={specialtyDetail?.image?.startsWith("https") ? specialtyDetail?.image : `${import.meta.env.VITE_APP_BACKEND_URL}${specialtyDetail?.image}` || defaultImage}
-                        style={{ marginBottom: 16 }}
-                        alt={specialtyDetail?.name}
-                    />
-                </div> 
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Chuyên khoa:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{specialtyDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Mô tả:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{specialtyDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Trạng thái:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        {specialtyDetail?.status === "active" ? (
-                            <Tag
-                                color="green"
-                            >
-                                Đang hoạt động
-                            </Tag>
+                <Descriptions
+                    bordered
+                    column={1}
+                    size='small'
+                >
+                    <Descriptions.Item label="" span={2}>
+                        {specialtyDetail?.image ? (
+                            <Image
+                                src={`${import.meta.env.VITE_APP_BACKEND_URL}${specialtyDetail.image}`}
+                                alt={specialtyDetail.image}
+                                width={100}
+                                height={100}
+                                style={{ borderRadius: "8px", objectFit: "cover" }}
+                                fallback={defaultImage}
+                            />
                         ) : (
-                            <Tag color="red">Ngừng hoạt động</Tag>
+                            <Text type="secondary">Chưa cập nhật</Text>
                         )}
-                    </Col>
-                </Row>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Tên chuyên khoa">
+                        {specialtyDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Mô tả">
+                        {specialtyDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Trạng thái">
+                        {specialtyDetail?.status === "active" ? (
+                            <Tag color="success">Đang hoạt động</Tag>
+                        ) : (
+                            <Tag color="default">Ngừng hoạt động</Tag>
+                        )}
+                    </Descriptions.Item>
+                </Descriptions>
             </ModalComponent>
             <LoadingComponent isLoading={isPendingCreate}>
                 <ModalComponent
@@ -669,6 +657,7 @@ const SpecialtyPage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         style={{ maxWidth: 600, padding: "20px" }}
+                        labelAlign='left'
                         onFinish={handleOnUpdateSpecialty}
                         autoComplete="off"
                         form={formUpdate}
@@ -702,7 +691,7 @@ const SpecialtyPage = () => {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Ảnh"
+                            label="Hình ảnh"
                             name="image"
                             valuePropName="fileList"
                             getValueFromEvent={(e) =>

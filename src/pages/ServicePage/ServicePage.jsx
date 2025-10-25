@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
 import { ServiceService } from '@/services/ServiceService'
-import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber, Row, Col } from "antd";
+import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber, Row, Col, Descriptions } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -242,7 +242,6 @@ const ServicePage = () => {
             dataIndex: "name",
             key: "name",
             ...getColumnSearchProps("name"),
-            sorter: (a, b) => a.name.length - b.name.length,
         },
         {
             title: "Chuyên khoa",
@@ -691,8 +690,8 @@ const ServicePage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
-                    <span>Thông tin chi tiết</span>
+                        <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                        <span>Thông tin chi tiết</span>
                     </span>
                 }
                 open={isModalDetailOpen}
@@ -701,42 +700,31 @@ const ServicePage = () => {
                 centered
                 style={{ borderRadius: 8 }}
             >
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Dịch vụ:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{serviceDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Mô tả:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{serviceDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Trạng thái:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
+                <Descriptions
+                    column={1}
+                    bordered
+                    size="middle"
+                >
+                    <Descriptions.Item label="Tên dịch vụ">
+                        {serviceDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Chuyên khoa">
+                        {serviceDetail?.specialty?.name || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Giá">
+                        {serviceDetail ? serviceDetail.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Mô tả">
+                        {serviceDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Trạng thái">
                         {serviceDetail?.status === "active" ? (
-                            <Tag
-                                color="green"
-                            >
-                                Đang hoạt động
-                            </Tag>
+                            <Tag color="success">Đang hoạt động</Tag>
                         ) : (
-                            <Tag color="red">Ngừng hoạt động</Tag>
+                            <Tag color="error">Ngừng hoạt động</Tag>
                         )}
-                    </Col>
-                </Row>
+                    </Descriptions.Item>
+                </Descriptions>
             </ModalComponent>
             <ModalComponent
                 title={

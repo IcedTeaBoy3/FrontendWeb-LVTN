@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom';
 import { AppointmentService } from '@/services/AppointmentService'
-import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber } from "antd";
+import { Space, Input, Button, Form, Typography, Dropdown, Tag } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -29,13 +29,9 @@ const AppointmentPage = () => {
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
-    const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalConfirmOpen, setIsModalConfirmOpen] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
-    const [formCreate] = Form.useForm();
-    const [formUpdate] = Form.useForm();
     const navigate = useNavigate();
 
     const rowSelection = {
@@ -219,7 +215,6 @@ const AppointmentPage = () => {
             dataIndex: "appointmentCode",
             key: "appointmentCode",
             ...getColumnSearchProps("appointmentCode"),
-            sorter: (a, b) => a.appointmentCode.length - b.appointmentCode.length,
         },
         {
             title: "Ngày khám",
@@ -270,14 +265,12 @@ const AppointmentPage = () => {
            dataIndex: "doctorName",
            key: "doctorName",
            ...getColumnSearchProps("doctorName"),
-           sorter: (a, b) => a?.doctorName?.length - b?.doctorName?.length, 
         },
         {
             title: "Bệnh nhân",
             dataIndex: "patientName",
             key: "patientName",
             ...getColumnSearchProps("patientName"),
-            sorter: (a, b) => a?.patientName?.length - b?.patientName?.length,
         },
         {
             title: "Trạng thái",
@@ -285,7 +278,6 @@ const AppointmentPage = () => {
             key: "status",
            render: (text) => (
                <Tag color={getStatusColor(text)}>{convertStatusAppointment(text)}</Tag>
-                
             ),
             filters: [
                 { text: "Chờ xác nhận", value: "pending" },

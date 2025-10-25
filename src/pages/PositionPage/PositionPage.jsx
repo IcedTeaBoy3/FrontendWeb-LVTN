@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Tag, Row, Col } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Tag, Row, Col, Descriptions } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -273,7 +273,6 @@ const PositionPage = () => {
             dataIndex: "title",
             key: "title",
             ...getColumnSearchProps("title"),
-            sorter: (a, b) => a.title.length - b.title.length,
         },
         {
             title: "Mô tả",
@@ -599,42 +598,25 @@ const PositionPage = () => {
                 centered
                 style={{ borderRadius: 8 }}
             >
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Chức vụ:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{positionDetail?.title || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Mô tả:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{positionDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Trạng thái:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
+                <Descriptions
+                    column={1}
+                    bordered
+                    size="small"
+                >
+                    <Descriptions.Item label="Tên chức vụ">
+                        {positionDetail?.title || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Mô tả">
+                        {positionDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Trạng thái">
                         {positionDetail?.status === "active" ? (
-                            <Tag
-                                color="green"
-                            >
-                                Đang hoạt động
-                            </Tag>
+                            <Tag color="green">Đang hoạt động</Tag>
                         ) : (
                             <Tag color="red">Ngừng hoạt động</Tag>
                         )}
-                    </Col>
-                </Row>
+                    </Descriptions.Item>
+                </Descriptions>
             </ModalComponent>
             <ModalComponent
                 title={

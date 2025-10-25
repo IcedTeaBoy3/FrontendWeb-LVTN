@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { AppointmentService } from "@/services/AppointmentService";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import ModalDetailPatient from "@/components/ModalDetailPatient/ModalDetailPatient";
-import { EyeOutlined, EditOutlined, MoreOutlined } from "@ant-design/icons";
-import { Dropdown, Typography, Timeline, Tag} from "antd";
+import { EyeOutlined, EditOutlined, MoreOutlined,SearchOutlined } from "@ant-design/icons";
+import { Dropdown, Typography, Timeline, Tag, Input, Space, Button } from "antd";
+import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import { convertGender } from "@/utils/gender_utils";
 import { convertStatusAppointment, getStatusColor} from "@/utils/status_appointment_utils";
@@ -29,6 +30,90 @@ const DoctorPatientPage = () => {
       setSelectedRowKeys(selectedKeys);
     },
     type: "checkbox",
+  };
+   // Tìm kiếm
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef(null);
+  const getColumnSearchProps = (dataIndex) => ({
+      filterDropdown: ({
+          setSelectedKeys,
+          selectedKeys,
+          confirm,
+          clearFilters,
+      }) => (
+          <div style={{ padding: 8 }}>
+              <Input
+                  ref={searchInput}
+                  placeholder={`Tìm theo ${dataIndex}`}
+                  value={selectedKeys[0]}
+                  onChange={(e) =>
+                      setSelectedKeys(e.target.value ? [e.target.value] : [])
+                  }
+                  onPressEnter={() =>
+                      handleSearch(selectedKeys, confirm, dataIndex)
+                  }
+                  style={{ marginBottom: 8, display: "block" }}
+              />
+              <Space>
+                  <ButtonComponent
+                      type="primary"
+                      onClick={() =>
+                          handleSearch(selectedKeys, confirm, dataIndex)
+                      }
+                      icon={<SearchOutlined />}
+                      size="small"
+                      style={{ width: 90 }}
+                  >
+                      Tìm
+                  </ButtonComponent>
+                  <Button
+                      onClick={() => handleReset(clearFilters, confirm)}
+                      size="small"
+                      style={{ width: 90 }}
+                  >
+                      Xóa
+                  </Button>
+              </Space>
+          </div>
+      ),
+      filterIcon: (filtered) => (
+          <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+      onFilter: (value, record) =>
+          record[dataIndex]
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+      filterDropdownProps: {
+        onOpenChange: (open) => {
+          if (open) {
+            setTimeout(() => searchInput.current?.select(), 100);
+          }
+        },
+      },
+      render: (text) =>
+        searchedColumn === dataIndex ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }} // màu bạn chọn
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : (
+          text
+        ),
+  });
+  // sửa lại để xóa cũng confirm luôn
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters, confirm) => {
+    clearFilters();
+    setSearchText("");
+    confirm(); // refresh bảng sau khi clear
   };
   const user = useSelector((state) => state.auth.user);
   const doctorId = user?.doctor?.doctorId;
@@ -69,21 +154,25 @@ const DoctorPatientPage = () => {
       title: 'Mã bệnh nhân',
       dataIndex: 'patientProfileCode',
       key: 'patientProfileCode',
+      ...getColumnSearchProps('patientProfileCode'),
     },
     {
       title: 'Số CMND/CCCD',
       dataIndex: 'idCard',
       key: 'idCard',
+      ...getColumnSearchProps('idCard'),
     },
     {
       title: 'Mã bảo hiểm y tế',
       dataIndex: 'insuranceCode',
       key: 'insuranceCode',
+      ...getColumnSearchProps('insuranceCode'),
     },
     {
       title: 'Họ và tên',
       dataIndex: 'fullName',
       key: 'fullName',
+      ...getColumnSearchProps('fullName'),
     },
     {
       title: 'Ngày sinh',
@@ -94,6 +183,12 @@ const DoctorPatientPage = () => {
       title: 'Giới tính',
       dataIndex: 'gender',
       key: 'gender',
+      filters: [
+        { text: 'Nam', value: 'Nam' },
+        { text: 'Nữ', value: 'Nữ' },
+        { text: 'Khác', value: 'Khác' },
+      ],
+      onFilter: (value, record) => record.gender === value,
     },
     {
       title: "Hành động",

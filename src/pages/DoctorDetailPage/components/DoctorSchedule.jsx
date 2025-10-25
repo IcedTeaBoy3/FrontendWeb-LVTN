@@ -212,7 +212,7 @@ const DoctorSchedule = ({id}) => {
             ...getColumnSearchProps('workDay'),
         },
         {
-            title: 'Thời gian slot',
+            title: 'Thời gian khám (phút)',
             dataIndex: 'slotDuration',
             key: 'slotDuration',
             filters: [
@@ -231,7 +231,7 @@ const DoctorSchedule = ({id}) => {
             sorter: (a, b) => a?.shiftCount - b?.shiftCount,
         },
         {
-            title: 'Số slot',
+            title: 'Số khung giờ',
             dataIndex: 'slotCount',
             key: 'slotCount',
             sorter: (a, b) => a?.slotCount - b?.slotCount,

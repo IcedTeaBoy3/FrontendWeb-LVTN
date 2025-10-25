@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { PatientProfileService } from '@/services/PatientProfileService'
 import AddressService from '@/services/AddressService'
-import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col,DatePicker,Select  } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col,DatePicker,Select, Descriptions  } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -13,7 +13,7 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import ethnicGroups from '@/data/ethnicGroups.js'
 import dayjs from 'dayjs';
-import { convertGender} from '@/utils/gender_utils';
+import { convertGender } from '@/utils/gender_utils';
 import { StyledCard } from '../DoctorPage/style';
 import {
     EditOutlined,
@@ -246,7 +246,7 @@ const PatientProfilePage = () => {
         index: index + 1,
         idCard: item.idCard,
         insuranceCode: item.insuranceCode || <Text type="secondary">Chưa cập nhật</Text>,
-        fullName: item.person.fullName, 
+        fullName: item.person.fullName || <Text type="secondary">Chưa cập nhật</Text>,
         dateOfBirth: item.person.dateOfBirth,
         gender: item.person.gender,
     }));
@@ -259,7 +259,7 @@ const PatientProfilePage = () => {
             sorter: (a, b) => a.index - b.index,
         },
         {
-            title: "Mã hồ sơ",
+            title: "Mã bệnh nhân",
             dataIndex: "patientProfileCode",
             key: "patientProfileCode",
             ...getColumnSearchProps("patientProfileCode"),
@@ -281,7 +281,6 @@ const PatientProfilePage = () => {
             dataIndex: "fullName",
             key: "fullName",
             ...getColumnSearchProps("fullName"),
-            render: (text) => text || <Text type="secondary">Chưa cập nhật</Text>,
         },
         {
             title: "Ngày sinh",
@@ -849,120 +848,23 @@ const PatientProfilePage = () => {
                 style={{ borderRadius: 8 }}
             >
                 <Title level={5}>Thông tin tài khoản</Title>
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Email:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.account.email || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Tên tài khoản:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.account.userName || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0 16px 0" }} />
-                {/* <Divider style={{ margin: "8px 0" }} /> */}
+                <Descriptions column={1} bordered size='small' style={{ marginBottom: 16 }}>
+                    <Descriptions.Item label="Email">{patientProfile?.account?.email || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Tên tài khoản">{patientProfile?.account?.userName || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                </Descriptions>
+               
                 <Title level={5}>Thông tin bệnh nhân</Title>
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Mã bệnh nhân:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.patientProfileCode || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>CCCD:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.idCard || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>BHYT:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.insuranceCode || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Họ và tên:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.person?.fullName || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>SĐT</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.person?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Ngày sinh:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{dayjs(patientProfile?.person?.dateOfBirth).format("DD/MM/YYYY") || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Giới tính:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{convertGender(patientProfile?.person?.gender) || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Địa chỉ:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.person?.address || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Dân tộc:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{findEthnic(ethnicGroups, patientProfile?.person?.ethnic) || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Nghề nghiệp:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{patientProfile?.person?.job || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
+                <Descriptions column={1} bordered size='small'>
+                    <Descriptions.Item label="Mã hồ sơ">{patientProfile?.patientProfileCode || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="CCCD">{patientProfile?.idCard || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Mã bảo hiểm">{patientProfile?.insuranceCode || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Họ và tên">{patientProfile?.person?.fullName || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Ngày sinh">{patientProfile?.person?.dateOfBirth ? dayjs(patientProfile.person.dateOfBirth).format("DD/MM/YYYY") : <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Giới tính">{convertGender(patientProfile?.person?.gender) || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="SĐT">{patientProfile?.person?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Dân tộc">{findEthnic(ethnicGroups, patientProfile?.person?.ethnic) || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Địa chỉ">{patientProfile?.person?.address || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                </Descriptions>
             </ModalComponent>
         </>
     )

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image, Row, Col } from "antd";
+import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image, Row, Col, Descriptions } from "antd";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -273,14 +273,12 @@ const DegreePage = () => {
             dataIndex: "title",
             key: "title",
             ...getColumnSearchProps("title"),
-            sorter: (a, b) => a.title.length - b.title.length,
         },
         {
             title: "Viết tắt",
             dataIndex: "abbreviation",
             key: "abbreviation",
             ...getColumnSearchProps("abbreviation"),
-            sorter: (a, b) => a.abbreviation.length - b.abbreviation.length,
         },
         {
             title: "Mô tả",
@@ -592,8 +590,8 @@ const DegreePage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
-                    <span>Thông tin chi tiết</span>
+                        <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                        <span>Thông tin chi tiết</span>
                     </span>
                 }
                 open={isModalDetailOpen}
@@ -602,59 +600,24 @@ const DegreePage = () => {
                 centered
                 style={{ borderRadius: 8 }}
             >
-               
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Bằng cấp:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{degreeDetail?.title || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Viết tắt:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{degreeDetail?.abbreviation || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Mô tả:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{degreeDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Trạng thái:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
+               <Descriptions bordered column={1} size="small">
+                    <Descriptions.Item label="Tên học vị">{degreeDetail?.title}</Descriptions.Item>
+                    <Descriptions.Item label="Viết tắt">{degreeDetail?.abbreviation}</Descriptions.Item>
+                    <Descriptions.Item label="Mô tả">{degreeDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Trạng thái">
                         {degreeDetail?.status === "active" ? (
-                            <Tag
-                                color="green"
-                            >
-                                Đang hoạt động
-                            </Tag>
+                            <Tag color="green">Đang hoạt động</Tag>
                         ) : (
                             <Tag color="red">Ngừng hoạt động</Tag>
                         )}
-                    </Col>
-                </Row>
+                    </Descriptions.Item>
+                </Descriptions>
             </ModalComponent>
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá chức vụ</span>
+                        <span>Xoá học vị</span>
                     </span>
                 }
                 open={isModalOpenDelete}
@@ -673,7 +636,7 @@ const DegreePage = () => {
                             <Text strong type="danger">
                                 xoá
                             </Text>{" "}
-                            chức vụ này không?
+                            học vị này không?
                         </Text>
                     </div>
                 </LoadingComponent>

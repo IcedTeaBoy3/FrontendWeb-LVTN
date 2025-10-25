@@ -273,36 +273,30 @@ const DoctorPage = () => {
             title: "Họ và tên",
             dataIndex: "fullName",
             key: "fullName",
-            sorter: (a, b) => a.fullName?.length - b.fullName?.length,
             ...getColumnSearchProps("fullName"),
-            render: (fullName) => {
-                return fullName ? <Text>{fullName}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
-            }
         },
         {
             title: "Email",
             dataIndex: "email",
             key: "email",
             ...getColumnSearchProps("email"),
-            render: (email) => {
-                return email ? <Text>{email}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
-            }
         },
         {
             title: "Số điện thoại",
             dataIndex: "phone",
             key: "phone",
             ...getColumnSearchProps("phone"),
-            render: (phone) => {
-                return phone ? <Text>{phone}</Text> : <Text type="secondary">Chưa cập nhật</Text>;
-            }
         },
         {
             title: "Chuyên khoa",
             dataIndex: "specialty",
             key: "specialty",
             render: (dS) => {
-                return dS ? <Tag color="blue">{dS?.specialty.name}</Tag> : <Text type="secondary">Chưa cập nhật</Text>;
+                return dS ? (
+                    <Tag color="blue">{dS?.specialty.name}</Tag>
+                ) : (
+                    <Text type="secondary">Chưa cập nhật</Text>
+                );
             },
             filters: uniqueSpecialties.map((spec) => ({ text: spec, value: spec })),
             onFilter: (value, record) => record?.specialty?.specialty?.name === value,
@@ -384,10 +378,10 @@ const DoctorPage = () => {
         return {
             key: item.doctorId || item.id,
             index: index + 1,
-            email: item.account?.email,
-            phone: item.account?.phone,
-            fullName: item.person?.fullName,
-            degree: item.degree?.title,
+            email: item.account?.email || <Text type="secondary">Chưa cập nhật</Text>,
+            phone: item.account?.phone || <Text type="secondary">Chưa cập nhật</Text>,
+            fullName: item.person?.fullName || <Text type="secondary">Chưa cập nhật</Text>,
+            degree: item.degree?.title || <Text type="secondary">Chưa cập nhật</Text>,
             specialty: item.doctorSpecialties.find((spec) => spec.isPrimary === true),
             workplace: item.doctorWorkplaces.find((work) => work.isPrimary === true),
         };

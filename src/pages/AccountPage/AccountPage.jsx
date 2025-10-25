@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { AccountService } from '@/services/AccountService'
-import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown,Tag, Select, Row, Avatar,Col } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown,Tag, Select, Row, Avatar, Col, Descriptions } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -246,8 +246,8 @@ const AccountPage = () => {
         key: item.accountId,
         index: index + 1,
         email: item.email,
-        userName: item.userName,
-        phone: item.phone,
+        userName: item.userName || 'Chưa cập nhật',
+        phone: item.phone || 'Chưa cập nhật',
         role: item.role,
         isBlocked: item.isBlocked,
         isVerified: item.isVerified,
@@ -265,22 +265,18 @@ const AccountPage = () => {
             dataIndex: "email",
             key: "email",
             ...getColumnSearchProps("email"),
-            sorter: (a, b) => a?.email.length - b?.email.length,
         },
         {
             title: "Tên tài khoản",
             dataIndex: "userName",
             key: "userName",
             ...getColumnSearchProps("userName"),
-            sorter: (a, b) => a?.userName?.length - b?.userName?.length,
-            render: (text) => text || <Text type="secondary">Chưa cập nhật</Text>,
         },
         {
             title: "Số điện thoại",
             dataIndex: "phone",
             key: "phone",
             ...getColumnSearchProps("phone"),
-            render: (text) => text || <Text type="secondary">Chưa cập nhật</Text>,
         },
         {
             title: "Vai trò",
@@ -462,7 +458,7 @@ const AccountPage = () => {
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
                 <ButtonComponent
                     type="primary"
-                    // onClick={() => setIsModalOpenCreate(true)}
+                    
                     icon={<PlusOutlined />}
                     style={{ marginRight: 8 }}
                 >
@@ -538,67 +534,21 @@ const AccountPage = () => {
                 centered
                 style={{ borderRadius: 8 }}
             >
-                <div style={{ padding: "8px 0" }}>
-                    <Avatar
-                    size={100}
-                    src={account?.avatar?.startsWith("https") ? account?.avatar : `${import.meta.env.VITE_APP_BACKEND_URL}${account?.avatar}` || defaultImage}
-                    style={{ marginBottom: 16 }}
-                    />
-                </div>
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Email:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{account?.email || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Tên tài khoản:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{account?.userName || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>SĐT:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{account?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Vai trò:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{convertRole(account?.role) || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Trạng thái:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Tag color={account?.isBlocked ? "red" : "green"}>{account?.isBlocked ? "Bị khoá" : "Hoạt động"}</Tag>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Xác thực:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Tag color={account?.isVerified ? "green" : "red"}>{account?.isVerified ? "Đã xác thực" : "Chưa xác thực"}</Tag>
-                    </Col>
-                </Row>
+                <Descriptions column={1} bordered size='small'>
+                    <Descriptions.Item label="Avatar">
+                        <Avatar
+                            size={100}
+                            src={defaultImage || `${import.meta.env.VITE_APP_BACKEND_URL}${account?.avatar}`}
+                            alt="Avatar"
+                        />
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Email">{account?.email || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Tên tài khoản">{account?.userName || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Số điện thoại">{account?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Vai trò">{convertRole(account?.role) || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Trạng thái"><Tag color={account?.isBlocked ? "red" : "green"}>{account?.isBlocked ? "Bị khoá" : "Hoạt động"}</Tag></Descriptions.Item>
+                    <Descriptions.Item label="Xác thực"><Tag color={account?.isVerified ? "green" : "red"}>{account?.isVerified ? "Đã xác thực" : "Chưa xác thực"}</Tag></Descriptions.Item>
+                </Descriptions>
             </ModalComponent>
             <ModalComponent
                 title={

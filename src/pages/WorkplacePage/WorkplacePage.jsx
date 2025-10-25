@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Menu, Upload, Tag, Image, Row, Col } from "antd";
+import { Space, Input, Button, Form, Select, Radio, Typography, Popover, Divider, Dropdown, Tag, Row, Col, Descriptions } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -232,7 +232,6 @@ const WorkplacePage = () => {
             dataIndex: "name",
             key: "name",
             ...getColumnSearchProps("name"),
-            sorter: (a, b) => a.name.length - b.name.length,
         },
         {
             title: "Mô tả",
@@ -674,52 +673,17 @@ const WorkplacePage = () => {
                 centered
                 style={{ borderRadius: 8 }}
             >
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Tên cơ sở:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{workplaceDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Mô tả:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{workplaceDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Địa chỉ:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{workplaceDetail?.address || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>SĐT:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        <Text>{workplaceDetail?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Text>
-                    </Col>
-                </Row>
-                <Divider style={{ margin: "8px 0" }} />
-
-                <Row style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                        <Text strong>Loại cơ sở:</Text>
-                    </Col>
-                    <Col span={14} style={{ textAlign: "right" }}>
-                        {workplaceDetail?.type === "hospital" ? <Tag color="blue" style={{ borderRadius: "8px", padding: "0 8px" }}>Bệnh viện</Tag> : <Tag color="green" style={{ borderRadius: "8px", padding: "0 8px" }}>Phòng khám</Tag>}
-                    </Col>
-                </Row>
+                <Descriptions
+                    column={1}
+                    bordered
+                    size="middle"
+                >
+                    <Descriptions.Item label="Tên cơ sở">{workplaceDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Mô tả">{workplaceDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Địa chỉ">{workplaceDetail?.address || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Số điện thoại">{workplaceDetail?.phone || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                    <Descriptions.Item label="Loại cơ sở">{workplaceDetail?.type === "hospital" ? <Tag color="blue" style={{ borderRadius: "8px", padding: "0 8px" }}>Bệnh viện</Tag> : <Tag color="green" style={{ borderRadius: "8px", padding: "0 8px" }}>Phòng khám</Tag>}</Descriptions.Item>
+                </Descriptions>
             </ModalComponent>
             <ModalComponent
                 title={
