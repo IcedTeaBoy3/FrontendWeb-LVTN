@@ -4,6 +4,8 @@ import { AppointmentService } from '@/services/AppointmentService';
 import { PaymentService } from '@/services/PaymentService';
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent';
+import ModalComponent from '@/components/ModalComponent/ModalComponent';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import * as Message from "@/components/Message/Message";
 import {Row, Col, Typography, Divider, Tag, Descriptions, Space, Image} from 'antd';
 import { getStatusColor,convertStatusAppointment } from '@/utils/status_appointment_utils';
@@ -23,6 +25,8 @@ import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatie
 const { Title,Text,Paragraph } = Typography;
 const DetailAppointmentPage = () => {
     const [isOpenModalDetailPatient, setIsOpenModalDetailPatient] = useState(false);
+    const [isOpenModalConfirm, setIsOpenModalConfirm] = useState(false);
+    const [isOpenModalPaymentConfirm, setIsOpenModalPaymentConfirm] = useState(false);
     const navigate = useNavigate();
     const { id } = useParams();
     const handleBack = () => {
@@ -65,16 +69,22 @@ const DetailAppointmentPage = () => {
     });
     const { data: appointment, isLoading: isLoadingAppointment } = queryDetailAppointment;
     const appointmentData = appointment?.data || {};
-    const handleUpdatePaymentStatus = (paymentId) => {
+    const { patientProfile, medicalResult, doctorService, payment } = appointmentData;
+    const handleOkConfirmPayment = () => {
         mutationUpdatePaymentStatus.mutate({
-            paymentId: paymentId,
+            paymentId: payment.paymentId,
             status: 'paid',
         });
     };
-    const handleConfirmAppointment = (appointmentId) => {
-        mutationConfirmAppointment.mutate(appointmentId);
+    const handleCancelConfirmPayment = () => {
+        setIsOpenModalPaymentConfirm(false);
     };
-    const { patientProfile, medicalResult, doctorService } = appointmentData;
+    const handleOkConfirm = () => {
+        mutationConfirmAppointment.mutate(appointmentData.appointmentId);
+    };
+    const handleCancelConfirm = () => {
+        setIsOpenModalConfirm(false);
+    };
 
     
     return (
@@ -86,6 +96,70 @@ const DetailAppointmentPage = () => {
                 style={{ fontSize: 18, padding: 0 }}
             >Chi tiết lịch khám</ButtonComponent>
             <Divider style={{margin:"12px 0"}}/>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span style={{ fontWeight: 600 }}>Xác nhận lịch khám</span>
+                    </span>
+                }
+                open={isOpenModalConfirm}
+                onOk={handleOkConfirm}
+                onCancel={handleCancelConfirm}
+                okText="Xác nhận"
+                cancelText="Hủy"
+                okButtonProps={{ 
+                    type: "primary", 
+                    danger: true, // 🔥 nhấn mạnh hành động có ảnh hưởng
+                }}
+                centered
+                style={{ borderRadius: 12 }}
+            >
+                <LoadingComponent isLoading={mutationConfirmAppointment.isPending}>
+                    <div style={{ textAlign: "center", padding: "12px 0" }}>
+                        <Text style={{ fontSize: 16 }}>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                            xác nhận
+                            </Text>{" "}
+                            lịch khám này không?
+                        </Text>
+                    
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span style={{ fontWeight: 600 }}>Xác nhận thanh toán</span>
+                    </span>
+                }
+                open={isOpenModalPaymentConfirm}
+                onOk={handleOkConfirmPayment}
+                onCancel={handleCancelConfirmPayment}
+                okText="Xác nhận"
+                cancelText="Hủy"
+                okButtonProps={{ 
+                    type: "primary", 
+                    danger: true, // 🔥 nhấn mạnh hành động có ảnh hưởng
+                }}
+                centered
+                style={{ borderRadius: 12 }}
+            >
+                <LoadingComponent isLoading={mutationUpdatePaymentStatus.isPending}>
+                    <div style={{ textAlign: "center", padding: "12px 0" }}>
+                        <Text style={{ fontSize: 16 }}>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                            xác nhận
+                            </Text>{" "}
+                            thanh toán cho lịch khám này không?
+                        </Text>
+                    
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
             <LoadingComponent isLoading={isLoadingAppointment}>
                 <Row gutter={[16, 16]}>
                     {/* THÔNG TIN LỊCH KHÁM */}
@@ -104,7 +178,7 @@ const DetailAppointmentPage = () => {
                                     ghost
                                     shape="round"
                                     icon={<CheckOutlined />}
-                                    onClick={() => handleConfirmAppointment(appointmentData.appointmentId)}
+                                    onClick={() => setIsOpenModalConfirm(true)}
                                     disabled={appointmentData.status === "confirmed"} // tránh xác nhận lại
                                 >
                                     Xác nhận lịch khám
@@ -210,13 +284,13 @@ const DetailAppointmentPage = () => {
                         </Title>
                         <Descriptions column={1} size="medium" bordered>
                             <Descriptions.Item label="Họ và tên">
-                            {appointmentData.doctorService?.doctor?.person?.fullName || "Chưa cập nhật"}
+                            {doctorService?.doctor?.person?.fullName || "Chưa cập nhật"}
                             </Descriptions.Item>
                             <Descriptions.Item label="Chuyên khoa">
-                            {appointmentData.doctorService?.service?.specialty?.name || "Chưa cập nhật"}
+                            {doctorService?.service?.specialty?.name || "Chưa cập nhật"}
                             </Descriptions.Item>
                             <Descriptions.Item label="Dịch vụ khám">
-                            {appointmentData.doctorService?.service?.name || "Chưa cập nhật"}
+                            {doctorService?.service?.name || "Chưa cập nhật"}
                             </Descriptions.Item>
                         </Descriptions>
                         </StyledCard>
@@ -236,7 +310,7 @@ const DetailAppointmentPage = () => {
                                         shape="round"
                                         ghost
                                         icon={<CheckOutlined />}
-                                        onClick={() => handleUpdatePaymentStatus(appointmentData.payment.paymentId)}
+                                        onClick={() => setIsOpenModalPaymentConfirm(true)}
                                         disabled={appointmentData?.payment?.status === "paid"} // tránh thanh toán lại
                                     >
                                         Xác nhận thanh toán

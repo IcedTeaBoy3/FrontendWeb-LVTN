@@ -296,8 +296,6 @@ const AppointmentPage = () => {
                 const itemActions = [
                     { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined style={{ fontSize: 16 }} /> },
                     { type: "divider" },
-                    // { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined style={{ fontSize: 16 }} /> },
-                    // { type: "divider" },
                     { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
                    
                     

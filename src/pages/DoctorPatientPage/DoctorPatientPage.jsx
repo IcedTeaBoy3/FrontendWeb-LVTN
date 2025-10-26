@@ -1,25 +1,27 @@
 import { useQuery } from "@tanstack/react-query"
 import { AppointmentService } from "@/services/AppointmentService";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import ModalDetailPatient from "@/components/ModalDetailPatient/ModalDetailPatient";
-import { EyeOutlined, EditOutlined, MoreOutlined,SearchOutlined } from "@ant-design/icons";
-import { Dropdown, Typography, Timeline, Tag, Input, Space, Button } from "antd";
+import { EyeOutlined, EditOutlined, MoreOutlined,SearchOutlined, CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { Dropdown, Typography, Timeline, Tag, Input, Space, Button, Card } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import { convertGender } from "@/utils/gender_utils";
 import { convertStatusAppointment, getStatusColor} from "@/utils/status_appointment_utils";
 import dayjs from "dayjs";
-const { Title, Text} = Typography;
+const { Title, Text, Paragraph} = Typography;
 const DoctorPatientPage = () => {
   const [isOpenDrawer, setIsOpenDrawer] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [rowSelected, setRowSelected] = useState(null);
   const [patientSelected, setPatientSelected] = useState(null);
   const [isOpenModalDetailPatient, setIsOpenModalDetailPatient] = useState(false);
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -266,18 +268,35 @@ const DoctorPatientPage = () => {
           <Timeline 
             mode="left"
             items={historyRecords.map((record) => ({
-              label: dayjs(record?.schedule?.workday).format('DD/MM/YYYY'),
+              label: (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                  <div style={{ color: "#1677ff", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                    <CalendarOutlined /> {dayjs(record.appointmentDate).format("DD/MM/YYYY")}
+                  </div>
+                  <div style={{ color: "green",fontWeight:"bold", display: "flex", alignItems: "center", gap: 4 }}>
+                    <ClockCircleOutlined /> {dayjs(record.slot.startTime).format("HH:mm")} - {dayjs(record.slot.endTime).format("HH:mm")}
+                  </div>
+                </div>
+              ),
               children: (
-                <div>
-                  <p><b>Bác sĩ:</b> {record.doctorService?.doctor?.person?.fullName}</p>
-                  <p><b>Dịch vụ:</b> {record.doctorService?.service?.name}</p>
-                  <p><b>Triệu chứng:</b> {record.symptoms || "Không có"}</p>
-                  <p><b>Kết quả:</b> {record.medicalResult?.diagnosis || "Chưa có"}</p>
-                  <p><b>Ghi chú:</b> {record.medicalResult?.note || "—"}</p>
+                <Card 
+                  actions={[
+                    <ButtonComponent
+                      type="primary"
+                      ghost
+                      onClick={() => navigate(`/doctor/patients/${record.medicalResult._id}`)}
+                    >Xem chi tiết</ButtonComponent>
+                  ]}
+                >
+                  <Paragraph ellipsis><Text strong>Dịch vụ khám: </Text>{record.doctorService?.service?.name || "Chưa cập nhật"}</Paragraph>
+                  <Paragraph ellipsis><Text strong>Triệu chứng: </Text>{record.symptoms || "Chưa cập nhật"}</Paragraph>
+                  <Paragraph ellipsis><Text strong>Kết quả: </Text>{record.medicalResult?.diagnosis || "Chưa cập nhật"}</Paragraph>
+                  <Paragraph ellipsis><Text strong>Ghi chú: </Text>{record.medicalResult?.note || "—"}</Paragraph>
+                 
                   <Tag color={getStatusColor(record.status)}>
                     {convertStatusAppointment(record.status)}
                   </Tag>
-                </div>
+                </Card>
               ),
             }))}
           />

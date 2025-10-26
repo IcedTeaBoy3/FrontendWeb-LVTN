@@ -97,6 +97,7 @@ const AdminLayout = () => {
         "/doctor/appointments": "Lịch khám",
         "/doctor/appointments/date": "Ngày khám",
         "/doctor/schedules/:id": "Chi tiết lịch làm việc",
+        "/doctor/patients/:id": "Chi tiết kết quả khám",
         "/doctor/personinfo": "Thông tin tài khoản",
     };
 
@@ -110,6 +111,9 @@ const AdminLayout = () => {
             let title = breadcrumbNameMap[url];
             if(!title && /^\/doctor\/schedules\/[^/]+$/.test(url)){
                 title = breadcrumbNameMap["/doctor/schedules/:id"];
+            }
+            if(!title && /^\/doctor\/patients\/[^/]+$/.test(url)){
+                title = breadcrumbNameMap["/doctor/patients/:id"];
             }
             return {
                 title: title || url,

@@ -9,4 +9,12 @@ export const MedicalResultService = {
             throw error.response.data;
         }
     },
+    getMedicalResult: async (medicalResultId) => {
+        try {
+            const response = await axiosInstance.get(`/medicalresult/get-medicalresult/${medicalResultId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
 };
