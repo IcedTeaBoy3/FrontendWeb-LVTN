@@ -5,7 +5,7 @@ import DoctorOverview from "./components/DoctorOverview";
 import StatisticByTime from "@/components/StatisticByTime/StatisticByTime";
 import DoctorStatisticPatient from "./components/DoctorStatisticPatient";
 import TimeFilter from "@/components/TimeFilter/TimeFilter";
-
+import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardService } from "@/services/DashboardService";
 import { useSelector } from "react-redux";

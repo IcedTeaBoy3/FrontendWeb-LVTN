@@ -1,116 +1,53 @@
-import { Typography,Card,Divider,Statistic } from "antd";
+import { Typography, Card, Divider, List, Tag, Rate, Space } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardService } from "@/services/DashboardService";
-import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,Legend } from 'recharts';
-// import { PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
-import PieChart from "../../components/PieChart/PieChart";
-import BarChart from "../../components/BarChart/BarChart";
+import { AppointmentService } from "@/services/AppointmentService";
+import { DoctorReviewService } from "@/services/DoctorReviewService";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { CalendarOutlined, ClockCircleOutlined, UserOutlined,MessageOutlined  } from "@ant-design/icons";
+import { convertStatusAppointment, getStatusColor } from "@/utils/status_appointment_utils";
 import Overview from "./components/Overview";
-import StatisticByTime from "@/components/StatisticByTime/StatisticByTime";
-import DoctorStatisticPatient from "../DoctorDashboard/components/DoctorStatisticPatient";
+import LoadingCompoent from "@/components/LoadingComponent/LoadingComponent";
 import TimeFilter from "@/components/TimeFilter/TimeFilter";
-import { StyleTabs} from "./style";
-import { UserOutlined } from "@ant-design/icons";
-const { Title,Text } = Typography;
+import PieChart from "@/components/PieChart/PieChart";
+const { Title,Text, Paragraph } = Typography;
 import { Row, Col } from "./style";
 import dayjs from "dayjs";
+const lineColor = '#0096ff';
 const COLORSSTATUS= ['#faad14', '#1890ff', '#52c41a', '#f5222d'];
-const COLORSVERIFICATION = ['#52c41a', '#f5222d']; 
- const statusNameMap = {
+const statusNameMap = {
     pending: 'Chờ xác nhận',
     confirmed: 'Đã xác nhận',
     completed: 'Đã hoàn thành',
     cancelled: 'Đã huỷ',
 };
-const COLORSGENDER = ["#1890ff", "#f759ab", "#52c41a", "#faad14"];
-
 const Dashboard = () => {
-    const [tabKey, setTabKey] = useState('range');
-    const [tabKeyDetails, setTabKeyDetails] = useState('revenue');
+
     const [filter, setFilter] = useState("today");
     const [dateRange, setDateRange] = useState([
-        dayjs().startOf('month').toISOString(),
-        dayjs().endOf('month').toISOString()
+        dayjs().subtract(6, 'day').startOf('day').toDate(), // 6 ngày trước
+        dayjs().endOf('day').toDate(), // hôm nay
     ]);
-    const [selectedMonth, setSelectedMonth] = useState(
-        dayjs().month() + 1
-    );
-    const [selectedYear, setSelectedYear] = useState(
-        dayjs().year()
-    );
-    const onChangeDateRange = (values) => {
-        if(values && values.length === 2) {
-            const startDate = values[0].startOf('day').toISOString();
-            const endDate = values[1].endOf('day').toISOString();
-            setDateRange([startDate, endDate]);
-        } else {
-            setDateRange([]);
-        }
-    };
-    const onChangeMonth = (date) => {
-        if (date) {
-            setSelectedMonth(date.month() + 1); // month() trả 0–11
-            setSelectedYear(date.year());
-        } else {
-            setSelectedMonth(null);
-            setSelectedYear(null);
-        }
-    };
-    const onChangeYear = (date) => {
-        if (date) {
-            setSelectedYear(date.year());
-        } else {
-            setSelectedYear(null);
-        }
-    };
+   
     const queryGetAdminDashboard = useQuery({
         queryKey: ['getAdminDashboard', filter],
         queryFn: () => DashboardService.getAdminOverview(filter),
         retry: 1,
         refetchOnWindowFocus: false,
-
-    });
-    const queryGetAdminStatisticPatient = useQuery({
-        queryKey: ['getAdminStatisticPatient'],
-        queryFn: () => DashboardService.getAdminStatisticPatient(),
-        retry: 1,
-        refetchOnWindowFocus: false,
     });
     const queryGetAdminRevenue = useQuery({
-        queryKey: ['getAdminRevenue', tabKey, dateRange, selectedMonth, selectedYear],
+        queryKey: ['getAdminRevenue'],
         queryFn: async () => {
-            if (tabKey === 'range' && dateRange.length === 2) {
+            if (dateRange.length === 2) {
                 return await DashboardService.getAdminRevenue({
                     type: 'range',
                     start: dateRange[0],
                     end: dateRange[1],
                 });
             }
-
-            if (tabKey === 'month' && selectedMonth && selectedYear) {
-                return await DashboardService.getAdminRevenue({
-                    type: 'month',
-                    month: selectedMonth,
-                    year: selectedYear,
-                });
-            }
-
-            if (tabKey === 'year' && selectedYear) {
-                return await DashboardService.getAdminRevenue({
-                    type: 'year',
-                    year: selectedYear,
-                });
-            }
-
-            return null;
         },
-        enabled: Boolean(
-            (tabKey === 'range' && dateRange.length === 2) ||
-            (tabKey === 'month' && selectedMonth && selectedYear) ||
-            (tabKey === 'year' && selectedYear)
-        ),
+        enabled: dateRange.length === 2,
         retry: 1,
         refetchOnWindowFocus: false,
     });
@@ -120,167 +57,94 @@ const Dashboard = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
-    const queryGetAdminAccountVerification = useQuery({
-        queryKey: ['getAdminAccountVerification'],
-        queryFn: () => DashboardService.getAdminAccountVerification(),
+    // gần nhất
+    const queryGetAllAppointments = useQuery({
+        queryKey: ['getAllAppointments'],
+        queryFn: () => AppointmentService.getAllAppointments({ page: 1, limit: 5 }),
         retry: 1,
         refetchOnWindowFocus: false,
     });
-    const queryGetAdminAppointmentPerDoctor = useQuery({
-        queryKey: ['getAdminAppointmentPerDoctor'],
-        queryFn: () => DashboardService.getAdminAppointmentPerDoctor(),
+    // lấy các đánh giá bình luần gần nhất
+    const queryGetRecentReviews = useQuery({
+        queryKey: ['getRecentReviews'],
+        queryFn: () => DoctorReviewService.getAllDoctorReviews({ page: 1, limit: 5 }),
         retry: 1,
         refetchOnWindowFocus: false,
     });
-    const queryGetAdminAppointment= useQuery({
-        queryKey: ['getAdminAppointmentPerDay', tabKey, dateRange, selectedMonth, selectedYear],
-        queryFn: async () => {
-            if (tabKey === 'range' && dateRange.length === 2) {
-                return await DashboardService.getAdminAppointment({
-                    type: 'range',
-                    start: dateRange[0],
-                    end: dateRange[1],
-                });
-            }
-            if (tabKey === 'month' && selectedMonth && selectedYear) {
-                return await DashboardService.getAdminAppointment({
-                    type: 'month',
-                    month: selectedMonth,
-                    year: selectedYear,
-                });
-            }
-            if (tabKey === 'year' && selectedYear) {
-                return await DashboardService.getAdminAppointment({
-                    type: 'year',
-                    year: selectedYear,
-                });
-            }
-        },
-        enabled: Boolean(
-            (tabKey === 'range' && dateRange.length === 2) ||
-            (tabKey === 'month' && selectedMonth && selectedYear) ||
-            (tabKey === 'year' && selectedYear)
-        ),
-        retry: 1,
-        refetchOnWindowFocus: false,
-    });
+    
     const { data: overview, isLoading: isLoadingOverview } = queryGetAdminDashboard;
     const { data: revenue, isLoading: isLoadingRevenue} = queryGetAdminRevenue;
     const { data: appointmentStatus, isLoading: isLoadingAppointmentStatus } = queryGetAdminAppointmentStatus;
-    const { data: accountVerification, isLoading: isLoadingAccountVerification } = queryGetAdminAccountVerification;
-    const { data: appointmentPerDoctor, isLoading: isLoadingAppointmentPerDoctor } = queryGetAdminAppointmentPerDoctor;
-    const { data: appointment, isLoading: isLoadingAppointment } = queryGetAdminAppointment;
-    const { data: statisticPatient, isLoading: isLoadingStatisticPatient } = queryGetAdminStatisticPatient;
-
-    const overviewData = overview?.data || {};
+    const { data: appointments, isLoading: isLoadingAppointments } = queryGetAllAppointments;
+    const { data: doctorReviews, isLoading: isLoadingRecentReviews } = queryGetRecentReviews;
     const revenueData = revenue?.data || [];
+    const overviewData = overview?.data || {};
     const appointmentStatusData = appointmentStatus?.data || {};
-    const accountVerificationData = accountVerification?.data || {};
-    const appointmentPerDoctorData = appointmentPerDoctor?.data || [];
-    const appointmentData = appointment?.data || [];
-    const statisticPatientData = statisticPatient?.data || {};
+    const appointmentData = appointments?.data?.appointments || [];
+    const doctorReviewsData = doctorReviews?.data?.reviews || [];
     // Chuyển sang array
     const pieChartData = Object.entries(appointmentStatusData).map(([key, value]) => ({
         name: statusNameMap[key] || key,
         value: value,
     }));
-    const donutChartData = Object.keys(accountVerificationData).map((key) => ({
-        name: key === 'verified' ? 'Đã xác thực' : 'Chưa xác thực',
-        value: accountVerificationData[key],
+    const recentAppointmentData = appointmentData.map(appointment => ({
+        key: appointment.id,
+        patientName: appointment.patientProfile.person?.fullName ?? '--',
+        doctorName: appointment.doctorService?.doctor?.person?.fullName ?? '--',
+        date: dayjs(appointment.schedule?.workday).format('DD/MM/YYYY'),
+        time: dayjs(appointment.slot?.startTime).format('HH:mm') + ' - ' + dayjs(appointment.slot?.endTime).format('HH:mm'),
+        status: appointment.status,
     }));
-    const pieChartDataGender = statisticPatientData.genderStats?.map(item => ({
-        name: item.gender === 'male' ? 'Nam' : item.gender === 'female' ? 'Nữ' : 'Khác',
-        value: item.total,
+    const recentReviewData = doctorReviewsData.map(review => ({
+        key: review?.doctorReviewId,
+        patientName: review?.patientProfile?.person?.fullName || '--',
+        doctorName: review?.doctorProfile?.person?.fullName || '--',
+        rating: review?.rating || 0,
+        comment: review?.comment || '--',
+        date: dayjs(review?.createdAt).format('DD/MM/YYYY'),
     }));
     return (
         <>
             <Row justify="space-between" align="middle" style={{ marginBottom: 20 }}>     
-                <Title level={4}>Thống kê tổng quan</Title>
+                <Title level={4}>Tổng quan hệ thống</Title>
                 <TimeFilter onChange={setFilter} />  
             </Row>
             <Overview isLoadingOverview={isLoadingOverview} overviewData={overviewData} />
             <Divider style={{ margin: '24px 0' }} />
-            <Title level={4}>Thống kê chi tiết</Title>
-            <StyleTabs
-                activeKey={tabKeyDetails}
-                onChange={(key) => setTabKeyDetails(key)}
-                style={{ marginBottom: 16 }}
-                items={[
-              
-                {
-                    key: 'revenue',
-                    label: 'Doanh thu',
-                    children: (
-                    <StatisticByTime
-                        revenueData={revenueData}
-                        appointmentData={appointmentData}
-                        isLoading={isLoadingRevenue || isLoadingAppointment}
-                        tabKey={tabKey}
-                        setTabKey={setTabKey}
-                        dateRange={dateRange}
-                        onChangeDateRange={onChangeDateRange}
-                        selectedMonth={selectedMonth}
-                        onChangeMonth={onChangeMonth}
-                        selectedYear={selectedYear}
-                        onChangeYear={onChangeYear}
-                    />
-                    ),
-                },
-                {
-                    key: "patients",
-                    label: "Bệnh nhân",
-                    children: (
-                    <>
-                        <DoctorStatisticPatient 
-                            statisticPatientData={statisticPatientData}
-                            isLoading={isLoadingStatisticPatient}
-                        />
-                    </>
-                    ),
-                },
-                {
-                    key: "doctors",
-                    label: "Bác sĩ",
-                },
-                {
-                    key: "appointments",
-                    label: "Lịch khám",
-                }
-                
-                
-                ]}
-            >
-                
-                
-            </StyleTabs>
+            <Title level={4}>Doanh thu 7 ngày trước</Title>
+            <Card>
+                <LoadingCompoent isLoading={isLoadingRevenue}>
+                    <ResponsiveContainer width="100%" height={350}>
+                        <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                            <defs>
+                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
+                            <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
+                            <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
+                            <Tooltip
+                                formatter={(value) =>
+                                    new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                }).format(value)
+                                }
+                            />
+                            <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </LoadingCompoent>
+            </Card>
             <Row gutter={[16, 16]} style={{ marginTop: 30 }}>
-
                 <Col span={12}>
                     <Card style={{ borderRadius: 16}}>
-                        <LoadingComponent isLoading={isLoadingAppointmentStatus}>
-                            <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                        <LoadingCompoent isLoading={isLoadingAppointmentStatus}>
+                            <Title level={4} style={{ textAlign: "center", marginBottom: 16 }}>
                                 Biểu đồ trạng thái lịch hẹn
                             </Title>
-                            {/* <ResponsiveContainer width="100%" height={300}>
-                                <PieChart>
-                                <Pie
-                                    data={pieChartData}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={130}
-                                    fill="#8884d8"
-                                    label
-                                >
-                                    {pieChartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORSSTATUS[index % COLORSSTATUS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend verticalAlign="bottom" />
-                                </PieChart>
-                            </ResponsiveContainer> */}
                             <PieChart
                                 outerRadius={130}
                                 COLORS={COLORSSTATUS}
@@ -289,13 +153,12 @@ const Dashboard = () => {
                             <Divider />
                             <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Tổng số lịch hẹn: {Object.values(appointmentStatusData).reduce((sum, val) => sum + val, 0)}</div>
                             <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Hoàn thành: {appointmentStatusData['completed'] || 0}</div>
-
-                        </LoadingComponent>
+                        </LoadingCompoent>
                     </Card>
                 </Col>
                 <Col span={12}>
-                    <Card style={{ borderRadius: 16 }}>
-                        <LoadingComponent isLoading={isLoadingAccountVerification}>
+                    {/* <Card style={{ borderRadius: 16 }}>
+                        <LoadingCompoent isLoading={isLoadingAccountVerification}>
                             <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
                                 Biểu đồ xác thực tài khoản người dùng
                             </Title>
@@ -307,35 +170,94 @@ const Dashboard = () => {
                             <Divider />
                             <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Tổng số tài khoản: {Object.values(accountVerificationData).reduce((sum, val) => sum + val, 0)}</div>
                             <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Đã xác thực: {accountVerificationData['verified'] || 0}</div>
-                        </LoadingComponent>
+                        </LoadingCompoent>
+                    </Card> */}
+                </Col>
+            </Row>
+            <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
+            {/* --- Lịch khám gần nhất --- */}
+                <Col span={12}>
+                    <Card
+                    title={<Title level={4} style={{ margin: 0 }}>📅 Lịch khám gần nhất</Title>}
+                    >
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={recentAppointmentData}
+                        split={true}
+                        renderItem={(item) => (
+                        <List.Item
+                            style={{
+                                borderBottom: "1px solid #f0f0f0",
+                                padding: "12px 0",
+                            }}
+                            actions={[
+                                <Tag color={getStatusColor(item.status)}>
+                                    {convertStatusAppointment(item.status)}
+                                </Tag>
+                            ]}
+                        >
+                            <List.Item.Meta
+                            title={
+                               
+                                <Text strong>{item.patientName}</Text>
+                               
+                            }
+                            description={
+                                <div style={{ lineHeight: 1.8 }}>
+                                <Text type="secondary">
+                                    <UserOutlined /> Bác sĩ:{" "}
+                                    <Text strong>{item.doctorName}</Text>
+                                </Text>
+                                <br />
+                                <Text type="secondary">
+                                    <CalendarOutlined /> Ngày: {item.date}
+                                </Text>
+                                <br />
+                                <Text type="secondary">
+                                    <ClockCircleOutlined /> Thời gian: {item.time}
+                                </Text>
+                                </div>
+                            }
+                            />
+                        </List.Item>
+                        )}
+                    />
+                    </Card>
+                </Col>
+
+            {/* --- Đánh giá gần nhất --- */}
+                <Col span={12}>
+                    <Card
+                        variant="false"
+                        title={<Title level={4} style={{ margin: 0 }}>⭐ Đánh giá gần nhất</Title>}
+                    >
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={recentReviewData}
+                        split={true}
+                        renderItem={(item) => (
+                        <List.Item
+                            key={item.key}
+                            actions={[
+                                <Tag type="secondary">
+                                    <CalendarOutlined /> Ngày: {item.date}
+                                </Tag>
+                            ]}
+                        >
+                            <List.Item.Meta
+                                title={<Rate disabled defaultValue={item.rating} />}
+                                avatar={<MessageOutlined style={{ fontSize: 20, color: "#1890ff" }} />}
+                                description={
+                                    <Paragraph style={{ marginTop: 6 }}>{item.comment}</Paragraph>
+                                }
+                            />
+                        
+                        </List.Item>
+                        )}
+                    />
                     </Card>
                 </Col>
             </Row>
-            {/* <LoadingComponent isLoading={isLoadingAppointmentPerDoctor}>
-
-                <Card title="Biểu đồ số lịch khám của mỗi bác sĩ theo trạng thái" style={{ borderRadius: 16, marginTop: 30 }}>
-                    <ResponsiveContainer width="100%" height={400}>
-                        <BarChart data={appointmentPerDoctorData || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="doctorName" />
-                        <YAxis label={{ value: 'Số lịch', angle: -90, position: 'insideLeft' }} />
-                        <Tooltip 
-                            formatter={(value, name) => [value, statusNameMap[name]]} // đổi tên tooltip
-                        />
-                        <Legend 
-                            verticalAlign="bottom" 
-                            formatter={(value) => statusNameMap[value] || value} // đổi tên legend
-                        />
-                        <Bar dataKey="pending" stackId="a" fill={COLORS.pending} />
-                        <Bar dataKey="confirmed" stackId="a" fill={COLORS.confirmed} />
-                        <Bar dataKey="completed" stackId="a" fill={COLORS.completed} />
-                        <Bar dataKey="cancelled" stackId="a" fill={COLORS.cancelled} />
-                    
-                        </BarChart>
-                    </ResponsiveContainer>
-                </Card>
-            </LoadingComponent> */}
-            
         </>
     )
 }

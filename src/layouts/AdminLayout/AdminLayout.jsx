@@ -25,18 +25,17 @@ import {
     TeamOutlined,
     LogoutOutlined,
     UserOutlined,
-    BellOutlined,
     InfoCircleFilled,
+    BarChartOutlined,
     MedicineBoxOutlined,
     SolutionOutlined,
-    FileTextOutlined,
     AppstoreOutlined,
 } from "@ant-design/icons";
 const menuItems = [
     {
         key: "/admin/dashboard",
         icon: <DashboardOutlined />,
-        label: "Thống kê",
+        label: "Tổng quan",
     },
     {
         key: "/admin/accounts",
@@ -82,7 +81,11 @@ const menuItems = [
         icon: <CalendarOutlined />,
         label: "Lịch khám",
     },
-   
+    {
+        key: "/admin/statistics",
+        icon: <BarChartOutlined />,
+        label: "Thống kê",
+    }
     
 ];
 import {
@@ -135,6 +138,7 @@ const AdminLayout = () => {
         "/admin/clinics": "Phòng khám",
         "/admin/services": "Dịch vụ",
         "/admin/personinfo": "Thông tin cá nhân",
+        "/admin/statistics": "Thống kê",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);

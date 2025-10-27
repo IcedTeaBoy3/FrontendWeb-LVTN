@@ -23,18 +23,16 @@ import {
     TeamOutlined,
     LogoutOutlined,
     UserOutlined,
-    BellOutlined,
     InfoCircleFilled,
     MedicineBoxOutlined,
-    SolutionOutlined,
     FileTextOutlined,
-    AppstoreOutlined,
+    BarChartOutlined 
 } from "@ant-design/icons";
 const menuItems = [
     {
         key: "/doctor/dashboard",
         icon: <DashboardOutlined />,
-        label: "Thống kê",
+        label: "Tổng quan",
     },
     {
         key: "/doctor/doctorinfo",
@@ -51,11 +49,15 @@ const menuItems = [
         icon: <MedicineBoxOutlined />,
         label: "Lịch làm việc",
     },
- 
     {
         key: "/doctor/appointments",
         icon: <CalendarOutlined />,
         label: "Lịch khám",
+    },
+    {
+        key: "/doctor/statistics",
+        icon: <BarChartOutlined />,
+        label: "Thống kê",
     }
 ];
 import {

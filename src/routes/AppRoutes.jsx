@@ -30,6 +30,7 @@ import DetailDoctorSchedulePage from "@/pages/DetailDoctorSchedulePage/DetailDoc
 import DoctorReviewPage from "@/pages/DoctorReviewPage/DoctorReviewPage";
 import DoctorInfo from "@/pages/DoctorInfo/DoctorInfo";
 import DetailMedicalResultPage from "@/pages/DetailMedicalResultPage/DetailMedicalResultPage";
+import StatisticPage from "@/pages/StatisticPage/StatisticPage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 import DoctorLayout from "@/layouts/DoctorLayout/DoctorLayout";
@@ -65,6 +66,7 @@ const AppRoutes = () => {
                     <Route path="appointments" element={<AppointmentPage />} />
                     <Route path="appointments/:id" element={<DetailAppointmentPage />} />
                     <Route path="doctorreviews" element={<DoctorReviewPage />} />
+                    <Route path="statistics" element={<StatisticPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
 
