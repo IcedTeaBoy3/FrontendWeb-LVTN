@@ -11,7 +11,7 @@ export default function BarChart({ data, xDataKey, barDataKey, barColor }) {
         <YAxis />
         <Tooltip />
         <Legend verticalAlign="bottom" />
-        <Bar dataKey={barDataKey} fill={barColor} />
+        <Bar dataKey={barDataKey} fill={barColor} name={barDataKey} />
       </ReBarChart>
     </ResponsiveContainer>
   );

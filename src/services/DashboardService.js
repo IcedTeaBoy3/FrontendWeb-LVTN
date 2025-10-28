@@ -116,4 +116,12 @@ export const DashboardService = {
             throw error.response.data;
         }
     },
+    getAdminSpecialtyPerDoctor: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-specialty-per-doctor');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
 }

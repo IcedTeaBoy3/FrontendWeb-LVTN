@@ -15,13 +15,7 @@ const { Title,Text, Paragraph } = Typography;
 import { Row, Col } from "./style";
 import dayjs from "dayjs";
 const lineColor = '#0096ff';
-const COLORSSTATUS= ['#faad14', '#1890ff', '#52c41a', '#f5222d'];
-const statusNameMap = {
-    pending: 'Chờ xác nhận',
-    confirmed: 'Đã xác nhận',
-    completed: 'Đã hoàn thành',
-    cancelled: 'Đã huỷ',
-};
+
 const Dashboard = () => {
 
     const [filter, setFilter] = useState("today");
@@ -51,12 +45,7 @@ const Dashboard = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
-    const queryGetAdminAppointmentStatus = useQuery({
-        queryKey: ['getAdminAppointmentStatus'],
-        queryFn: () => DashboardService.getAdminAppointmentStatus(),
-        retry: 1,
-        refetchOnWindowFocus: false,
-    });
+    
     // gần nhất
     const queryGetAllAppointments = useQuery({
         queryKey: ['getAllAppointments'],
@@ -74,19 +63,16 @@ const Dashboard = () => {
     
     const { data: overview, isLoading: isLoadingOverview } = queryGetAdminDashboard;
     const { data: revenue, isLoading: isLoadingRevenue} = queryGetAdminRevenue;
-    const { data: appointmentStatus, isLoading: isLoadingAppointmentStatus } = queryGetAdminAppointmentStatus;
+    
     const { data: appointments, isLoading: isLoadingAppointments } = queryGetAllAppointments;
     const { data: doctorReviews, isLoading: isLoadingRecentReviews } = queryGetRecentReviews;
     const revenueData = revenue?.data || [];
     const overviewData = overview?.data || {};
-    const appointmentStatusData = appointmentStatus?.data || {};
+    // const appointmentStatusData = appointmentStatus?.data || {};
     const appointmentData = appointments?.data?.appointments || [];
     const doctorReviewsData = doctorReviews?.data?.reviews || [];
     // Chuyển sang array
-    const pieChartData = Object.entries(appointmentStatusData).map(([key, value]) => ({
-        name: statusNameMap[key] || key,
-        value: value,
-    }));
+   
     const recentAppointmentData = appointmentData.map(appointment => ({
         key: appointment.id,
         patientName: appointment.patientProfile.person?.fullName ?? '--',
@@ -138,126 +124,93 @@ const Dashboard = () => {
                     </ResponsiveContainer>
                 </LoadingCompoent>
             </Card>
-            <Row gutter={[16, 16]} style={{ marginTop: 30 }}>
-                <Col span={12}>
-                    <Card style={{ borderRadius: 16}}>
-                        <LoadingCompoent isLoading={isLoadingAppointmentStatus}>
-                            <Title level={4} style={{ textAlign: "center", marginBottom: 16 }}>
-                                Biểu đồ trạng thái lịch hẹn
-                            </Title>
-                            <PieChart
-                                outerRadius={130}
-                                COLORS={COLORSSTATUS}
-                                data={pieChartData || []}
-                            />
-                            <Divider />
-                            <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Tổng số lịch hẹn: {Object.values(appointmentStatusData).reduce((sum, val) => sum + val, 0)}</div>
-                            <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Hoàn thành: {appointmentStatusData['completed'] || 0}</div>
-                        </LoadingCompoent>
-                    </Card>
-                </Col>
-                <Col span={12}>
-                    {/* <Card style={{ borderRadius: 16 }}>
-                        <LoadingCompoent isLoading={isLoadingAccountVerification}>
-                            <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                Biểu đồ xác thực tài khoản người dùng
-                            </Title>
-                            <PieChart
-                                outerRadius={130}
-                                COLORS={COLORSVERIFICATION}
-                                data={donutChartData || []}
-                            />
-                            <Divider />
-                            <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Tổng số tài khoản: {Object.values(accountVerificationData).reduce((sum, val) => sum + val, 0)}</div>
-                            <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Đã xác thực: {accountVerificationData['verified'] || 0}</div>
-                        </LoadingCompoent>
-                    </Card> */}
-                </Col>
-            </Row>
-            <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
-            {/* --- Lịch khám gần nhất --- */}
-                <Col span={12}>
-                    <Card
-                    title={<Title level={4} style={{ margin: 0 }}>📅 Lịch khám gần nhất</Title>}
-                    >
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={recentAppointmentData}
-                        split={true}
-                        renderItem={(item) => (
-                        <List.Item
-                            style={{
-                                borderBottom: "1px solid #f0f0f0",
-                                padding: "12px 0",
-                            }}
-                            actions={[
-                                <Tag color={getStatusColor(item.status)}>
-                                    {convertStatusAppointment(item.status)}
-                                </Tag>
-                            ]}
+            
+            <LoadingCompoent isLoading={isLoadingRecentReviews || isLoadingAppointments}>
+                <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
+                {/* --- Lịch khám gần nhất --- */}
+                    <Col span={12}>
+                        <Card
+                        title={<Title level={4} style={{ margin: 0 }}>📅 Lịch khám gần nhất</Title>}
                         >
-                            <List.Item.Meta
-                            title={
-                               
-                                <Text strong>{item.patientName}</Text>
-                               
-                            }
-                            description={
-                                <div style={{ lineHeight: 1.8 }}>
-                                <Text type="secondary">
-                                    <UserOutlined /> Bác sĩ:{" "}
-                                    <Text strong>{item.doctorName}</Text>
-                                </Text>
-                                <br />
-                                <Text type="secondary">
-                                    <CalendarOutlined /> Ngày: {item.date}
-                                </Text>
-                                <br />
-                                <Text type="secondary">
-                                    <ClockCircleOutlined /> Thời gian: {item.time}
-                                </Text>
-                                </div>
-                            }
-                            />
-                        </List.Item>
-                        )}
-                    />
-                    </Card>
-                </Col>
-
-            {/* --- Đánh giá gần nhất --- */}
-                <Col span={12}>
-                    <Card
-                        variant="false"
-                        title={<Title level={4} style={{ margin: 0 }}>⭐ Đánh giá gần nhất</Title>}
-                    >
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={recentReviewData}
-                        split={true}
-                        renderItem={(item) => (
-                        <List.Item
-                            key={item.key}
-                            actions={[
-                                <Tag type="secondary">
-                                    <CalendarOutlined /> Ngày: {item.date}
-                                </Tag>
-                            ]}
-                        >
-                            <List.Item.Meta
-                                title={<Rate disabled defaultValue={item.rating} />}
-                                avatar={<MessageOutlined style={{ fontSize: 20, color: "#1890ff" }} />}
-                                description={
-                                    <Paragraph style={{ marginTop: 6 }}>{item.comment}</Paragraph>
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={recentAppointmentData}
+                            split={true}
+                            renderItem={(item) => (
+                            <List.Item
+                                style={{
+                                    borderBottom: "1px solid #f0f0f0",
+                                    padding: "12px 0",
+                                }}
+                                actions={[
+                                    <Tag color={getStatusColor(item.status)}>
+                                        {convertStatusAppointment(item.status)}
+                                    </Tag>
+                                ]}
+                            >
+                                <List.Item.Meta
+                                title={
+                                
+                                    <Text strong>{item.patientName}</Text>
+                                
                                 }
-                            />
-                        
-                        </List.Item>
-                        )}
-                    />
-                    </Card>
-                </Col>
-            </Row>
+                                description={
+                                    <div style={{ lineHeight: 1.8 }}>
+                                    <Text type="secondary">
+                                        <UserOutlined /> Bác sĩ:{" "}
+                                        <Text strong>{item.doctorName}</Text>
+                                    </Text>
+                                    <br />
+                                    <Text type="secondary">
+                                        <CalendarOutlined /> Ngày: {item.date}
+                                    </Text>
+                                    <br />
+                                    <Text type="secondary">
+                                        <ClockCircleOutlined /> Thời gian: {item.time}
+                                    </Text>
+                                    </div>
+                                }
+                                />
+                            </List.Item>
+                            )}
+                        />
+                        </Card>
+                    </Col>
+
+                {/* --- Đánh giá gần nhất --- */}
+                    <Col span={12}>
+                        <Card
+                            variant="false"
+                            title={<Title level={4} style={{ margin: 0 }}>⭐ Đánh giá gần nhất</Title>}
+                        >
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={recentReviewData}
+                            split={true}
+                            renderItem={(item) => (
+                            <List.Item
+                                key={item.key}
+                                actions={[
+                                    <Tag type="secondary">
+                                        <CalendarOutlined /> Ngày: {item.date}
+                                    </Tag>
+                                ]}
+                            >
+                                <List.Item.Meta
+                                    title={<Rate disabled defaultValue={item.rating} />}
+                                    avatar={<MessageOutlined style={{ fontSize: 20, color: "#1890ff" }} />}
+                                    description={
+                                        <Paragraph style={{ marginTop: 6 }}>{item.comment}</Paragraph>
+                                    }
+                                />
+                            
+                            </List.Item>
+                            )}
+                        />
+                        </Card>
+                    </Col>
+                </Row>
+            </LoadingCompoent>
         </>
     )
 }

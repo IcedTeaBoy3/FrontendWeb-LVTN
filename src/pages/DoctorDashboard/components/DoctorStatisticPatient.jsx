@@ -3,7 +3,7 @@ import BarChart from "@/components/BarChart/BarChart";
 import PieChart from "@/components/PieChart/PieChart";
 import LoadingCompoent from "@/components/LoadingComponent/LoadingComponent";
 import { StyledCard } from "./style";
-import { Row, Col, Statistic, Card } from "antd";
+import { Row, Col, Statistic, Card, Splitter } from "antd";
 import { Typography } from "antd";
 const { Title } = Typography;
 const COLORSGENDER = ["#1890ff", "#f759ab", "#52c41a", "#faad14"];
@@ -44,30 +44,34 @@ const DoctorStatisticPatient = ({statisticPatientData, isLoading}) => {
                     </StyledCard>
                 </Col>
             </Row>
-            <Row gutter={[24, 24]} style={{ marginTop: 32 }}>
-                <Col xs={24} md={12}>
-                    <Card >
-                        <Title level={5} style={{textAlign:'center', marginBottom: 16}}>Biểu đồ bệnh nhân theo giới tính</Title>
-                        <PieChart
-                            outerRadius={120}
-                            COLORS={COLORSGENDER}
-                            data={pieChartDataGender || []}
-                        />
-                    </Card>
-                   
-                </Col >
-                <Col span={12} xs={24} md={12}>
+            <Splitter style={{ marginTop: 32, height: 420 }}>
+                <Splitter.Panel defaultSize="50%">
                     <Card>
-                        <Title level={5} style={{textAlign:'center', marginBottom: 16}}>Biểu đồ bệnh nhân theo độ tuổi</Title>
-                        <BarChart
-                            data={barChartDataAge || []}
-                            xDataKey="ageRange"
-                            barDataKey="total"
-                            barColor="#1890ff"
-                        />
+                    <Title level={4} style={{ textAlign: "center", marginBottom: 16 }}>
+                        Biểu đồ bệnh nhân theo giới tính
+                    </Title>
+                    <PieChart
+                        outerRadius={120}
+                        COLORS={COLORSGENDER}
+                        data={pieChartDataGender || []}
+                    />
                     </Card>
-                </Col>
-            </Row>
+                </Splitter.Panel>
+
+                <Splitter.Panel defaultSize="50%">
+                    <Card>
+                    <Title level={4} style={{ textAlign: "center", marginBottom: 16 }}>
+                        Biểu đồ bệnh nhân theo độ tuổi
+                    </Title>
+                    <BarChart
+                        data={barChartDataAge || []}
+                        xDataKey="ageRange"
+                        barDataKey="total"
+                        barColor="#1890ff"
+                    />
+                    </Card>
+                </Splitter.Panel>
+            </Splitter>
         </LoadingCompoent>
     )
 }

@@ -1,4 +1,4 @@
-import { DatePicker, Divider, Typography, Row,Card} from "antd";
+import { DatePicker, Divider, Typography, Row,Card, Splitter} from "antd";
 import { StyleTabs } from "@/pages/Dashboard/style";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -26,17 +26,16 @@ const StatisticByTime = ({
             <StyleTabs
                 activeKey={tabKey}
                 onChange={setTabKey}
+                type="card"
+                size="medium"
                 items={[
                     // ====== THEO KHOẢNG NGÀY ======
                     {
                         key: 'range',
                         label: 'Theo khoảng ngày',
                         children: (
-                            <>
-                                
+                            <>                   
                                 <Row justify={'start'} style={{ marginBottom: 30 }}>
-
-
                                     <RangePicker
                                         onChange={onChangeDateRange}
                                         format="DD/MM/YYYY"
@@ -46,57 +45,66 @@ const StatisticByTime = ({
                                         style={{ marginBottom: 20 }}
                                     />
                                 </Row>
-                               
-                            
-                                <LoadingComponent isLoading={isLoading}>
-                                    <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                        Biểu đồ doanh thu theo khoảng ngày {dateRange.length === 2 ? `từ ${new Date(dateRange[0]).toLocaleDateString('vi-VN')} đến ${new Date(dateRange[1]).toLocaleDateString('vi-VN')}` : ''}
-                                    </Title>
-                                    <ResponsiveContainer width="100%" height={350}>
-                                        <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                               <LoadingComponent isLoading={isLoading}>
+                                    <Splitter layout="vertical" style={{ height: 1000 }}>
+                                        {/* --- Biểu đồ doanh thu --- */}
+                                        <Splitter.Panel defaultSize="50%">
+                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                            Biểu đồ doanh thu theo khoảng ngày{" "}
+                                            {dateRange.length === 2
+                                            ? `từ ${new Date(dateRange[0]).toLocaleDateString("vi-VN")} đến ${new Date(dateRange[1]).toLocaleDateString("vi-VN")}`
+                                            : ""}
+                                        </Title>
+                                        <ResponsiveContainer width="100%" height={350}>
+                                            <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                                             <defs>
                                                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
-                                            <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
-                                            <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
-                                            <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
+                                            <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0" />
+                                            <XAxis dataKey="date" label={{ value: "Ngày", position: "insideBottomRight", offset: 0 }} />
+                                            <YAxis label={{ value: "Doanh thu (VND)", angle: -90, position: "insideLeft" }} />
                                             <Tooltip
                                                 formatter={(value) =>
-                                                    new Intl.NumberFormat('vi-VN', {
-                                                        style: 'currency',
-                                                        currency: 'VND',
+                                                new Intl.NumberFormat("vi-VN", {
+                                                    style: "currency",
+                                                    currency: "VND",
                                                 }).format(value)
                                                 }
                                             />
                                             <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
-                                        </LineChart>
-                                    </ResponsiveContainer>
-                                    <Divider />
-                                    <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                        Biểu đồ số lịch khám theo khoảng ngày {dateRange.length === 2 ? `từ ${new Date(dateRange[0]).toLocaleDateString('vi-VN')} đến ${new Date(dateRange[1]).toLocaleDateString('vi-VN')}` : ''}
-                                    </Title>
-                                    <ResponsiveContainer width="100%" height={300}>
-                                        <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                        </Splitter.Panel>
+
+                                        {/* --- Biểu đồ số lịch khám --- */}
+                                        <Splitter.Panel defaultSize="50%">
+                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                            Biểu đồ số lịch khám theo khoảng ngày{" "}
+                                            {dateRange.length === 2
+                                            ? `từ ${new Date(dateRange[0]).toLocaleDateString("vi-VN")} đến ${new Date(dateRange[1]).toLocaleDateString("vi-VN")}`
+                                            : ""}
+                                        </Title>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                                             <defs>
                                                 <linearGradient id="colorAppointment" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
-                                            <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
-                                            <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
-                                            <YAxis label={{ value: 'Số lịch khám', angle: -90, position: 'insideLeft' }} />
-                                            <Tooltip
-                                                formatter={(value) => value.toLocaleString('vi-VN')}
-                                            />
+                                            <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0" />
+                                            <XAxis dataKey="date" label={{ value: "Ngày", position: "insideBottomRight", offset: 0 }} />
+                                            <YAxis label={{ value: "Số lịch khám", angle: -90, position: "insideLeft" }} />
+                                            <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
                                             <Line type="monotone" dataKey="totalAppointments" stroke={lineColor} strokeWidth={2} />
-                                        </LineChart>
-                                    </ResponsiveContainer>
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                        </Splitter.Panel>
+                                    </Splitter>
                                 </LoadingComponent>
-
                             </>
                         ),
                     },

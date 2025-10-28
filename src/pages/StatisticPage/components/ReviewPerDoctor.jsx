@@ -1,20 +1,19 @@
-
+import React from 'react'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent'
 import TableStyle from '@/components/TableStyle/TableStyle'
-import { Card, Typography, Splitter } from 'antd'
+import { Card, Typography, Divider, Splitter,Rate  } from 'antd'
 import { useState } from 'react'
 const { Title } = Typography
-const AppointmentPerService = ({data, isLoading}) => {
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 5,
-    });
-    const dataTable = data?.map((item, index) => ({
-        key: item.serviceId,
+
+const ReviewPerDoctor = ({data, isLoading}) => {
+    const [pagination, setPagination] = useState({ current: 1, pageSize: 5});
+    const dataTableAvgRating = data?.map((item, index) => ({
+        key: item.doctorId || index,
         index: index + 1,
-        serviceName: item.serviceName,
-        appointmentCount: item.appointmentCount,
+        doctorName: item.doctorName,
+        averageRating: item.averageRating,
+        ratingCount: item.ratingCount,
     }));
     const columns = [
         {
@@ -25,27 +24,33 @@ const AppointmentPerService = ({data, isLoading}) => {
             width: 100,
         },
         {
-            title: 'Tên dịch vụ',
-            dataIndex: 'serviceName',
-            key: 'serviceName',
+            title: 'Tên bác sĩ',
+            dataIndex: 'doctorName',
+            key: 'doctorName',
         },
         {
-            title: 'Số lịch khám',
-            dataIndex: 'appointmentCount',
-            key: 'appointmentCount',
-            sorter: (a, b) => a.appointmentCount - b.appointmentCount,
-        }
+            title: 'Đánh giá trung bình',
+            dataIndex: 'averageRating',
+            key: 'averageRating',
+            sorter: (a, b) => a?.averageRating - b?.averageRating,
+            render: (value) => <Rate allowHalf disabled defaultValue={value} />
+        },
+        {
+            title: 'Số lượt đánh giá',
+            dataIndex: 'ratingCount',
+            key: 'ratingCount',
+            sorter: (a, b) => a?.ratingCount - b?.ratingCount,
+        },
     ];
     return (
         <LoadingComponent isLoading={isLoading}>
-            <Splitter style={{ height: 500  }}>
+            <Splitter style={{ height: 500 }}>
                 <Splitter.Panel defaultSize="40%">
                     <Card>
-                        <Title level={4}>Danh sách dịch vụ</Title>
+                        <Title level={4} style={{marginBottom:16}}>Top bác sĩ được đánh giá cao nhất</Title>
                         <TableStyle
-                        
+                            dataSource={dataTableAvgRating}
                             columns={columns}
-                            dataSource={dataTable}
                             pagination={pagination}
                             onChange={(page, pageSize) => {
                                 setPagination((prev) => ({
@@ -54,13 +59,12 @@ const AppointmentPerService = ({data, isLoading}) => {
                                     pageSize: pageSize,
                                 }));
                             }}
-                           
                         />
                     </Card>
                 </Splitter.Panel>
-                <Splitter.Panel defaultSize="60%">
+                <Splitter.Panel defaultSize="50%">
                     <Card>
-                        <Title level={4} style={{ textAlign: 'center', marginBottom: 16 }}>Biểu đồ cột số lịch khám của mỗi dịch vụ</Title>
+                        <Title level={4} style={{textAlign:'center',marginBottom:16}}>Biểu đồ cột đánh giá trung bình của mỗi bác sĩ</Title>
                         <ResponsiveContainer width="100%" height={400}>
                             <BarChart
                                 layout="vertical"
@@ -70,7 +74,7 @@ const AppointmentPerService = ({data, isLoading}) => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis type="number" />
                             <YAxis
-                                dataKey="serviceName"
+                                dataKey="doctorName"
                                 type="category"
                                 width={150}
                                 tick={{ fontSize: 13 }}
@@ -78,9 +82,9 @@ const AppointmentPerService = ({data, isLoading}) => {
                             <Tooltip />
                             <Legend />
                             <Bar
-                                dataKey="appointmentCount"
-                                fill="#1976d2"
-                                name="Số lịch khám"
+                                dataKey="averageRating"
+                                fill="#faad14"
+                                name="Đánh giá trung bình"
                                 radius={[0, 5, 5, 0]} // bo góc cho đẹp
                                 barSize={25}
                             />
@@ -88,10 +92,16 @@ const AppointmentPerService = ({data, isLoading}) => {
                         </ResponsiveContainer>
                     </Card>
                 </Splitter.Panel>
+                
             </Splitter>
-           
+                
+                   
+                    
+                    
+            
+                
         </LoadingComponent>
     )
 }
 
-export default AppointmentPerService
+export default ReviewPerDoctor
