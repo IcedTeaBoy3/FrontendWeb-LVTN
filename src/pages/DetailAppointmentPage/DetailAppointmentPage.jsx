@@ -43,6 +43,7 @@ const DetailAppointmentPage = () => {
         onSuccess: (data) => {
             if (data.status === 'success') {
                 Message.success(data.message || 'Cập nhật trạng thái thanh toán thành công');
+                setIsOpenModalPaymentConfirm(false);
                 queryDetailAppointment.refetch(); // Tải lại dữ liệu lịch khám
             }else {
                 Message.error(data.message || 'Cập nhật trạng thái thanh toán thất bại');
@@ -58,6 +59,7 @@ const DetailAppointmentPage = () => {
         onSuccess: (data) => {
             if (data.status === 'success') {
                 Message.success(data.message || 'Xác nhận lịch khám thành công');
+                setIsOpenModalConfirm(false);
                 queryDetailAppointment.refetch(); // Tải lại dữ liệu lịch khám
             }else {
                 Message.error(data.message || 'Xác nhận lịch khám thất bại');

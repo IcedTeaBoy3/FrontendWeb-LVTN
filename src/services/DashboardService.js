@@ -99,5 +99,21 @@ export const DashboardService = {
         } catch (error) {
             throw error.response.data;
         }
-    }
+    },
+    getAppointmentPerServiceStats: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/appointment-per-service-stats');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    getAdminAverageRating: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-average-rating');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
 }
