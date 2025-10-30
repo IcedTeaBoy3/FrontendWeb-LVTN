@@ -2,12 +2,12 @@ import { UserOutlined } from "@ant-design/icons";
 import BarChart from "@/components/BarChart/BarChart";
 import PieChart from "@/components/PieChart/PieChart";
 import LoadingCompoent from "@/components/LoadingComponent/LoadingComponent";
-import { StyledCard } from "./style";
+import { StyledCard } from "../../pages/DoctorDashboard/components/style";
 import { Row, Col, Statistic, Card, Splitter } from "antd";
 import { Typography } from "antd";
 const { Title } = Typography;
 const COLORSGENDER = ["#1890ff", "#f759ab", "#52c41a", "#faad14"];
-const DoctorStatisticPatient = ({statisticPatientData, isLoading}) => {
+const StatisticPatient = ({statisticPatientData, isLoading}) => {
     const pieChartDataGender = statisticPatientData.genderStats?.map(item => ({
         name: item.gender === 'male' ? 'Nam' : item.gender === 'female' ? 'Nữ' : 'Khác',
         value: item.total,
@@ -76,4 +76,4 @@ const DoctorStatisticPatient = ({statisticPatientData, isLoading}) => {
     )
 }
 
-export default DoctorStatisticPatient
+export default StatisticPatient

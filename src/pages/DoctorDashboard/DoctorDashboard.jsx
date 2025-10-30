@@ -3,7 +3,7 @@ import { Row, Col, Card, Statistic,Typography,Divider, Tabs, } from "antd";
 
 import DoctorOverview from "./components/DoctorOverview";
 import StatisticByTime from "@/components/StatisticByTime/StatisticByTime";
-import DoctorStatisticPatient from "./components/DoctorStatisticPatient";
+import DoctorStatisticPatient from "../../components/StatisticPatient/StatisticPatient";
 import TimeFilter from "@/components/TimeFilter/TimeFilter";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import { useQuery } from "@tanstack/react-query";
@@ -60,88 +60,13 @@ const DoctorDashboard = () => {
     keepPreviousData: true,
     enabled: !!filter && !!doctorId,
   });
-  const queryGetDoctorRevenue = useQuery({
-    queryKey: ['getDoctorRevenue', tabKey, dateRange, selectedMonth, selectedYear, doctorId],
-    queryFn: async () => {
-      if (tabKey === 'range' && dateRange.length === 2) {
-        return await DashboardService.getDoctorRevenue(doctorId, {
-          type: 'range',
-          start: dateRange[0],
-          end: dateRange[1],
-        });
-      }
-
-      if (tabKey === 'month' && selectedMonth && selectedYear) {
-        return await DashboardService.getDoctorRevenue(doctorId, {
-          type: 'month',
-          month: selectedMonth,
-          year: selectedYear,
-        });
-      }
-
-      if (tabKey === 'year' && selectedYear) {
-        return await DashboardService.getDoctorRevenue(doctorId, {
-          type: 'year',
-          year: selectedYear,
-        });
-      }
-
-      return null;
-    },
-    enabled: Boolean(
-        (tabKey === 'range' && dateRange.length === 2 && doctorId) ||
-        (tabKey === 'month' && selectedMonth && selectedYear && doctorId) ||
-        (tabKey === 'year' && selectedYear && doctorId)
-    ),
-    retry: 1,
-    refetchOnWindowFocus: false,
-  });
-  const queryGetDoctorAppointment = useQuery({
-    queryKey: ['getDoctorAppointment', tabKey, dateRange, selectedMonth, selectedYear, doctorId],
-    queryFn: async () => {
-      if (tabKey === 'range' && dateRange.length === 2) {
-        return await DashboardService.getDoctorAppointment( doctorId, {
-          type: 'range',
-          start: dateRange[0],
-          end: dateRange[1],
-        });
-      }
-      if (tabKey === 'month' && selectedMonth && selectedYear) {
-          return await DashboardService.getDoctorAppointment( doctorId, {
-              type: 'month',
-              month: selectedMonth,
-              year: selectedYear,
-          });
-      }
-      if (tabKey === 'year' && selectedYear) {
-          return await DashboardService.getDoctorAppointment( doctorId, {
-              type: 'year',
-              year: selectedYear,
-          });
-      }
-    },
-    enabled: Boolean(
-        (tabKey === 'range' && dateRange.length === 2 && doctorId) ||
-        (tabKey === 'month' && selectedMonth && selectedYear && doctorId) ||
-        (tabKey === 'year' && selectedYear && doctorId)
-    ),
-    retry: 1,
-    refetchOnWindowFocus: false,
-  });
-  const queryGetDoctorStatisticPatient = useQuery({
-    queryKey: ['getDoctorStatisticPatient', doctorId],
-    queryFn: () => DashboardService.getDoctorStatisticPatient(doctorId),
-    enabled: !!doctorId,
-  });
+  
 
   const { data: doctorOverviewData, isLoading: isLoadingDoctorOverview } = queryGetDoctorOverview;
-  const { data: doctorStatisticPatientData, isLoading: isLoadingDoctorStatisticPatient } = queryGetDoctorStatisticPatient;
-  const { data: revenue, isLoading: isLoadingRevenue } = queryGetDoctorRevenue;
-  const { data: appointment, isLoading: isLoadingAppointment } = queryGetDoctorAppointment;
-  const revenueData = revenue?.data || [];
-  const appointmentData = appointment?.data || [];
+ 
+
   const overview = doctorOverviewData?.data || {};
-  const statisticPatientData = doctorStatisticPatientData?.data || {};
+ 
   return (
     <>
       <Row justify="space-between" align="middle" style={{ marginBottom: 20 }}>
@@ -150,48 +75,11 @@ const DoctorDashboard = () => {
       </Row>
       <DoctorOverview overview={overview} isLoading={isLoadingDoctorOverview} />
       <Divider style={{ margin: '24px 0' }} />
-      <Title level={4}>Thống kê chi tiết</Title>
-      <StyleTabs
-        activeKey={tabKeyDetails}
-        onChange={(key) => setTabKeyDetails(key)}
-        style={{ marginBottom: 16 }}
-        items={[
-          {
-            key: 'revenue',
-            label: 'Doanh thu',
-            children: (
-              <StatisticByTime
-                revenueData={revenueData}
-                appointmentData={appointmentData}
-                isLoading={isLoadingRevenue || isLoadingAppointment}
-                tabKey={tabKey}
-                setTabKey={setTabKey}
-                dateRange={dateRange}
-                onChangeDateRange={onChangeDateRange}
-                selectedMonth={selectedMonth}
-                onChangeMonth={onChangeMonth}
-                selectedYear={selectedYear}
-                onChangeYear={onChangeYear}
-              />
-            ),
-          },
-          {
-            key: "patients",
-            label: "Bệnh nhân",
-            children: (
-              <DoctorStatisticPatient 
-                statisticPatientData={statisticPatientData}
-                isLoading={isLoadingDoctorStatisticPatient}
-              />
-            ),
-          }
-          
-          
-        ]}
-      >
+      
+      
         
         
-      </StyleTabs>
+      
       
     </>
   )

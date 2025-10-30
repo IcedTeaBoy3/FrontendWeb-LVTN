@@ -14,7 +14,6 @@ import {
     Breadcrumb,
     theme,
     Popover,
-    Grid,
     Divider,
 } from "antd";
 import {
@@ -92,7 +91,7 @@ const AdminLayout = () => {
     };
     const breadcrumbNameMap = {
         "/doctor": "Bác sĩ",
-        "/doctor/dashboard": "Thống kê",
+        "/doctor/dashboard": "Tổng quan",
         "/doctor/doctorinfo": "Thông tin bác sĩ",
         "/doctor/patients": "Bệnh nhân",
         "/doctor/schedules": "Lịch làm việc",
@@ -101,6 +100,7 @@ const AdminLayout = () => {
         "/doctor/schedules/:id": "Chi tiết lịch làm việc",
         "/doctor/patients/:id": "Chi tiết kết quả khám",
         "/doctor/personinfo": "Thông tin tài khoản",
+        "/doctor/statistics": "Thống kê cá nhân",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);

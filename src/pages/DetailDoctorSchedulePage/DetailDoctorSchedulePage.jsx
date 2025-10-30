@@ -273,7 +273,7 @@ const DetailDoctorSchedulePage = () => {
     if(!shift) return;
     setShiftSelected(shift);
     setIsModalOpenDetail(true);
-  }
+  };
   const handleBack = () => {
     navigate(-1);
   };
@@ -369,16 +369,14 @@ const DetailDoctorSchedulePage = () => {
         icon={<ArrowLeftOutlined />}
         onClick={handleBack}
         style={{ fontSize: 18, padding: 0 }}
-
       >Chi tiết lịch làm việc</ButtonComponent>
       <Divider style={{ margin: "12px 0" }} />
       <ButtonComponent 
         type="primary"
         icon={<PlusOutlined />}
+        style={{ marginBottom: 16 }}
         onClick={() => setIsModalOpenCreate(true)}
       >Thêm ca làm việc</ButtonComponent>
-      
-      <Divider style={{ margin: "12px 0" }} />
       <LoadingComponent isLoading={isPendingCreate}>
         <ModalComponent
           title="Thêm mới ca làm việc"

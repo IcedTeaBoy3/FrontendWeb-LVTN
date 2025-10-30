@@ -1,19 +1,16 @@
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar,  } from "recharts";
-
-import { Typography,Card,Divider,Rate,Splitter } from "antd";
+import { Typography,Card,Divider} from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardService } from "@/services/DashboardService";
 import PieChart from "@/components/PieChart/PieChart";
 import StatisticByTime from "@/components/StatisticByTime/StatisticByTime";
-import DoctorStatisticPatient from "@/pages/DoctorDashboard/components/DoctorStatisticPatient";
+import StatisticPatient from "@/components/StatisticPatient/StatisticPatient";
 import AppointmentPerService from "./components/AppointmentPerService";
 import AppointmentPerDoctor from "./components/AppointmentPerDoctor";
 import DoctorPerSpecialty from "./components/DoctorPerSpecialty";
 import ReviewPerDoctor from "./components/ReviewPerDoctor";
 import { StyleTabs} from "./style";
-import TableStyle from "@/components/TableStyle/TableStyle";
 const { Title,Text } = Typography;
 import { Row, Col } from "./style";
 import dayjs from "dayjs";
@@ -240,7 +237,7 @@ const StatisticPage = () => {
                         label: "Bệnh nhân",
                         children: (
                         <>
-                            <DoctorStatisticPatient 
+                            <StatisticPatient
                                 statisticPatientData={statisticPatientData}
                                 isLoading={isLoadingStatisticPatient}
                             />

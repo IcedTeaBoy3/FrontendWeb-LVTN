@@ -35,8 +35,6 @@ const SchedulePage = () => {
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
-    
-
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -276,7 +274,7 @@ const SchedulePage = () => {
             ],
             onFilter: (value, record) => record?.slotDuration === value,
         },
-         {
+        {
             title: "Số ca / ngày",
             dataIndex: "shiftCount",
             key: "shiftCount",
