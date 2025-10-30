@@ -85,6 +85,7 @@ const ClinicPage = () => {
             // Tách địa chỉ
             const parts = clinicData.address?.split(',').map((p) => p.trim()) || [];
             const [specificAddress, wardName, districtName, provinceName] = parts;
+            console.log('parts', parts);
 
             // Tìm mã tỉnh/huyện/xã
             const provinceObj = provinces.find((p) => p.name === provinceName);
@@ -150,6 +151,7 @@ const ClinicPage = () => {
             }
         });
         const fullAddress = `${values.specificAddress}, ${getNameByCode(wards, values.ward)}, ${getNameByCode(districts, values.district)}, ${getNameByCode(provinces, values.province)}`;
+        console.log('fullAddress', fullAddress);
         formData.append("address", fullAddress);
         formData.append("name", values.name);
         formData.append("description", values.description);

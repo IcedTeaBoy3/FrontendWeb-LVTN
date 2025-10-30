@@ -34,6 +34,7 @@ const FormAuth = ({ isRegister, onSubmit, onChangeForm, isPending }) => {
     <FormContainer>
       <TabsComponent
         items={items}
+        centered
         onChange={onChangeForm}
         defaultActiveKey="2"
         activeKey={isRegister ? "2" : "1"}

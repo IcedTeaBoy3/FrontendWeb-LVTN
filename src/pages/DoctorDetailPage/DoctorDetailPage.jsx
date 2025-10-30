@@ -65,6 +65,8 @@ const DoctorDetailPage = () => {
             <div style={{ padding: '16px', background: '#fff', marginTop: '16px 0' }}>
 
                 <TabsComponent
+                    type="card"
+                    
                     defaultActiveKey="1"
                     items={items}
                 />
