@@ -4,12 +4,24 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import { FilePdfOutlined } from "@ant-design/icons";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, Legend } from "recharts";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import dayjs from "dayjs";
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
- 
+ const COLORS = {
+    pending: '#faad14',
+    confirmed: '#1890ff',
+    completed: '#52c41a',
+    cancelled: '#f5222d',
+};
+const statusNameMap = {
+    pending: 'Chờ xác nhận',
+    confirmed: 'Đã xác nhận',
+    completed: 'Đã hoàn thành',
+    cancelled: 'Đã hủy',
+};
 const StatisticByTime = ({
     tabKey,
     setTabKey,
@@ -25,7 +37,6 @@ const StatisticByTime = ({
 }) => {
     const lineColor =
     tabKey === 'range' ? '#1890ff' : tabKey === 'month' ? '#52c41a' : '#faad14';
-    console.log('revenueData', revenueData);
     const handleExportPDF = async () => {
         let input;
         if (tabKey === 'range') {
@@ -65,6 +76,7 @@ const StatisticByTime = ({
 
         pdf.save("Baocaodoanhthu.pdf");
     };
+    console.log("appointmentData", appointmentData);
     return (
         <Card style={{ borderRadius: 16}}>
             <StyleTabs
@@ -104,13 +116,16 @@ const StatisticByTime = ({
                                             {/* --- Biểu đồ doanh thu --- */}
                                             <Splitter.Panel defaultSize="50%">
                                             <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                                Biểu đồ doanh thu theo khoảng ngày{" "}
+                                                Biểu đồ doanh thu theo ngày {" "}
                                                 {dateRange.length === 2
                                                 ? `từ ${new Date(dateRange[0]).toLocaleDateString("vi-VN")} đến ${new Date(dateRange[1]).toLocaleDateString("vi-VN")}`
                                                 : ""}
                                             </Title>
-                                            <ResponsiveContainer width="100%" height={350}>
-                                                <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                            <ResponsiveContainer width="100%" height={400}> 
+                                                <LineChart 
+                                                    data={revenueData} 
+                                                    margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                                                >
                                                 <defs>
                                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                                     <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
@@ -135,27 +150,38 @@ const StatisticByTime = ({
 
                                             {/* --- Biểu đồ số lịch khám --- */}
                                             <Splitter.Panel defaultSize="50%">
-                                            <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                                Biểu đồ số lịch khám theo khoảng ngày{" "}
-                                                {dateRange.length === 2
-                                                ? `từ ${new Date(dateRange[0]).toLocaleDateString("vi-VN")} đến ${new Date(dateRange[1]).toLocaleDateString("vi-VN")}`
-                                                : ""}
-                                            </Title>
-                                            <ResponsiveContainer width="100%" height={300}>
-                                                <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                                                <defs>
-                                                    <linearGradient id="colorAppointment" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0" />
-                                                <XAxis dataKey="date" label={{ value: "Ngày", position: "insideBottomRight", offset: 0 }} />
-                                                <YAxis label={{ value: "Số lịch khám", angle: -90, position: "insideLeft" }} />
-                                                <Tooltip formatter={(value) => value.toLocaleString("vi-VN")} />
-                                                <Line type="monotone" dataKey="totalAppointments" stroke={lineColor} strokeWidth={2} />
-                                                </LineChart>
-                                            </ResponsiveContainer>
+                                                <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                                    Biểu đồ số lịch khám theo ngày{" "}
+                                                    {dateRange.length === 2
+                                                    ? `từ ${new Date(dateRange[0]).toLocaleDateString("vi-VN")} đến ${new Date(dateRange[1]).toLocaleDateString("vi-VN")}`
+                                                    : ""}
+                                                </Title>
+                                                <ResponsiveContainer 
+                                                    width="100%" 
+                                                    height={400}
+                                                >
+                                                    <BarChart 
+                                                        data={appointmentData} 
+                                                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                                                        
+                                                    >
+                                                        <CartesianGrid strokeDasharray="3 3" />
+                                                        <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
+                                                        <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
+                                                        <Tooltip 
+                                                            formatter={(value, name) => [value, statusNameMap[name]]} // đổi tên tooltip
+                                                        />
+                                                        <Legend 
+                                                            verticalAlign="bottom" 
+                                                            formatter={(value) => statusNameMap[value] || value} // đổi tên legend
+                                                        />
+                                                        <Bar dataKey="pending" stackId="a" fill={COLORS.pending} />
+                                                        <Bar dataKey="confirmed" stackId="a" fill={COLORS.confirmed} />
+                                                        <Bar dataKey="completed" stackId="a" fill={COLORS.completed} />
+                                                        <Bar dataKey="cancelled" stackId="a" fill={COLORS.cancelled} />
+                                                
+                                                    </BarChart>
+                                                </ResponsiveContainer>
                                             </Splitter.Panel>
                                         </Splitter>
                                     </div>
@@ -193,46 +219,57 @@ const StatisticByTime = ({
                                     </ButtonComponent>
                                 </Row>
                                 <LoadingComponent isLoading={isLoading}>
-                                    <div id="report-month">   {/* 👈 vùng sẽ chụp PDF */}
-                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                            Biểu đồ doanh thu tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
-                                        </Title>
-                                        <ResponsiveContainer width="100%" height={300}>
-                                            <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                                                <defs>
-                                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
-                                                <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
-                                                <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
-                                                <Tooltip formatter={(v) => v.toLocaleString('vi-VN') + ' ₫'} />
-                                                <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
-                                        <Divider />
-                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                            Biểu đồ số lịch khám tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
-                                        </Title>
-                                        <ResponsiveContainer width="100%" height={300}>
-                                            <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                                                <defs>
-                                                    <linearGradient id="colorAppointment" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
-                                                <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
-                                                <YAxis label={{ value: 'Số lịch khám', angle: -90, position: 'insideLeft' }} />
-                                                <Tooltip
-                                                    formatter={(value) => value.toLocaleString('vi-VN')}
-                                                />
-                                                <Line type="monotone" dataKey="totalAppointments" stroke={lineColor} strokeWidth={2} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
+                                    <div id="report-month">   
+                                        <Splitter layout="vertical" style={{ height: 1000 }}>
+
+                                            <Splitter.Panel defaultSize="50%">
+
+                                                <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                                    Biểu đồ doanh thu tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
+                                                </Title>
+                                                <ResponsiveContainer width="100%" height={400}>
+                                                    <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                                        <defs>
+                                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                                <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                            </linearGradient>
+                                                        </defs>
+                                                        <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
+                                                        <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
+                                                        <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
+                                                        <Tooltip formatter={(v) => v.toLocaleString('vi-VN') + ' ₫'} />
+                                                        <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </Splitter.Panel>
+                                          
+                                            <Splitter.Panel defaultSize="50%">
+
+                                                <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                                    Biểu đồ số lịch khám tháng {selectedMonth && selectedYear ? `${selectedMonth}/${selectedYear}` : ''}
+                                                </Title>
+                                                <ResponsiveContainer width="100%" height={400}>
+                                                    <BarChart data={appointmentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                                        <CartesianGrid strokeDasharray="3 3" />
+                                                        <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
+                                                        <YAxis label={{ value: 'Số lịch', angle: -90, position: 'insideLeft' }} />
+                                                        <Tooltip 
+                                                            formatter={(value, name) => [value, statusNameMap[name]]} // đổi tên tooltip
+                                                        />
+                                                        <Legend 
+                                                            verticalAlign="bottom" 
+                                                            formatter={(value) => statusNameMap[value] || value} // đổi tên legend
+                                                        />
+                                                        <Bar dataKey="pending" stackId="a" fill={COLORS.pending} />
+                                                        <Bar dataKey="confirmed" stackId="a" fill={COLORS.confirmed} />
+                                                        <Bar dataKey="completed" stackId="a" fill={COLORS.completed} />
+                                                        <Bar dataKey="cancelled" stackId="a" fill={COLORS.cancelled} />
+                                                
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </Splitter.Panel>
+                                        </Splitter>
                                     </div>
                                 </LoadingComponent>
                             </>
@@ -268,43 +305,58 @@ const StatisticByTime = ({
                                 </Row>
 
                                 <LoadingComponent isLoading={isLoading}>
-                                    <div id="report-year">   {/* 👈 vùng sẽ chụp PDF */}
-                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                            Biểu đồ doanh thu năm {selectedYear || ''}
-                                        </Title>
-                                        <ResponsiveContainer width="100%" height={300}>
-                                            <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                                                <defs>
-                                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <XAxis dataKey="month" label={{ value: 'Tháng', position: 'insideBottomRight', offset: 0 }} />
-                                                <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
-                                                <Tooltip formatter={(v) => v.toLocaleString('vi-VN') + ' ₫'} />
-                                                <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
-                                        <Divider />
-                                        <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
-                                            Biểu đồ số lịch khám năm {selectedYear || ''}
-                                        </Title>
-                                        <ResponsiveContainer width="100%" height={300}>
-                                            <LineChart data={appointmentData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                                                <defs>
-                                                    <linearGradient id="colorAppointment" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                                                        <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
-                                                <XAxis dataKey="month" label={{ value: 'Tháng', position: 'insideBottomRight', offset: 0 }} />
-                                                <YAxis label={{ value: 'Số lịch khám', angle: -90, position: 'insideLeft' }} />
-                                                <Tooltip formatter={(value) => value.toLocaleString('vi-VN')} />
-                                                <Line type="monotone" dataKey="totalAppointments" stroke={lineColor} strokeWidth={2} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
+                                    <div id="report-year">   
+                                        <Splitter layout="vertical" style={{ height: 1000 }}>
+                                            <Splitter.Panel defaultSize="50%">
+                                                {/* --- Biểu đồ doanh thu --- */}
+                                                <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                                Biểu đồ doanh thu năm {selectedYear || ''}
+                                                </Title>
+                                                <ResponsiveContainer width="100%" height={400}>
+                                                    <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                                                        <defs>
+                                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                                                                <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
+                                                            </linearGradient>
+                                                        </defs>
+                                                        <XAxis dataKey="month" label={{ value: 'Tháng', position: 'insideBottomRight', offset: 0 }} />
+                                                        <YAxis label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }} />
+                                                        <Tooltip formatter={(v) => v.toLocaleString('vi-VN') + ' ₫'} />
+                                                        <Line type="monotone" dataKey="totalRevenue" stroke={lineColor} strokeWidth={2} />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </Splitter.Panel>
+                                            <Splitter.Panel defaultSize="50%">
+                                                {/* --- Biểu đồ số lịch khám --- */}
+                                                <Title level={5} style={{ textAlign: "center", marginBottom: 16 }}>
+                                                    Biểu đồ số lịch khám năm {selectedYear || ''}
+                                                </Title>
+                                                <ResponsiveContainer width="100%" height={400}>
+                                                    <BarChart data={appointmentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                                        <CartesianGrid strokeDasharray="3 3" />
+                                                        <XAxis dataKey="month" label={{ value: 'Tháng', position: 'insideBottomRight', offset: 0 }} />
+                                                        <YAxis label={{ value: 'Số lịch', angle: -90, position: 'insideLeft' }} />
+                                                        <Tooltip 
+                                                            formatter={(value, name) => [value, statusNameMap[name]]} // đổi tên tooltip
+                                                        />
+                                                        <Legend 
+                                                            verticalAlign="bottom" 
+                                                            formatter={(value) => statusNameMap[value] || value} // đổi tên legend
+                                                        />
+                                                        <Bar dataKey="pending" stackId="a" fill={COLORS.pending} />
+                                                        <Bar dataKey="confirmed" stackId="a" fill={COLORS.confirmed} />
+                                                        <Bar dataKey="completed" stackId="a" fill={COLORS.completed} />
+                                                        <Bar dataKey="cancelled" stackId="a" fill={COLORS.cancelled} />
+                                                
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </Splitter.Panel>
+                                        </Splitter>
+
+                                        
+                                        
+                                        
                                     </div>
                                 </LoadingComponent>
                             </>

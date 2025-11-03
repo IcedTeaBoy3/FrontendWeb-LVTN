@@ -192,7 +192,7 @@ const StatisticPage = () => {
     const avgRatingData = avgRating?.data || [];
     const appointmentStatusData = appointmentStatus?.data || [];
     const specialtyPerDoctorData = specialtyPerDoctor?.data || [];
-    
+    console.log("appointmentData", appointmentData);
     return (
         <>
             <StyleTabs

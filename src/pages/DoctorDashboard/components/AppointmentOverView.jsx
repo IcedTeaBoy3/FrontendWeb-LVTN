@@ -43,7 +43,7 @@ const AppointmentOverView = ({doctorId}) => {
                 <StatusAppointment data={appointmentStatus} isLoading={isLoadingDoctorAppointmentStatus} />
             </Splitter.Panel>
             <Splitter.Panel defaultSize="60%">
-                <LoadingComponent isLoading={isLoadingDoctorAppointment} />
+                <LoadingComponent isLoading={isLoadingDoctorAppointment} >
                     <Card >
                         <Typography.Title level={4} style={{ marginBottom: 16 }}>Lịch hẹn gần đây</Typography.Title>
                         <List
@@ -89,7 +89,7 @@ const AppointmentOverView = ({doctorId}) => {
                             )}
                         />
                     </Card>
-                <LoadingComponent/>
+                </LoadingComponent>
             </Splitter.Panel>
         </Splitter>
     )
