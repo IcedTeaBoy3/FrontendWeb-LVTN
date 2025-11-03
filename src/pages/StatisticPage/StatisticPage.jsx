@@ -1,28 +1,23 @@
-import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
-import { Typography,Card,Divider} from "antd";
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardService } from "@/services/DashboardService";
-import PieChart from "@/components/PieChart/PieChart";
 import StatisticByTime from "@/components/StatisticByTime/StatisticByTime";
 import StatisticPatient from "@/components/StatisticPatient/StatisticPatient";
 import AppointmentPerService from "./components/AppointmentPerService";
 import AppointmentPerDoctor from "./components/AppointmentPerDoctor";
 import DoctorPerSpecialty from "./components/DoctorPerSpecialty";
 import ReviewPerDoctor from "./components/ReviewPerDoctor";
+import RevenuePerDoctor from "./components/RevenuePerDoctor";
+import { SpecialtyService } from "@/services/SpecialtyService";
+import { Select } from "antd";
 import { StyleTabs} from "./style";
-const { Title,Text } = Typography;
-import { Row, Col } from "./style";
 import dayjs from "dayjs";
-import StatusAppointment from "../../components/StatusAppointment/StatusAppointment";
-
-// const COLORSVERIFICATION = ['#52c41a', '#f5222d']; 
-
-// const COLORSGENDER = ["#1890ff", "#f759ab", "#52c41a", "#faad14"];
+import RevenuePerService from "./components/RevenuePerService";
 
 const StatisticPage = () => {
     const [tabKey, setTabKey] = useState('range');
-
+    const [selectedSpecialty, setSelectedSpecialty] = useState(null);
     const [tabKeyDetails, setTabKeyDetails] = useState('revenue');
     const [dateRange, setDateRange] = useState([
         dayjs().startOf('month').toISOString(),
@@ -63,6 +58,7 @@ const StatisticPage = () => {
         queryKey: ['getAdminStatisticPatient'],
         queryFn: () => DashboardService.getAdminStatisticPatient(),
         retry: 1,
+        keepPreviousData: true,
         refetchOnWindowFocus: false,
     });
     const queryGetAdminRevenue = useQuery({
@@ -99,24 +95,15 @@ const StatisticPage = () => {
             (tabKey === 'year' && selectedYear)
         ),
         retry: 1,
+        keepPreviousData: true,
         refetchOnWindowFocus: false,
     });
-    const queryGetAdminAppointmentStatus = useQuery({
-        queryKey: ['getAdminAppointmentStatus'],
-        queryFn: () => DashboardService.getAdminAppointmentStatus(),
-        retry: 1,
-        refetchOnWindowFocus: false,
-    });
-    // const queryGetAdminAccountVerification = useQuery({
-    //     queryKey: ['getAdminAccountVerification'],
-    //     queryFn: () => DashboardService.getAdminAccountVerification(),
-    //     retry: 1,
-    //     refetchOnWindowFocus: false,
-    // });
+   
     const queryGetAdminAppointmentPerDoctor = useQuery({
         queryKey: ['getAdminAppointmentPerDoctor'],
         queryFn: () => DashboardService.getAdminAppointmentPerDoctor(),
         retry: 1,
+        keepPreviousData: true,
         refetchOnWindowFocus: false,
     });
     const queryGetAdminAppointment= useQuery({
@@ -151,48 +138,72 @@ const StatisticPage = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
+    
     const queryGetAppointmentPerServiceStats = useQuery({
-        queryKey: ['getAppointmentPerServiceStats'],
-        queryFn: () => DashboardService.getAppointmentPerServiceStats(),
+        queryKey: ['getAppointmentPerServiceStats', selectedSpecialty],
+        queryFn: () => DashboardService.getAppointmentPerServiceStats(selectedSpecialty),
         retry: 1,
+        keepPreviousData: true,
         refetchOnWindowFocus: false,
     });
     const queryGetAdminAvgRating = useQuery({
         queryKey: ['getAdminAverageRating'],
         queryFn: () => DashboardService.getAdminAverageRating(),
         retry: 1,
+        keepPreviousData: true,
         refetchOnWindowFocus: false,
     });
     const queryGetSpecialtyPerDoctor = useQuery({
         queryKey: ['getAdminSpecialtyPerDoctor'],
         queryFn: () => DashboardService.getAdminSpecialtyPerDoctor(),
         retry: 1,
+        keepPreviousData: true,
         refetchOnWindowFocus: false,
     });
+    const queryGetAdminRevenuePerService = useQuery({
+        queryKey: ['getAdminRevenuePerService', selectedSpecialty],
+        queryFn: () => DashboardService.getAdminRevenuePerService(selectedSpecialty),
+        retry: 1,
+        keepPreviousData: true,
+        refetchOnWindowFocus: false,
+    });
+    const queryGetAllSpecialties = useQuery({
+        queryKey: ['getAllSpecialties'],
+        queryFn: () => SpecialtyService.getAllSpecialties({ status: '', page: 1, limit: 1000 }),
+        refetchOnWindowFocus: false,
+        retry: 1,
+        keepPreviousData: true,
+    });
+    const queryGetAdminRevenuePerDoctor = useQuery({
+        queryKey: ['getAdminRevenuePerDoctor'],
+        queryFn: () => DashboardService.getAdminRevenuePerDoctor(),
+        retry: 1,
+        keepPreviousData: true,
+        refetchOnWindowFocus: false,
+    });
+    const { data: dataSpecialties, isLoading: isLoadingSpecialties } = queryGetAllSpecialties;
+    const specialtiesData = dataSpecialties?.data?.specialties;
     
     const { data: revenue, isLoading: isLoadingRevenue} = queryGetAdminRevenue;
-    // const { data: accountVerification, isLoading: isLoadingAccountVerification } = queryGetAdminAccountVerification;
     const { data: appointment, isLoading: isLoadingAppointment } = queryGetAdminAppointment;
     const { data: statisticPatient, isLoading: isLoadingStatisticPatient } = queryGetAdminStatisticPatient;
     const { data: appointmentPerServiceStats, isLoading: isLoadingAppointmentPerServiceStats } = queryGetAppointmentPerServiceStats;
     const { data: appointmentPerDoctor, isLoading: isLoadingAppointmentPerDoctor } = queryGetAdminAppointmentPerDoctor;
     const { data: avgRating, isLoading: isLoadingAvgRating } = queryGetAdminAvgRating;
-    const { data: appointmentStatus, isLoading: isLoadingAppointmentStatus } = queryGetAdminAppointmentStatus;
     const { data: specialtyPerDoctor, isLoading: isLoadingSpecialtyPerDoctor } = queryGetSpecialtyPerDoctor;
-    
+    const { data: revenuePerService, isLoading: isLoadingRevenuePerService } = queryGetAdminRevenuePerService;
+    const { data: revenuePerDoctor, isLoading: isLoadingRevenuePerDoctor } = queryGetAdminRevenuePerDoctor;
+    console.log("revenuePerDoctor", revenuePerDoctor);
 
-    
-    
-    // const accountVerificationData = accountVerification?.data || {};
     const revenueData = revenue?.data || [];
     const appointmentData = appointment?.data || [];
     const statisticPatientData = statisticPatient?.data || {};
     const appointmentPerServiceStatsData = appointmentPerServiceStats?.data || [];
     const appointmentPerDoctorData = appointmentPerDoctor?.data || [];
     const avgRatingData = avgRating?.data || [];
-    const appointmentStatusData = appointmentStatus?.data || [];
     const specialtyPerDoctorData = specialtyPerDoctor?.data || [];
-    console.log("appointmentData", appointmentData);
+    const revenuePerDoctorData = revenuePerDoctor?.data || [];
+    console.log("revenuePerDoctorData", revenuePerDoctorData);
     return (
         <>
             <StyleTabs
@@ -240,6 +251,11 @@ const StatisticPage = () => {
                         label: "Bác sĩ",
                         children: (
                             <>
+                                <RevenuePerDoctor
+                                    data={revenuePerDoctorData}
+                                    isLoading={isLoadingRevenuePerDoctor}
+                                />
+                                <br/>
                                 <AppointmentPerDoctor
                                     data={appointmentPerDoctorData}
                                     isLoading={isLoadingAppointmentPerDoctor}
@@ -258,22 +274,37 @@ const StatisticPage = () => {
                         )
                     },
                     {
-                        key: "appointments",
-                        label: "Lịch khám",
+                        key: "services",
+                        label: "Dịch vụ",
                         children: (
                             <>
+                                <Select
+                                    style={{ width: 250, marginBottom: 16 }}
+                                    placeholder="Chọn chuyên khoa"
+                                    loading={isLoadingSpecialties}
+                                    options={specialtiesData?.map((specialty) => ({
+                                        label: specialty.name,
+                                        value: specialty.specialtyId,
+                                    }))}
+                                    showSearch
+                                    onChange={(value) => {
+                                        setSelectedSpecialty(value);
+                                    }}
+                                    optionFilterProp="label"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                    }
+                                    allowClear
+                                />
                                 <AppointmentPerService
                                     data={appointmentPerServiceStatsData}
                                     isLoading={isLoadingAppointmentPerServiceStats}
                                 />
-                                <StatusAppointment
-                                    data={appointmentStatusData}
-                                    isLoading={isLoadingAppointmentStatus}
+                                <br/>
+                                <RevenuePerService
+                                    data={revenuePerService?.data || []}
+                                    isLoading={isLoadingRevenuePerService}
                                 />
-                                
-                                    
-                                    
-                              
                             </>
                             
                         )

@@ -13,8 +13,8 @@ const StatisticPatient = ({statisticPatientData, isLoading}) => {
         value: item.total,
     }));
     const barChartDataAge = statisticPatientData.ageStats?.map(item => ({
-        ageRange: item.range,
-        total: item.total,
+        "Tuổi": item.range,
+        "Số lượng": item.total,
     }));
     const total = statisticPatientData?.totalPatients || 0;
     const repeat = statisticPatientData?.repeatPatients || 0;
@@ -44,7 +44,7 @@ const StatisticPatient = ({statisticPatientData, isLoading}) => {
                     </StyledCard>
                 </Col>
             </Row>
-            <Splitter style={{ marginTop: 32, height: 420 }}>
+            <Splitter style={{ marginTop: 32, height: 500, gap: '16px' }}>
                 <Splitter.Panel defaultSize="50%">
                     <Card>
                     <Title level={4} style={{ textAlign: "center", marginBottom: 16 }}>
@@ -65,8 +65,8 @@ const StatisticPatient = ({statisticPatientData, isLoading}) => {
                     </Title>
                     <BarChart
                         data={barChartDataAge || []}
-                        xDataKey="ageRange"
-                        barDataKey="total"
+                        xDataKey="Tuổi"
+                        barDataKey="Số lượng"
                         barColor="#1890ff"
                     />
                     </Card>

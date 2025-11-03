@@ -53,7 +53,7 @@ const DoctorPerSpecialty = ({data, isLoading}) => {
     ]
     return (   
         <LoadingComponent isLoading={isLoading}>
-            <Splitter style={{ height: 500  }}>
+            <Splitter style={{ height: 500, gap: '16px' }}>
                 <Splitter.Panel defaultSize="40%">
                     <Card>
                         <Title level={4}>Danh sách bác sĩ</Title>

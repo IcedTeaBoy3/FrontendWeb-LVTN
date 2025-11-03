@@ -83,12 +83,11 @@ const ClinicPage = () => {
     useEffect(() => {
         const fetchAndSetClinicData = async () => {
             // Tách địa chỉ
-            const parts = clinicData.address?.split(',').map((p) => p.trim()) || [];
+            const parts = clinicData.address?.split(',')?.map((p) => p.trim()) || [];
             const [specificAddress, wardName, districtName, provinceName] = parts;
-            console.log('parts', parts);
 
             // Tìm mã tỉnh/huyện/xã
-            const provinceObj = provinces.find((p) => p.name === provinceName);
+            const provinceObj = provinces?.find((p) => p.name === provinceName);
             const provinceCode = provinceObj?.code;
 
             let districtCode, wardCode;
@@ -97,14 +96,14 @@ const ClinicPage = () => {
             if (provinceCode) {
                 districtsData = await AddressService.getDistrictsByProvince(provinceCode);
                 setDistricts(districtsData);
-                const districtObj = districtsData.find((d) => d.name === districtName);
+                const districtObj = districtsData?.find((d) => d.name === districtName);
                 districtCode = districtObj?.code;
             }
 
             if (districtCode) {
                 wardsData = await AddressService.getWardsByDistrict(districtCode);
                 setWards(wardsData);
-                const wardObj = wardsData.find((w) => w.name === wardName);
+                const wardObj = wardsData?.find((w) => w.name === wardName);
                 wardCode = wardObj?.code;
             }
 
@@ -116,12 +115,12 @@ const ClinicPage = () => {
                 email: clinicData.email,
                 website: clinicData.website,
                 workHours: clinicData.workHours,
-                services: clinicData.services.map((service) => service.serviceId),
+                services: clinicData.services?.map((service) => service.serviceId),
                 specificAddress: specificAddress || '',
                 province: provinceCode || undefined,
                 district: districtCode || undefined,
                 ward: wardCode || undefined,
-                images: (clinicData.images || []).map((url, index) => ({
+                images: (clinicData.images || [])?.map((url, index) => ({
                     uid: -index - 1,
                     name: url,
                     status: 'done',
@@ -299,7 +298,7 @@ const ClinicPage = () => {
                                     <Select
                                         placeholder="Chọn tỉnh/thành phố"
                                         showSearch
-                                        options={provinces.map((province) => ({
+                                        options={provinces?.map((province) => ({
                                             label: province.name,
                                             value: province.code,
                                         }))}

@@ -20,12 +20,29 @@ const AppointmentPerDoctor = ({data, isLoading, title}) => {
     return (
         <LoadingComponent isLoading={isLoading}>
             <Card>
-                <Title level={4} style={{textAlign:'center',marginBottom:16}}>Biểu đồ cột số lịch khám của mỗi bác sĩ</Title>
+                <Title level={4} style={{marginBottom:16}}>Biểu đồ số lịch khám của mỗi bác sĩ</Title>
+                <br/>
                 <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="doctorName" />
-                    <YAxis label={{ value: 'Số lịch', angle: -90, position: 'insideLeft' }} />
+                    <XAxis 
+                        dataKey="doctorName" 
+                        label={{ 
+                            value: 'Bác sĩ', 
+                            position: 'insideBottomRight',
+                            style: { fontSize: 14, fontWeight: 600, fill: '#555' }
+                        }} 
+                        angle={-10} 
+                        textAnchor="end"
+                    />
+                    <YAxis label={{ 
+                        value: 'Số lịch khám', 
+                        angle: -90, 
+                        position: 'insideLeft',
+                        offset: -10,
+                        style: { textAnchor: 'middle', fontSize: 14, fontWeight: 600, fill: '#555' }
+
+                    }} />
                     <Tooltip 
                         formatter={(value, name) => [value, statusNameMap[name]]} // đổi tên tooltip
                     />

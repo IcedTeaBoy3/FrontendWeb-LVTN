@@ -36,61 +36,69 @@ const AppointmentPerService = ({data, isLoading}) => {
             sorter: (a, b) => a.appointmentCount - b.appointmentCount,
         }
     ];
+   
     return (
-        <LoadingComponent isLoading={isLoading}>
-            <Splitter style={{ height: 500  }}>
-                <Splitter.Panel defaultSize="40%">
-                    <Card>
-                        <Title level={4}>Danh sách dịch vụ</Title>
-                        <TableStyle
-                        
-                            columns={columns}
-                            dataSource={dataTable}
-                            pagination={pagination}
-                            onChange={(page, pageSize) => {
-                                setPagination((prev) => ({
-                                    ...prev,
-                                    current: page,
-                                    pageSize: pageSize,
-                                }));
-                            }}
-                           
-                        />
-                    </Card>
-                </Splitter.Panel>
-                <Splitter.Panel defaultSize="60%">
-                    <Card>
-                        <Title level={4} style={{ textAlign: 'center', marginBottom: 16 }}>Biểu đồ cột số lịch khám của mỗi dịch vụ</Title>
-                        <ResponsiveContainer width="100%" height={400}>
-                            <BarChart
-                                layout="vertical"
-                                data={data}
-                                margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
-                            >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" />
-                            <YAxis
-                                dataKey="serviceName"
-                                type="category"
-                                width={150}
-                                tick={{ fontSize: 13 }}
+        <>
+        
+            <LoadingComponent isLoading={isLoading}>
+                <Splitter style={{ height: 500, gap: '16px' }}>
+                    <Splitter.Panel defaultSize="40%">
+                        <Card>
+                            <Title level={4}>Danh sách dịch vụ</Title>
+                            <TableStyle
+                            
+                                columns={columns}
+                                dataSource={dataTable}
+                                pagination={pagination}
+                                onChange={(page, pageSize) => {
+                                    setPagination((prev) => ({
+                                        ...prev,
+                                        current: page,
+                                        pageSize: pageSize,
+                                    }));
+                                }}
+                            
                             />
-                            <Tooltip />
-                            <Legend />
-                            <Bar
-                                dataKey="appointmentCount"
-                                fill="#1976d2"
-                                name="Số lịch khám"
-                                radius={[0, 5, 5, 0]} // bo góc cho đẹp
-                                barSize={25}
-                            />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </Card>
-                </Splitter.Panel>
-            </Splitter>
-           
-        </LoadingComponent>
+                        </Card>
+                    </Splitter.Panel>
+                    <Splitter.Panel defaultSize="60%">
+                        <Card>
+                            <Title level={4} style={{ textAlign: 'center', marginBottom: 16 }}>Biểu đồ cột số lịch khám của mỗi dịch vụ</Title>
+                            <ResponsiveContainer width="100%" height={400}>
+                                <BarChart
+                                    layout="vertical"
+                                    data={data}
+                                    margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
+                                >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis 
+                                    type="number" 
+                                  
+                                />
+                                <YAxis
+                                    dataKey="serviceName"
+                                    type="category"
+                                    width={150}
+                                    tick={{ fontSize: 14,  fill: '#555' }}
+                                   
+                                />
+                                <Tooltip />
+                                <Legend />
+                                <Bar
+                                    dataKey="appointmentCount"
+                                    fill="#1976d2"
+                                    name="Số lịch khám"
+                                    radius={[0, 5, 5, 0]} // bo góc cho đẹp
+                                    barSize={25}
+                                />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </Card>
+                    </Splitter.Panel>
+                </Splitter>
+            
+            </LoadingComponent>
+        </>
     )
 }
 

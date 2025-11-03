@@ -6,7 +6,7 @@ export default function PieChart({ data, COLORS, outerRadius = 100 }) {
   if (!data || data.length === 0) return <p>Không có dữ liệu</p>;
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={400}>
       <RePieChart>
         <Pie
           data={data}

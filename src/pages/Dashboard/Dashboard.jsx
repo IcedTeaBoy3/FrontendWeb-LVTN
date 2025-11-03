@@ -10,6 +10,7 @@ import { convertStatusAppointment, getStatusColor } from "@/utils/status_appoint
 import Overview from "./components/Overview";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import StatisticRevenueSevenDay from "@/components/StatistticRevenueSevenDay/StatisticRevenueSevenDay";
+import StatusAppointment from "@/components/StatusAppointment/StatusAppointment";
 import TimeFilter from "@/components/TimeFilter/TimeFilter";
 const { Title,Text, Paragraph } = Typography;
 import { Row, Col } from "./style";
@@ -58,17 +59,27 @@ const Dashboard = () => {
         keepPreviousData: true,
         refetchOnReconnect: false,
     });
+     const queryGetAdminAppointmentStatus = useQuery({
+        queryKey: ['getAdminAppointmentStatus'],
+        queryFn: () => DashboardService.getAdminAppointmentStatus(),
+        retry: 1,
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
+        refetchOnReconnect: false,
+    });
     
     const { data: overview, isLoading: isLoadingOverview } = queryGetAdminDashboard;
     const { data: revenue, isLoading: isLoadingRevenue} = queryGetAdminRevenue;
     
     const { data: appointments, isLoading: isLoadingAppointments } = queryGetAllAppointments;
     const { data: doctorReviews, isLoading: isLoadingRecentReviews } = queryGetRecentReviews;
+    const { data: appointmentStatus, isLoading: isLoadingAppointmentStatus } = queryGetAdminAppointmentStatus;
     const revenueData = revenue?.data || [];
     const overviewData = overview?.data || {};
     // const appointmentStatusData = appointmentStatus?.data || {};
     const appointmentData = appointments?.data?.appointments || [];
     const doctorReviewsData = doctorReviews?.data?.reviews || [];
+    const appointmentStatusData = appointmentStatus?.data || [];
     // Chuyển sang array
    
     const recentAppointmentData = appointmentData.map(appointment => ({
@@ -94,16 +105,21 @@ const Dashboard = () => {
                 <TimeFilter onChange={setFilter} />  
             </Row>
             <Overview isLoadingOverview={isLoadingOverview} overviewData={overviewData} />
-            <Divider style={{ margin: '24px 0' }} />
+            <br/>
             <Title level={4}>Doanh thu 7 ngày trước</Title>
             <StatisticRevenueSevenDay data={revenueData} isLoading={isLoadingRevenue} />
-
+            <br/>
+            <StatusAppointment
+                data={appointmentStatusData}
+                isLoading={isLoadingAppointmentStatus}
+            />
+                                
             <LoadingComponent isLoading={isLoadingRecentReviews || isLoadingAppointments}>
                 <Row gutter={[24, 24]} style={{ marginTop: 30 }}>
                 {/* --- Lịch khám gần nhất --- */}
                     <Col span={12}>
                         <Card
-                        title={<Title level={4} style={{ margin: 0 }}>📅 Lịch khám gần nhất</Title>}
+                            title={<Title level={4} style={{ margin: 0 }}>📅 Lịch khám gần nhất</Title>}
                         >
                         <List
                             itemLayout="horizontal"

@@ -108,9 +108,21 @@ export const DashboardService = {
             throw error.response.data;
         }
     },
-    getAppointmentPerServiceStats: async () => {
+    getAppointmentPerServiceStats: async (specialtyId) => {
         try {
-            const response = await axiosInstance.get('/dashboard/appointment-per-service-stats');
+            const response = await axiosInstance.get('/dashboard/appointment-per-service-stats', {
+                params: { specialtyId }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    getAdminRevenuePerService: async (specialtyId) => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-revenue-per-service', {
+                params: { specialtyId }
+            });
             return response.data;
         } catch (error) {
             throw error.response.data;
@@ -127,6 +139,14 @@ export const DashboardService = {
     getAdminSpecialtyPerDoctor: async () => {
         try {
             const response = await axiosInstance.get('/dashboard/admin-specialty-per-doctor');
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    getAdminRevenuePerDoctor: async () => {
+        try {
+            const response = await axiosInstance.get('/dashboard/admin-revenue-per-doctor');
             return response.data;
         } catch (error) {
             throw error.response.data;

@@ -128,7 +128,6 @@ const DoctorStatisticPage = () => {
     const revenueData = revenue?.data || [];
     const appointmentData = appointment?.data || [];
     const statisticPatientData = doctorStatisticPatientData?.data || {};
-    console.log("appointmentData", appointmentData);
     return (
         <>
             <Title level={4}>Thống kê chi tiết</Title>

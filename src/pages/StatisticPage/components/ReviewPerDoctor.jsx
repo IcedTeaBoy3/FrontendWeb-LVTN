@@ -9,7 +9,7 @@ const { Title } = Typography
 const ReviewPerDoctor = ({data, isLoading}) => {
     const [pagination, setPagination] = useState({ current: 1, pageSize: 5});
     const dataTableAvgRating = data?.map((item, index) => ({
-        key: item.doctorId || index,
+        key: item.doctorId,
         index: index + 1,
         doctorName: item.doctorName,
         averageRating: item.averageRating,
@@ -44,7 +44,7 @@ const ReviewPerDoctor = ({data, isLoading}) => {
     ];
     return (
         <LoadingComponent isLoading={isLoading}>
-            <Splitter style={{ height: 500 }}>
+            <Splitter style={{ height: 500, gap: '16px' }}>
                 <Splitter.Panel defaultSize="40%">
                     <Card>
                         <Title level={4} style={{marginBottom:16}}>Top bác sĩ được đánh giá cao nhất</Title>
@@ -62,7 +62,7 @@ const ReviewPerDoctor = ({data, isLoading}) => {
                         />
                     </Card>
                 </Splitter.Panel>
-                <Splitter.Panel defaultSize="50%">
+                <Splitter.Panel defaultSize="60%">
                     <Card>
                         <Title level={4} style={{textAlign:'center',marginBottom:16}}>Biểu đồ cột đánh giá trung bình của mỗi bác sĩ</Title>
                         <ResponsiveContainer width="100%" height={400}>

@@ -117,10 +117,10 @@ const DoctorSchedulePage = () => {
   const isPendingCreate = mutationCreateSchedule.isPending;
   const isPendingUpdate = mutationUpdateSchedule.isPending;
   const schedulesData = schedules?.data || [];
-  const calendarData = schedulesData.map(schedule => {
+  const calendarData = schedulesData?.map(schedule => {
     return {
       id: schedule._id,
-      date: dayjs(schedule.workday).format('DD/MM/YYYY'),
+      date: dayjs(schedule.workday)?.format('DD/MM/YYYY'),
       shifts: schedule.shifts || [],
       slotDuration: schedule.slotDuration,
       totalShifts: schedule.totalShifts,
@@ -444,7 +444,7 @@ const DoctorSchedulePage = () => {
             label: 'Danh sách lịch làm việc', 
             children: (
               <>
-                <Title level={5} style={{ marginBottom: 16 }}>Danh sách lịch làm việc tháng {selectedDate.format("MM/YYYY")}</Title>
+                <Title level={5} style={{ marginBottom: 16 }}>Danh sách lịch làm việc tháng {selectedDate?.format("MM/YYYY")}</Title>
                 <DatePicker
                   picker="month"
                   onChange={(date) => setSelectedDate(date)}
