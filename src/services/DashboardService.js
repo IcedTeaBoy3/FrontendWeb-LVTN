@@ -28,6 +28,14 @@ export const DashboardService = {
             throw error.response.data;
         }
     },
+    getDoctorAppointmentStatus: async (doctorId) => {
+        try {
+            const response = await axiosInstance.get(`/dashboard/doctor-appointment-status/${doctorId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
     getAdminAccountVerification: async () => {
         try {
             const response = await axiosInstance.get('/dashboard/admin-account-verification');

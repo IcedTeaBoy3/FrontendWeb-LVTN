@@ -38,9 +38,9 @@ const DoctorAppointmentDate = () => {
     pageSize: 5,
     total: 0,
   });
-  const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector((state) => state.auth.user);
+  const doctorId = user?.doctor?.doctorId;
   const { state } = location;
   const rowSelection = {
     selectedRowKeys,
@@ -52,7 +52,7 @@ const DoctorAppointmentDate = () => {
 
   const queryGetAllDoctorAppointments = useQuery({
     queryKey: ['doctor-appointments', state?.list[0]?.date],
-    queryFn: () => AppointmentService.getDoctorAppointments({accountId: user?.accountId, date: dayjs(state?.list[0]?.date,"DD/MM/YYYY").format("YYYY-MM-DD") }),
+    queryFn: () => AppointmentService.getDoctorAppointments(doctorId, { date: dayjs(state?.list[0]?.date,"DD/MM/YYYY").format("YYYY-MM-DD") }),
     keepPreviousData: true,
   });
   const mutationCreateMedicalResult = useMutation({

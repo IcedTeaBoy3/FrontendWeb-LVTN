@@ -349,17 +349,17 @@ const PatientProfilePage = () => {
         setIsModalOpenDelete(true);
     };
     const handleEditPatientProfile = async (id) => {
-        const patient = data.find((item) => item.patientProfileId === id);
+        const patient = data?.find((item) => item.patientProfileId === id);
         
         if(patient){
             setIsDrawerOpen(true);
             setPatientProfile(patient);
            // Tách địa chỉ
-            const parts = patient.person.address.split(',').map((p) => p.trim());
+            const parts = patient.person.address.split(',')?.map((p) => p.trim());
             const [specificAddress, wardName, districtName, provinceName] = parts;
 
             // Tìm mã
-            const provinceObj = provinces.find((p) => p.name === provinceName);
+            const provinceObj = provinces?.find((p) => p.name === provinceName);
             const provinceCode = provinceObj?.code;
 
             let districtObj, wardObj;
@@ -398,7 +398,7 @@ const PatientProfilePage = () => {
         }
     };
     const handleViewPatientProfile = (id) => {
-        const patient = data.find((item) => item.patientProfileId === id);
+        const patient = data?.find((item) => item.patientProfileId === id);
         if(patient){
             setPatientProfile(patient);
             setIsModalDetailOpen(true);
@@ -474,7 +474,7 @@ const PatientProfilePage = () => {
         if (selectedRowKeys.length === dataTable.length) {
             setSelectedRowKeys([]);
         } else {
-            setSelectedRowKeys(dataTable.map(item => item.key));
+            setSelectedRowKeys(dataTable?.map(item => item.key));
         }
     };
 
@@ -705,7 +705,7 @@ const PatientProfilePage = () => {
                                 name="ethnicGroup"
                             >
                                 <Select
-                                    options={ethnicGroups.map(group => ({
+                                    options={ethnicGroups?.map(group => ({
                                         label: group.name,
                                         value: group.code
                                     }))}
@@ -743,7 +743,7 @@ const PatientProfilePage = () => {
                                 ]}
                             >
                                 <Select
-                                    options={provinces.map(province => ({
+                                    options={provinces?.map(province => ({
                                         label: province.name,
                                         value: province.code
                                     }))}
@@ -767,7 +767,7 @@ const PatientProfilePage = () => {
                                 ]}
                             >
                                 <Select
-                                    options={districts.map(district => ({
+                                    options={districts?.map(district => ({
                                         label: district.name,
                                         value: district.code
                                     }))}
@@ -791,7 +791,7 @@ const PatientProfilePage = () => {
                                 ]}
                             >
                                 <Select
-                                    options={wards.map(ward => ({
+                                    options={wards?.map(ward => ({
                                         label: ward.name,
                                         value: ward.code
                                     }))}

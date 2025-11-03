@@ -42,9 +42,9 @@ export const AppointmentService = {
 
         }
     },
-    getDoctorAppointments: async ({accountId ,date ,page = 1, limit = 100}) => {
+    getDoctorAppointments: async (doctorId,{page = 1, limit = 100, date}) => {
         try {
-            const response = await axiosInstance.get(`/appointment/get-doctor-appointments/${accountId}`, { params: { page, limit, date } });
+            const response = await axiosInstance.get(`/appointment/get-doctor-appointments/${doctorId}`, { params: { page, limit, date } });
             return response.data;
         } catch (error) {
             throw error.response.data;

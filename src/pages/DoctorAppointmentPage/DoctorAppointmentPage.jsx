@@ -19,12 +19,14 @@ const DoctorAppointmentPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const user = useSelector((state) => state.auth.user);
+  const doctorId = user?.doctor?.doctorId;
   const navigate = useNavigate();
   const queryGetDoctorAppointments = useQuery({
-    queryKey: ['doctor-appointments', user?.accountId],
-    queryFn: () => AppointmentService.getDoctorAppointments({ accountId: user?.accountId, page: 1, limit: 10 }),
+    queryKey: ['doctor-appointments', doctorId],
+    queryFn: () => AppointmentService.getDoctorAppointments(doctorId, { page: 1, limit: 10 }),
     keepPreviousData: true,
-    enabled: !!user?.accountId,
+    
+    enabled: !!doctorId,
   });
   const { data: doctorAppointmentsData, isLoading: isLoadingDoctorAppointments } = queryGetDoctorAppointments;
   const doctorAppointments = doctorAppointmentsData?.data?.appointments|| [];

@@ -25,6 +25,7 @@ const StatisticByTime = ({
 }) => {
     const lineColor =
     tabKey === 'range' ? '#1890ff' : tabKey === 'month' ? '#52c41a' : '#faad14';
+    console.log('revenueData', revenueData);
     const handleExportPDF = async () => {
         let input;
         if (tabKey === 'range') {

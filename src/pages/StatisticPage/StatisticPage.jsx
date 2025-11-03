@@ -14,17 +14,12 @@ import { StyleTabs} from "./style";
 const { Title,Text } = Typography;
 import { Row, Col } from "./style";
 import dayjs from "dayjs";
+import StatusAppointment from "../../components/StatusAppointment/StatusAppointment";
 
 // const COLORSVERIFICATION = ['#52c41a', '#f5222d']; 
 
 // const COLORSGENDER = ["#1890ff", "#f759ab", "#52c41a", "#faad14"];
-const COLORSSTATUS= ['#faad14', '#1890ff', '#52c41a', '#f5222d'];
-const statusNameMap = {
-    pending: 'Chờ xác nhận',
-    confirmed: 'Đã xác nhận',
-    completed: 'Đã hoàn thành',
-    cancelled: 'Đã huỷ',
-};
+
 const StatisticPage = () => {
     const [tabKey, setTabKey] = useState('range');
 
@@ -197,11 +192,7 @@ const StatisticPage = () => {
     const avgRatingData = avgRating?.data || [];
     const appointmentStatusData = appointmentStatus?.data || [];
     const specialtyPerDoctorData = specialtyPerDoctor?.data || [];
-    const pieChartData = Object.entries(appointmentStatusData).map(([key, value]) => ({
-        name: statusNameMap[key] || key,
-        value: value,
-    }));
-
+    
     return (
         <>
             <StyleTabs
@@ -275,26 +266,14 @@ const StatisticPage = () => {
                                     data={appointmentPerServiceStatsData}
                                     isLoading={isLoadingAppointmentPerServiceStats}
                                 />
-                                <Row gutter={[16, 16]} style={{ marginTop: 30 }}>
-                                    <Col span={12}>
-                                        <Card style={{ borderRadius: 16}}>
-                                            <LoadingComponent isLoading={isLoadingAppointmentStatus}>
-                                                <Title level={4} style={{ textAlign: "center", marginBottom: 16 }}>
-                                                    Biểu đồ trạng thái lịch hẹn
-                                                </Title>
-                                                <PieChart
-                                                    outerRadius={130}
-                                                    COLORS={COLORSSTATUS}
-                                                    data={pieChartData || []}
-                                                />
-                                                <Divider />
-                                                <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Tổng số lịch hẹn: {Object.values(appointmentStatusData).reduce((sum, val) => sum + val, 0)}</div>
-                                                <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Hoàn thành: {appointmentStatusData['completed'] || 0}</div>
-                                            </LoadingComponent>
-                                        </Card>
-                                    </Col>
+                                <StatusAppointment
+                                    data={appointmentStatusData}
+                                    isLoading={isLoadingAppointmentStatus}
+                                />
+                                
                                     
-                                </Row>
+                                    
+                              
                             </>
                             
                         )
