@@ -1,4 +1,4 @@
-import { ConfigProvider, Typography, Calendar,List, Divider, Form, Select, DatePicker, Button, Input, Space,Dropdown  } from "antd";
+import { Typography, Calendar,List, Divider, Form, Select, DatePicker, Button, Input, Space,Dropdown  } from "antd";
 import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSelector } from "react-redux";
@@ -15,10 +15,7 @@ import * as Message from "@/components/Message/Message";
 import Highlighter from 'react-highlight-words';
 import { CalendarCell, ShiftTag, ShiftTime, EmptyText } from './style';
 import { getColorForShiftName } from '@/utils/shiftName_utils';
-import viVN from 'antd/locale/vi_VN';
 import dayjs from "dayjs";
-import "dayjs/locale/vi";
-// Thiết lập ngôn ngữ cho dayjs
 dayjs.locale("vi");
 const { Text, Title } = Typography;
 const DoctorSchedulePage = () => {
@@ -379,7 +376,7 @@ const DoctorSchedulePage = () => {
     setIsDrawerOpen(true);
   };
   return (
-    <ConfigProvider locale={viVN}>
+    <>
       <Title level={4}>Quản lý lịch làm việc</Title>
       <Divider style={{ margin: '12px 0' }} />
       <ButtonComponent 
@@ -637,7 +634,7 @@ const DoctorSchedulePage = () => {
         </ModalComponent>
       </LoadingComponent >
       
-    </ConfigProvider>
+    </>
   )
 }
 

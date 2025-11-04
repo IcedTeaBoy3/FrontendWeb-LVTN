@@ -548,7 +548,7 @@ const DetailDoctorSchedulePage = () => {
               <Col span={24}>
                 <Text strong>
                   <CalendarOutlined style={{ color: "#faad14", marginRight: 8 }} />
-                  Tổng số slot:{" "}
+                  Tổng số khung giờ:{" "}
                 </Text>
                 <Text>{shiftSelected?.slotCount || 0}</Text>
               </Col>

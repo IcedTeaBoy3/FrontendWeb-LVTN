@@ -22,7 +22,7 @@ import {
     CheckOutlined,
 } from "@ant-design/icons";
 import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
-const { Title,Text,Paragraph } = Typography;
+const { Title,Text } = Typography;
 const DetailAppointmentPage = () => {
     const [isOpenModalDetailPatient, setIsOpenModalDetailPatient] = useState(false);
     const [isOpenModalConfirm, setIsOpenModalConfirm] = useState(false);
@@ -181,7 +181,7 @@ const DetailAppointmentPage = () => {
                                     shape="round"
                                     icon={<CheckOutlined />}
                                     onClick={() => setIsOpenModalConfirm(true)}
-                                    disabled={appointmentData.status === "confirmed"} // tránh xác nhận lại
+                                    disabled={appointmentData.status !== "pending"} // tránh xác nhận lại
                                 >
                                     Xác nhận lịch khám
                                 </ButtonComponent>,

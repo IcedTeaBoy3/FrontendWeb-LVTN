@@ -411,7 +411,7 @@ const DetailSchedulePage = () => {
             <Space>
               <ClockCircleOutlined style={{ color: "#faad14" }} />
               <Text>
-                <b>Thời gian slot: </b>
+                <b>Thời gian khám: </b>
                 {scheduleInfo?.slotDuration || "—"} phút
               </Text>
             </Space>
@@ -596,7 +596,7 @@ const DetailSchedulePage = () => {
               <Col span={24}>
                 <Text strong>
                   <CalendarOutlined style={{ color: "#faad14", marginRight: 8 }} />
-                  Tổng số slot:{" "}
+                  Tổng số khung giờ:{" "}
                 </Text>
                 <Text>{shiftSelected?.slotCount || 0}</Text>
               </Col>

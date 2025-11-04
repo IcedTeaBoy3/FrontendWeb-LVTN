@@ -14,6 +14,10 @@ export const ServiceService = {
         const response = await axiosInstance.get(`/service/get-service/${serviceId}`);
         return response.data;
     },
+    getServicesBySpecialty: async (specialtyId) => {
+        const response = await axiosInstance.get(`/service/get-services-by-specialty/${specialtyId}`);
+        return response.data;
+    },
     createService: async (serviceData) => {
         const response = await axiosInstance.post('/service/create-service', serviceData);
         return response.data;

@@ -130,7 +130,6 @@ const DoctorStatisticPage = () => {
     const statisticPatientData = doctorStatisticPatientData?.data || {};
     return (
         <>
-            <Title level={4}>Thống kê chi tiết</Title>
             <StyleTabs
                 activeKey={tabKeyDetails}
                 type='card'

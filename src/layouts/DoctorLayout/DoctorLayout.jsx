@@ -72,8 +72,6 @@ import {
 } from "./style";
 const AdminLayout = () => {
     const [collapsed, setCollapsed] = useState(false);
-    // const { useBreakpoint } = Grid;
-    // const screens = useBreakpoint();
     const user = useSelector((state) => state.auth.user);
     const [isOpenPopupUser, setIsOpenPopupUser] = useState(false);
     const navigate = useNavigate();

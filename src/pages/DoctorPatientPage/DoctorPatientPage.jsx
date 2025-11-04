@@ -11,6 +11,8 @@ import { EyeOutlined, EditOutlined, MoreOutlined,SearchOutlined, CalendarOutline
 import { Dropdown, Typography, Timeline, Tag, Input, Space, Button, Card } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
+import * as Message from "@/components/Message/Message";
+
 import { convertGender } from "@/utils/gender_utils";
 import { convertStatusAppointment, getStatusColor} from "@/utils/status_appointment_utils";
 import dayjs from "dayjs";
@@ -133,6 +135,7 @@ const DoctorPatientPage = () => {
   const { data: doctorPatientHistoryData, isLoading: isLoadingDoctorPatientHistory } = queryGetDoctorPatientHistory;
   const patients = doctorPatientsData?.data || [];
   const historyRecords = doctorPatientHistoryData?.data || [];
+  // console.log("historyRecords", historyRecords);
   const dataTable = patients.map((patient, index) => ({
     key: patient.patientProfileId,
     index: index + 1,
@@ -140,7 +143,6 @@ const DoctorPatientPage = () => {
     insuranceCode : patient?.insuranceCode,
     patientProfileCode: patient?.patientProfileCode,
     fullName: patient?.person?.fullName,
-    dateOfBirth: dayjs(patient?.person?.dateOfBirth).format('DD/MM/YYYY'),
     gender: convertGender(patient?.person?.gender),
   }));
   const handleCloseModalDetailPatient = () => {
@@ -199,7 +201,7 @@ const DoctorPatientPage = () => {
         const itemActions = [
           { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined style={{ fontSize: 16 }} /> },
           { type: "divider" },
-          { key: "history", label: "Xem lịch sử khám", icon: <EditOutlined style={{ fontSize: 16 }} /> },
+          { key: "history", label: "Xem lịch sử khám", icon: <ClockCircleOutlined style={{ fontSize: 16 }} /> },
         ];
 
         const onMenuClick = ({ key, domEvent }) => {
@@ -284,13 +286,18 @@ const DoctorPatientPage = () => {
                     <ButtonComponent
                       type="primary"
                       ghost
-                      onClick={() => navigate(`/doctor/patients/${record.medicalResult._id}`)}
+                      onClick={() => {
+                        if(!record.medicalResult){
+                          Message.warning("Chưa có kết quả khám cho cuộc hẹn này!");
+                        }
+                        navigate(`/doctor/patients/${record.medicalResult._id}`);
+                      }}
                     >Xem chi tiết</ButtonComponent>
                   ]}
                 >
                   <Paragraph ellipsis><Text strong>Dịch vụ khám: </Text>{record.doctorService?.service?.name || "Chưa cập nhật"}</Paragraph>
                   <Paragraph ellipsis><Text strong>Triệu chứng: </Text>{record.symptoms || "Chưa cập nhật"}</Paragraph>
-                  <Paragraph ellipsis><Text strong>Kết quả: </Text>{record.medicalResult?.diagnosis || "Chưa cập nhật"}</Paragraph>
+                  <Paragraph ellipsis><Text strong>Chuẩn đoán: </Text>{record.medicalResult?.diagnosis || "Chưa cập nhật"}</Paragraph>
                   <Paragraph ellipsis><Text strong>Ghi chú: </Text>{record.medicalResult?.note || "—"}</Paragraph>
                  
                   <Tag color={getStatusColor(record.status)}>

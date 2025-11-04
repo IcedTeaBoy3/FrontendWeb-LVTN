@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Form, Typography, Space, Divider, Select, Skeleton, InputNumber, Checkbox, Card } from "antd";
 import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { DoctorServiceService } from "@/services/DoctorServiceService";
+import { DoctorSpecialtyService } from "@/services/DoctorSpecialtyService";
 import { ServiceService } from "@/services/ServiceService";
 import * as Message from "@/components/Message/Message";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -15,6 +16,7 @@ const { Text, Title } = Typography;
 const DoctorService = ({id}) => {
     const [isOpenModalCreateDoctorService, setIsOpenModalCreateDoctorService] = useState(false);
     const [rowSelectedService, setRowSelectedService] = useState(null);
+    const [selectedSpecialtyId, setSelectedSpecialtyId] = useState(null);
     const [isModalOpenDeleteService, setIsModalOpenDeleteService] = useState(false);
     const [selectedRowKeyServices, setSelectedRowKeyServices] = useState([]);
     const [isDrawerOpenService, setIsDrawerOpenService] = useState(false);
@@ -37,6 +39,16 @@ const DoctorService = ({id}) => {
         queryKey: ['getServicesByDoctor', id],
         queryFn: () => DoctorServiceService.getServicesByDoctor(id),
         enabled: !!id,
+    });
+    const queryGetAllSpecialtiesByDoctor = useQuery({
+        queryKey: ['getSpecialtiesByDoctor', id],
+        queryFn: () => DoctorSpecialtyService.getSpecialtiesByDoctor(id),
+        enabled: !!id,
+    });
+    const queryGetAllServicesBySpecialty = useQuery({
+        queryKey: ['getServicesBySpecialty', selectedSpecialtyId],
+        queryFn: () => ServiceService.getServicesBySpecialty(selectedSpecialtyId),
+        enabled: !!selectedSpecialtyId,
     });
     const mutationCreateDoctorService = useMutation({
         mutationKey: ['createDoctorService'],
@@ -90,17 +102,16 @@ const DoctorService = ({id}) => {
             Message.error(error.response.data.message || "Xoá dịch vụ thất bại");
         }
     });
-    const queryGetAllServices = useQuery({
-        queryKey: ['getAllServices'],
-        queryFn: () => ServiceService.getAllServices({status: 'active', page: 1, limit: 100}),
-    });
     const { data: doctorServices, isLoading: isLoadingServicesByDoctor } = queryGetAllServicesByDoctor;
     const isPendingCreateDoctorService = mutationCreateDoctorService.isPending;
     const isPendingUpdateDoctorService = mutationUpdateDoctorService.isPending;
     const isPendingDeleteService = mutationDeleteDoctorService.isPending;
-    const { data: services, isLoading: isLoadingServices } = queryGetAllServices;
+    const { data: specialties, isLoading: isLoadingSpecialties } = queryGetAllSpecialtiesByDoctor;
+    const { data: services, isLoading: isLoadingServices } = queryGetAllServicesBySpecialty;
     const doctorServiceData = doctorServices?.data || [];
-    const serviceData = services?.data?.services || [];
+    const doctorSpecialtyData = specialties?.data || [];
+    const serviceData = services?.data || [];
+    console.log("serviceData", serviceData);
     const columnServices = [
         {
             title: "STT",
@@ -161,7 +172,9 @@ const DoctorService = ({id}) => {
     const handleEditService = (key) => {
         const service = doctorServiceData.find((item) => item.doctorServiceId === key);
         if (service) {
+            setSelectedSpecialtyId(service?.service?.specialty);
             formUpdateDoctorService.setFieldsValue({
+                specialtyId: service?.service?.specialty,
                 serviceId: service?.service?.serviceId,
                 price: service?.price,
             });
@@ -186,7 +199,6 @@ const DoctorService = ({id}) => {
         setIsOpenModalCreateDoctorService(false);
     };
     const handleOkDeleteService = () => {
-        console.log(rowSelectedService);
         mutationDeleteDoctorService.mutate(rowSelectedService);
     };
     const handleCancelDeleteService = () => {
@@ -217,7 +229,7 @@ const DoctorService = ({id}) => {
         > 
             <LoadingComponent isLoading={isPendingCreateDoctorService}>
                 <ModalComponent
-                    title="Thêm mới chuyên khoa"
+                    title="Thêm mới dịch vụ cho bác sĩ"
                     open={isOpenModalCreateDoctorService}
                     onOk={handleCreateDoctorService}
                     onCancel={handleCloseCreateDoctorService}
@@ -235,6 +247,37 @@ const DoctorService = ({id}) => {
                         form={formCreateDoctorService}
                         labelAlign="left"
                     >
+                        <Form.Item
+                            label="Chuyên khoa"
+                            name="specialtyId"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn chuyên khoa!",
+                                }
+                            ]}
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Chọn chuyên khoa"
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                notFoundContent={
+                                    isLoadingSpecialties ? <Skeleton active title={false} paragraph={{ rows: 1 }} /> : "Không tìm thấy"
+                                }
+                                options={doctorSpecialtyData.map((sp) => ({
+                                    label: sp.specialty?.name,
+                                    value: sp.specialty?.specialtyId
+                                }))}
+                                onChange={(value) => {
+                                    setSelectedSpecialtyId(value);
+                                    formCreateDoctorService.setFieldsValue({ serviceId: null });
+                                }}
+                            />
+                        </Form.Item>
+
                         <Form.Item
                             label="Dịch vụ"
                             name="serviceId"
@@ -260,7 +303,14 @@ const DoctorService = ({id}) => {
                                     label: sv.name,
                                     value: sv.serviceId
                                 }))}
-                            ></Select>
+                                onChange={(value) => {
+                                    formCreateDoctorService.setFieldsValue({ serviceId: value });
+                                    const service = serviceData.find((sv) => sv.serviceId === value);
+                                    if (service) {
+                                        formCreateDoctorService.setFieldsValue({ price: service.price });
+                                    }
+                                }}
+                            />
 
                         </Form.Item>
                         <Form.Item
@@ -325,16 +375,45 @@ const DoctorService = ({id}) => {
                         labelAlign="left"
                     >
                         <Form.Item
+                            label="Chuyên khoa"
+                            name="specialtyId"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn chuyên khoa!",
+                                }
+                            ]}
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Chọn chuyên khoa"
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                notFoundContent={
+                                    isLoadingSpecialties ? <Skeleton active title={false} paragraph={{ rows: 1 }} /> : "Không tìm thấy"
+                                }
+                                options={doctorSpecialtyData.map((sp) => ({
+                                    label: sp.specialty?.name,
+                                    value: sp.specialty?.specialtyId
+                                }))}
+                                onChange={(value) => {
+                                    setSelectedSpecialtyId(value);
+                                    formUpdateDoctorService.setFieldsValue({ serviceId: null });
+                                }}
+                            />
+                        </Form.Item>
+                        <Form.Item
                             label="Dịch vụ"
                             name="serviceId"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Vui lòng nhập tên!",
+                                    message: "Vui lòng chọn dịch vụ!",
                                 },
                             ]}
                         >
-
                             <Select
                                 showSearch
                                 placeholder="Chọn dịch vụ"
@@ -349,8 +428,14 @@ const DoctorService = ({id}) => {
                                     label: sv.name,
                                     value: sv.serviceId
                                 }))}
-                            ></Select>
-
+                                onChange={(value) => {
+                                    formUpdateDoctorService.setFieldsValue({ serviceId: value });
+                                    const service = serviceData.find((sv) => sv.serviceId === value);
+                                    if (service) {
+                                        formUpdateDoctorService.setFieldsValue({ price: service.price });
+                                    }
+                                }}
+                            />
                         </Form.Item>
                         <Form.Item
                             label="Giá tiền"
