@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useState, useRef } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { AppointmentService } from '@/services/AppointmentService'
-import { Space, Input, Button, Form, Typography, Dropdown, Tag } from "antd";
+import { AppointmentService } from '@/services/AppointmentService';
+import { PaymentService } from '@/services/PaymentService';
+import { Space, Input, Button, Typography, Dropdown, Tag } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -12,16 +13,14 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import * as DatetimeUtils from '@/utils/datetime_utils';
 import { getStatusColor,convertStatusAppointment } from '@/utils/status_appointment_utils';
+import { convertStatusPayment, getStatusPaymentColor } from '@/utils/status_payment_utils';
 import {
-    EditOutlined,
     DeleteOutlined,
     SearchOutlined,
     MoreOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
-    PlusOutlined,
     ExportOutlined,
-    CheckOutlined, 
     CheckCircleFilled
 } from "@ant-design/icons";
 const { Text,Title } = Typography;
@@ -32,6 +31,7 @@ const AppointmentPage = () => {
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalConfirmOpen, setIsModalConfirmOpen] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [isModalConfirmPaymentOpen, setIsModalConfirmPaymentOpen] = useState(false);
     const navigate = useNavigate();
 
     const rowSelection = {
@@ -187,10 +187,28 @@ const AppointmentPage = () => {
             Message.error(error?.response?.data?.message || "Xóa nhiều lịch khám thất bại");
         }
     });
+    const mutationUpdatePaymentStatus = useMutation({
+        mutationKey: ['update-payment-status'],
+        mutationFn: ({ paymentId, status }) => PaymentService.updatePaymentStatus(paymentId, {status}),
+        onSuccess: (data) => {
+            if (data.status === 'success') {
+                Message.success(data.message || 'Cập nhật trạng thái thanh toán thành công');
+                setIsModalConfirmPaymentOpen(false);
+                setRowSelected(null);
+                queryGetAllAppointments.refetch();
+            }else {
+                Message.error(data.message || 'Cập nhật trạng thái thanh toán thất bại');
+            }
+        },
+        onError: (error) => {
+            Message.error(error?.message || 'Cập nhật trạng thái thanh toán thất bại');
+        }
+    });
     const { data: appointments, isLoading: isLoadingAppointments} = queryGetAllAppointments;
     const { isPending: isPendingConfirm } = mutationConfirmAppointment;
     const { isPending: isPendingDelete } = mutationDeleteAppointment;
     const { isPending: isPendingDeleteMany } = mutationDeleteManyAppointments;
+    const { isPending: isPendingUpdatePayment } = mutationUpdatePaymentStatus;
     const appointmentData = appointments?.data?.appointments || [];
     const dataTable = appointmentData.map((item, index) => ({
         key: item.id,
@@ -201,6 +219,8 @@ const AppointmentPage = () => {
         appointmentDate: item.schedule?.workday,
         appointmentTime: item.slot,
         description: item.description,
+        paymentStatus: item.payment?.status,
+        paymentId: item.payment?.paymentId,
         status: item.status,
     }));
     const columns = [
@@ -276,8 +296,8 @@ const AppointmentPage = () => {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
-           render: (text) => (
-               <Tag color={getStatusColor(text)}>{convertStatusAppointment(text)}</Tag>
+            render: (text) => (
+            <Tag color={getStatusColor(text)}>{convertStatusAppointment(text)}</Tag>
             ),
             filters: [
                 { text: "Chờ xác nhận", value: "pending" },
@@ -288,7 +308,22 @@ const AppointmentPage = () => {
             onFilter: (value, record) => record.status.startsWith(value),
             filterMultiple: false,
         },
-
+        {
+            title: "Thanh toán",
+            dataIndex: "paymentStatus",
+            key: "paymentStatus",
+            render: (text) => (
+                <Tag color={text === "paid" ? "green" : "red"}>
+                    {text === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}
+                </Tag>
+            ),
+            filters: [
+                { text: "Đã thanh toán", value: "paid" },
+                { text: "Chưa thanh toán", value: "unpaid" },
+            ],
+            onFilter: (value, record) => record.paymentStatus.startsWith(value),
+            filterMultiple: false,
+        },
         {
             title: "Hành động",
             key: "action",
@@ -302,7 +337,11 @@ const AppointmentPage = () => {
                 ];
                 if(record.status === "pending") {
                     itemActions.push({ type: "divider" });
-                    itemActions.push({ key: "confirm", label: "Xác nhận", icon: <CheckCircleFilled style={{ fontSize: 16, color: "green" }} /> });
+                    itemActions.push({ key: "confirm", label: <Text type="green">Xác nhận lịch</Text>, icon: <CheckCircleFilled style={{ fontSize: 16, color: "green" }} /> });
+                }
+                if(record.paymentStatus === "unpaid") {
+                    itemActions.push({ type: "divider" });
+                    itemActions.push({ key: "confirmPayment", label: <Text type="green">Xác nhận thanh toán</Text>, icon: <CheckCircleFilled style={{ fontSize: 16, color: "green" }} /> });
                 }
 
                 const onMenuClick = ({ key, domEvent }) => {
@@ -311,6 +350,7 @@ const AppointmentPage = () => {
                     if (key === "detail") return handleViewAppointment(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
                     if (key === "confirm") return setIsModalConfirmOpen(true);
+                    if (key === "confirmPayment") return setIsModalConfirmPaymentOpen(true);
                 };
 
                 return (
@@ -356,6 +396,16 @@ const AppointmentPage = () => {
     };
     const handleCancelDeleteMany = () => {
         setIsModalOpenDeleteMany(false);
+    };
+    const handleOkConfirmPayment = () => {
+        const paymentId = dataTable.find(item => item.key === rowSelected)?.paymentId;
+        if (paymentId) {
+            mutationUpdatePaymentStatus.mutate({ paymentId, status: 'paid' });
+        }
+    };
+    const handleCancelConfirmPayment = () => {
+        setIsModalConfirmPaymentOpen(false);
+        setRowSelected(null);
     };
     const menuProps = {
         items: [
@@ -467,11 +517,43 @@ const AppointmentPage = () => {
                     </div>
                 </LoadingComponent>
             </ModalComponent>
-                        <ModalComponent
+            <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá dịch vụ</span>
+                        <span style={{ fontWeight: 600 }}>Xác nhận thanh toán</span>
+                    </span>
+                }
+                open={isModalConfirmPaymentOpen}
+                onOk={handleOkConfirmPayment}
+                onCancel={handleCancelConfirmPayment}
+                okText="Xác nhận"
+                cancelText="Hủy"
+                okButtonProps={{ 
+                    type: "primary", 
+                    danger: true, // 🔥 nhấn mạnh hành động có ảnh hưởng
+                }}
+                centered
+                style={{ borderRadius: 12 }}
+            >
+                <LoadingComponent isLoading={isPendingUpdatePayment}>
+                    <div style={{ textAlign: "center", padding: "12px 0" }}>
+                        <Text style={{ fontSize: 16 }}>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                            xác nhận
+                            </Text>{" "}
+                            thanh toán cho lịch khám này không?
+                        </Text>
+                    
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá lịch khám</span>
                     </span>
                 }
                 open={isModalOpenDeleteMany}
@@ -490,12 +572,11 @@ const AppointmentPage = () => {
                             <Text strong type="danger">
                                 xoá
                             </Text>{" "}
-                            {selectedRowKeys.length} dịch vụ này không?
+                            {selectedRowKeys.length} lịch khám này không?
                         </Text>
                     </div>
                 </LoadingComponent>
             </ModalComponent>
-
         </>
     )
 }

@@ -1,23 +1,21 @@
 
-import { useNavigate, useLocation } from "react-router-dom"
-import { Space, Input, Form, Select, Radio, Typography, Divider, Dropdown, DatePicker, Upload, Tag, Popover,Descriptions } from "antd";
+import { useLocation } from "react-router-dom"
+import { Space, Input, Form, Typography, Dropdown, Upload, Tag} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
-import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
-import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
-import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
-import defaultImage from "@/assets/default_image.png";
-import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined, CheckOutlined,UploadOutlined  } from "@ant-design/icons";
+import { SearchOutlined, EyeOutlined, MoreOutlined, ExclamationCircleOutlined ,UploadOutlined, CheckCircleFilled  } from "@ant-design/icons";
 import { useState, useRef} from "react";
 import { useSelector } from "react-redux";
 import { useQuery,useMutation } from '@tanstack/react-query';
 import { AppointmentService } from '@/services/AppointmentService';
 import { MedicalResultService } from "@/services/MedicalResultService";
 import { convertStatusAppointment, getStatusColor } from '@/utils/status_appointment_utils';
+import { convertStatusPayment, getStatusPaymentColor } from '@/utils/status_payment_utils';
 import DrawerDetailAppointment from "./components/DrawerDetailAppointment";
+import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 // Thiết lập ngôn ngữ cho dayjs
@@ -33,6 +31,7 @@ const DoctorAppointmentDate = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [rowSelected, setRowSelected] = useState(null);
   const [appointmentDetail, setAppointmentDetail] = useState(null);
+  const [isOpenModalCancel, setIsOpenModalCancel] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -59,8 +58,9 @@ const DoctorAppointmentDate = () => {
     mutationKey: ['create-medical-result'],
     mutationFn: (medicalResultData) => MedicalResultService.createMedicalResult(medicalResultData),
     onSuccess: (data) => {
-      Message.success("Tạo kết quả khám thành công!");
+      Message.success(data.message || "Tạo kết quả khám thành công");
       setIsOpenModal(false);
+      setIsOpenDrawer(false);
       formCreate.resetFields();
       queryGetAllDoctorAppointments.refetch();
     },
@@ -68,6 +68,19 @@ const DoctorAppointmentDate = () => {
       Message.error("Tạo kết quả khám thất bại: " + (error?.message || "Lỗi không xác định"));
       console.log("Error creating medical result:", error);
     },
+  });
+  const mutationCancelAppointment = useMutation({
+    mutationKey: ['cancel-appointment'],
+    mutationFn: AppointmentService.cancelAppointment,
+    onSuccess: (data) => {
+      Message.success(data.message || "Huỷ lịch khám thành công");
+      setIsOpenModalCancel(false);
+      if(isDrawerOpen) setIsDrawerOpen(false);
+      queryGetAllDoctorAppointments.refetch();
+    },
+    onError: (error) => {
+      Message.error(error?.response?.data?.message || "Huỷ lịch khám thất bại: Lỗi không xác định");
+    }
   });
   const getColumnSearchProps = (dataIndex) => ({
   filterDropdown: ({
@@ -197,6 +210,21 @@ const DoctorAppointmentDate = () => {
       onFilter: (value, record) => record.status === value,
     },
     {
+      title: "Thanh toán",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      render: (paymentStatus) => (
+        <Tag color={getStatusPaymentColor(paymentStatus)}>
+          {convertStatusPayment(paymentStatus)}
+        </Tag>
+      ),
+      filters: [
+        { text: 'Chưa thanh toán', value: 'unpaid' },
+        { text: 'Đã thanh toán', value: 'paid' },
+      ],
+      onFilter: (value, record) => record.paymentStatus === value,
+    },
+    {
       title: "Hành động",
       key: "action",
       render: (_, record) => {
@@ -205,8 +233,11 @@ const DoctorAppointmentDate = () => {
           
         ];
         if(record.status == "confirmed"){
-          itemActions.push({ key: "complete", label: "Hoàn thành", icon: <CheckOutlined style={{ fontSize: 16 }} /> });
           itemActions.push({ type: "divider" });
+          itemActions.push({ key: "complete", label: "Hoàn thành", icon: <CheckCircleFilled style={{ fontSize: 16,color:'green' }} /> });
+          itemActions.push({ type: "divider" });
+          itemActions.push({ key: "cancel", label: "Huỷ lịch khám", icon: <ExclamationCircleOutlined style={{ fontSize: 16,color:'red' }} /> });
+
         }
 
         const onMenuClick = ({ key, domEvent }) => {
@@ -214,6 +245,7 @@ const DoctorAppointmentDate = () => {
           domEvent.stopPropagation(); // tránh chọn row khi bấm menu
           if (key === "detail") return handleViewAppointment(record.key);
           if (key === "complete") return handleCompleteAppointment(record.key);
+          if (key === "cancel") return setIsOpenModalCancel(true);
         };
 
         return (
@@ -246,6 +278,7 @@ const DoctorAppointmentDate = () => {
       patientName: appointment.patientProfile?.person?.fullName || '--',
       date: dayjs(appointment.schedule?.workday).format('DD/MM/YYYY'),
       time: dayjs(appointment?.slot?.startTime).format('HH:mm') + ' - ' + dayjs(appointment?.slot?.endTime).format('HH:mm'),
+      paymentStatus: appointment.payment?.status,
       status: appointment.status,
     };
   });
@@ -273,7 +306,14 @@ const DoctorAppointmentDate = () => {
         });
         mutationCreateMedicalResult.mutate(formData);
       });
-    };
+  };
+  const handleOkCancelConfirm = () => {
+    console.log("Huỷ appointmentId:", rowSelected);
+    mutationCancelAppointment.mutate(rowSelected);
+  };
+  const handleCancelConfirm = () => {
+    setIsOpenModalCancel(false);
+  };
 
   return (
     <>
@@ -407,11 +447,43 @@ const DoctorAppointmentDate = () => {
           </Form.Item>
         </Form>
       </ModalComponent>
+      <ModalComponent
+        title={
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+            <span style={{ fontWeight: 600 }}>Huỷ lịch khám</span>
+          </span>
+        }
+        open={isOpenModalCancel}
+        onOk={handleOkCancelConfirm}
+        onCancel={handleCancelConfirm}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        okButtonProps={{ 
+          type: "primary", 
+          danger: true, 
+        }}
+        centered
+        style={{ borderRadius: 12 }}
+    >
+      <LoadingComponent isLoading={mutationCancelAppointment.isPending} >
+        <div style={{ textAlign: "center", padding: "12px 0" }}>
+          <Text style={{ fontSize: 16 }}>
+            Bạn có chắc chắn muốn{" "}
+            <Text strong type="danger">
+              huỷ
+            </Text>{" "}
+            lịch khám này không ( bệnh nhân không đến khám )?
+          </Text>
+        </div>
+      </LoadingComponent>
+      </ModalComponent>
       <DrawerDetailAppointment
         visible={isDrawerOpen}
         appointmentDetail={appointmentDetail}
         onClose={() => setIsDrawerOpen(false)}
         onComplete={() => setIsOpenModal(true)}
+        onCancel={() => setIsOpenModalCancel(true)}
       />
     </>
   )

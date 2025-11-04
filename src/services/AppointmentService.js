@@ -25,6 +25,14 @@ export const AppointmentService = {
             throw error.response.data;
         }
     },
+    cancelAppointment: async (appointmentId) => {
+        try {
+            const response = await axiosInstance.put(`/appointment/cancel-appointment/${appointmentId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
     deleteManyAppointments: async (appointmentIds) => {
         try {
             const response = await axiosInstance.post('/appointment/delete-many-appointments', { appointmentIds });
