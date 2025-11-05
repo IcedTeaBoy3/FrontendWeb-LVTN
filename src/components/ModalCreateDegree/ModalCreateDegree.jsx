@@ -18,8 +18,8 @@ const ModalCreateDegree = ({formCreate,isPendingCreate, isModalOpenCreate, handl
                     name="formCreate"
                     labelCol={{ span: 6 }}
                     wrapperCol={{ span: 18 }}
+                    labelAlign="left"
                     style={{ maxWidth: 600, padding: "20px" }}
-                    initialValues={{ remember: true }}
                     autoComplete="off"
                     form={formCreate}
                 >

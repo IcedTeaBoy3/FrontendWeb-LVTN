@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Form, Typography, Space, Divider, Select, Skeleton, InputNumber, Checkbox, Card } from "antd";
-import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { Form, Typography, Space, Select, Skeleton, InputNumber, Checkbox, Card, Table } from "antd";
+import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined,ExportOutlined } from "@ant-design/icons";
 import { SpecialtyService } from "@/services/SpecialtyService";
 import { DoctorSpecialtyService } from "@/services/DoctorSpecialtyService";
 import * as Message from "@/components/Message/Message";
@@ -10,6 +10,8 @@ import TableStyle from "@/components/TableStyle/TableStyle";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
+import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
+
 const { Text, Title } = Typography;
 const DoctorSpecialty = ({ id }) => {
     const [isOpenModalCreateDoctorSpecialty, setIsOpenModalCreateDoctorSpecialty] = useState(false);
@@ -17,6 +19,8 @@ const DoctorSpecialty = ({ id }) => {
     const [isModalOpenDeleteSpecialty, setIsModalOpenDeleteSpecialty] = useState(false);
     const [rowSelectedSpecialty, setRowSelectedSpecialty] = useState(null);
     const [selectedRowKeySpecialties, setSelectedRowKeySpecialties] = useState([]);
+    const [selectedSpecialties, setSelectedSpecialties] = useState([]);
+    const [isOpenModalDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [formCreateDoctorSpecialty] = Form.useForm();
     const [formUpdateDoctorSpecialty] = Form.useForm();
     const rowSelectionSpecialties = {
@@ -59,6 +63,24 @@ const DoctorSpecialty = ({ id }) => {
             Message.error(error.response.data.message || "Thêm chuyên khoa thất bại");
         }
     });
+    const mutationCreateMultipleDoctorSpecialty = useMutation({
+        mutationKey: ['createMultipleDoctorSpecialty'],
+        mutationFn: ({ doctorId, data }) => DoctorSpecialtyService.assignSpecialtiesToDoctor(doctorId, data),
+        onSuccess: (data) => {
+            if (data.status == "success") {
+                Message.success(data.message);
+                formCreateDoctorSpecialty.resetFields();
+                setIsOpenModalCreateDoctorSpecialty(false);
+                setSelectedSpecialties([]);
+                queryGetAllSpecialtiesByDoctor.refetch();
+            } else {
+                Message.error(data.message || "Thêm chuyên khoa thất bại");
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Thêm chuyên khoa thất bại");
+        }
+    });
     const mutationDeleteDoctorSpecialty = useMutation({
         mutationKey: ['deleteDoctorSpecialty'],
         mutationFn: DoctorSpecialtyService.removeDoctorFromSpecialty,
@@ -67,6 +89,23 @@ const DoctorSpecialty = ({ id }) => {
                 Message.success(data.message);
                 setRowSelectedSpecialty(null);
                 setIsModalOpenDeleteSpecialty(false);
+                queryGetAllSpecialtiesByDoctor.refetch();
+            } else {
+                Message.error(data.message || "Xoá chuyên khoa thất bại");
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Xoá chuyên khoa thất bại");
+        }
+    });
+    const mutationDeleteManyDoctorSpecialty = useMutation({
+        mutationKey: ['deleteManyDoctorSpecialty'],
+        mutationFn: ({ doctorId, doctorSpecialtyIds }) => DoctorSpecialtyService.removeManySpecialtiesFromDoctor(doctorId, doctorSpecialtyIds),
+        onSuccess: (data) => {
+            if (data.status == "success") {
+                Message.success(data.message);
+                setSelectedRowKeySpecialties([]);
+                setIsModalOpenDeleteMany(false);
                 queryGetAllSpecialtiesByDoctor.refetch();
             } else {
                 Message.error(data.message || "Xoá chuyên khoa thất bại");
@@ -99,6 +138,7 @@ const DoctorSpecialty = ({ id }) => {
     const { isPending: isPendingCreateDoctorSpecialty } = mutationCreateDoctorSpecialty;
     const { isPending: isPendingUpdateDoctorSpecialty } = mutationUpdateDoctorSpecialty;
     const { isPending: isPendingDeleteDoctorSpecialty } = mutationDeleteDoctorSpecialty;
+    const { isPending: isPendingDeleteManyDoctorSpecialty } = mutationDeleteManyDoctorSpecialty;
     const specialtyData = specialties?.data?.specialties || [];
     const doctorSpecialtyData = doctorSpecialties?.data || [];
     const columnSpecialties = [
@@ -174,12 +214,34 @@ const DoctorSpecialty = ({ id }) => {
         };
     });
     const handleCreateDoctorSpecialty = () => {
-        formCreateDoctorSpecialty.validateFields().then((values) => {
-            mutationCreateDoctorSpecialty.mutate({
-                ...values,
-                doctorId: id
+        mutationCreateMultipleDoctorSpecialty.mutate({ doctorId: id, data: selectedSpecialties });
+    };
+    const handleSpecialtyChange = (values) => {
+        const newSpecialties = values.map((id) => {
+            const existing = selectedSpecialties.find((item) => item === id);
+            if (existing) return existing; // giữ giá trị cũ nếu có
+            const specialty = specialtyData.find((sp) => sp.specialtyId === id);
+            return {specialtyId: id, name: specialty?.name, yearsOfExperience: null, isPrimary: false};
+        })
+        setSelectedSpecialties(newSpecialties);
+    };
+    const handleYearsOfExperienceChange = (value, key) => {
+        setSelectedSpecialties((prev) => {
+            return prev.map((item) => {
+                if (item.specialtyId === key) {
+                    return { ...item, yearsOfExperience: value };
+                }
+                return item;
             });
         });
+    };
+    const handleIsPrimaryChange = (checked, key) => {
+        setSelectedSpecialties((prev) =>
+            prev.map((item) => ({
+                ...item,
+                isPrimary: item.specialtyId === key ? checked : false,
+            }))
+        );
     };
     const handleCloseCreateDoctorSpecialty = () => {
         setIsOpenModalCreateDoctorSpecialty(false);
@@ -206,6 +268,65 @@ const DoctorSpecialty = ({ id }) => {
             id: rowSelectedSpecialty, data: { ...values, doctorId: id }
         });
     };
+    const handleSelectedAll = () => {
+        if (selectedRowKeySpecialties.length === dataTableSpecialties.length) {
+            setSelectedRowKeySpecialties([]);
+        } else {
+            setSelectedRowKeySpecialties(dataTableSpecialties.map(item => item.key));
+        }
+    };
+    const menuProps = {
+        items: [
+            {
+                key: "export",
+                label: "Xuất file",
+                icon: <ExportOutlined style={{ fontSize: 16 }} />,
+            },
+            {
+                type: "divider"
+            },
+            {
+                key: "delete",
+                label: <Text type="danger">Xoá tất cả</Text>,
+                icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
+                onClick: () => setIsModalOpenDeleteMany(true),
+            },
+        ],
+    };
+    const handleOkDeleteMany = () => {
+        mutationDeleteManyDoctorSpecialty.mutate({ doctorId: id, doctorSpecialtyIds: selectedRowKeySpecialties });
+    };
+    const handleCancelDeleteMany = () => {
+        setIsModalOpenDeleteMany(false);
+    };
+    const columns = [
+        {
+            title: 'Chuyên khoa',
+            dataIndex: 'name',
+            
+        },
+        {
+            title: 'Năm kinh nghiệm',
+            dataIndex: 'yearsOfExperience',
+            render: (text, record) => (
+                <InputNumber
+                    min={0}
+                    value={text}
+                    onChange={(value) => handleYearsOfExperienceChange(value, record.key)}
+                />
+            )
+        },
+        {
+            title: "Chuyên khoa chính",
+            dataIndex: "isPrimary",
+            render: (isPrimary, record) => (
+                <Checkbox
+                    checked={isPrimary}
+                    onChange={(e) => handleIsPrimaryChange(e.target.checked, record.key)}
+                />
+            )
+        }
+    ]
     return (
         <Card
             title={
@@ -240,71 +361,49 @@ const DoctorSpecialty = ({ id }) => {
                         form={formCreateDoctorSpecialty}
                         labelAlign="left"
                     >
+                        {/* ✅ Chọn nhiều chuyên khoa */}
                         <Form.Item
                             label="Chuyên khoa"
-                            name="specialtyId"
+                            name="specialtyIds"
                             rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên!",
-                                },
+                                { required: true, message: "Vui lòng chọn chuyên khoa" },
                             ]}
                         >
-
                             <Select
                                 showSearch
+                                mode="multiple"
                                 placeholder="Chọn chuyên khoa"
                                 optionFilterProp="children"
                                 filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
                                 }
                                 notFoundContent={
-                                    isLoadingSpecialties ? <Skeleton active title={false} paragraph={{ rows: 1 }} /> : "Không tìm thấy"
+                                    isLoadingSpecialties ? (
+                                        <Skeleton active title={false} paragraph={{ rows: 1 }} />
+                                    ) : (
+                                        "Không tìm thấy"
+                                    )
                                 }
                                 options={specialtyData.map((sp) => ({
                                     label: sp.name,
-                                    value: sp.specialtyId
+                                    value: sp.specialtyId,
                                 }))}
-                            ></Select>
-
+                                onChange={handleSpecialtyChange}
+                            />
                         </Form.Item>
-                        <Form.Item
-                            label="Năm kinh nghiệm"
-                            name="yearsOfExperience"
-                            rules={[
 
-                                () => ({
-                                    validator(_, value) {
-                                        if (value === undefined) {
-                                            return Promise.resolve();
-                                        }
+                        {/* ✅ Hiển thị động năm kinh nghiệm cho từng chuyên khoa */}
+                        {selectedSpecialties.length > 0 && (
+                            <Table
+                                dataSource={selectedSpecialties.map((sp) => ({
+                                    key: sp.specialtyId,
+                                    ...sp,
+                                }))}
+                                columns={columns}
+                                pagination={false}
+                            />
+                        )}
 
-                                        if (!Number.isInteger(value) || value < 0) {
-                                            return Promise.reject(
-                                                new Error("Số năm kinh nghiệm phải là số nguyên dương!")
-                                            );
-                                        }
-
-                                        if (value > 25) {
-                                            return Promise.reject(
-                                                new Error("Số năm kinh nghiệm không được lớn hơn 25!")
-                                            );
-                                        }
-
-                                        return Promise.resolve();
-                                    },
-                                }),
-                            ]}
-                        >
-                            <InputNumber min={0} style={{ width: "100%" }} />
-                        </Form.Item>
-                        <Form.Item
-                            label="Chuyên khoa chính"
-                            name="isPrimary"
-                            valuePropName="checked"
-                        >
-                            <Checkbox></Checkbox>
-                        </Form.Item>
                     </Form>
                 </ModalComponent>
             </LoadingComponent>
@@ -444,12 +543,45 @@ const DoctorSpecialty = ({ id }) => {
                 </LoadingComponent>
 
             </DrawerComponent>
+            <BulkActionBar
+                selectedRowKeys={selectedRowKeySpecialties}
+                handleSelectedAll={handleSelectedAll}
+                menuProps={menuProps}
+
+            />
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá chuyên khoa</span>
+                    </span>
+                }
+                open={isOpenModalDeleteMany}
+                onOk={handleOkDeleteMany}
+                okText="Xoá"
+                cancelText="Hủy"
+                onCancel={handleCancelDeleteMany}
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDeleteManyDoctorSpecialty}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            {selectedRowKeySpecialties.length} chuyên khoa đã chọn không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
             <TableStyle
                 rowSelection={rowSelectionSpecialties}
                 columns={columnSpecialties}
                 loading={isLoadingSpecialtiesByDoctor}
                 dataSource={dataTableSpecialties}
-              
                 pagination={paginationSpecialties}
                 onChange={(page) => {
                     setPaginationSpecialties(page);

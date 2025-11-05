@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Form, Typography, Space, Divider, Select, Skeleton, InputNumber, Checkbox, Card } from "antd";
-import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { Form, Typography, Space, Divider, Select, Skeleton, InputNumber, Checkbox, Card, Table } from "antd";
+import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined, ExportOutlined } from "@ant-design/icons";
 import { DoctorServiceService } from "@/services/DoctorServiceService";
 import { DoctorSpecialtyService } from "@/services/DoctorSpecialtyService";
 import { ServiceService } from "@/services/ServiceService";
@@ -11,15 +11,19 @@ import TableStyle from "@/components/TableStyle/TableStyle";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
+import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
+
 const { Text, Title } = Typography;
 
 const DoctorService = ({id}) => {
     const [isOpenModalCreateDoctorService, setIsOpenModalCreateDoctorService] = useState(false);
     const [rowSelectedService, setRowSelectedService] = useState(null);
     const [selectedSpecialtyId, setSelectedSpecialtyId] = useState(null);
+    const [selectedServices, setSelectedServices] = useState([]);
     const [isModalOpenDeleteService, setIsModalOpenDeleteService] = useState(false);
     const [selectedRowKeyServices, setSelectedRowKeyServices] = useState([]);
     const [isDrawerOpenService, setIsDrawerOpenService] = useState(false);
+    const [isOpenModalDeleteMany, setIsOpenModalDeleteMany] = useState(false);
     const [formCreateDoctorService] = Form.useForm();
     const [formUpdateDoctorService] = Form.useForm();
     const rowSelectionServices = {
@@ -67,6 +71,24 @@ const DoctorService = ({id}) => {
             Message.error(error.response.data.message || "Thêm dịch vụ thất bại");
         }
     });
+    const mutationCreateMultipleDoctorService = useMutation({
+        mutationKey: ['createMultipleDoctorService'],
+        mutationFn: ({doctorId, data}) => DoctorServiceService.assignMultipleServicesToDoctor(doctorId, data),
+        onSuccess: (data) => {
+            if (data?.status == "success") {
+                Message.success(data.message);
+                formCreateDoctorService.resetFields();
+                setSelectedServices([]);
+                setIsOpenModalCreateDoctorService(false);
+                queryGetAllServicesByDoctor.refetch();
+            } else {
+                Message.error(data.message || "Thêm dịch vụ thất bại");
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Thêm dịch vụ thất bại");
+        }
+    });
     const mutationUpdateDoctorService = useMutation({
         mutationKey: ['updateDoctorService'],
         mutationFn: ({id,data}) => DoctorServiceService.updateDoctorService(id,data),
@@ -102,16 +124,33 @@ const DoctorService = ({id}) => {
             Message.error(error.response.data.message || "Xoá dịch vụ thất bại");
         }
     });
+    const mutationDeleteMultipleDoctorService = useMutation({
+        mutationKey: ['deleteMultipleDoctorService'],
+        mutationFn: ({doctorId, doctorServiceIds}) => DoctorServiceService.removeMultipleServicesFromDoctor(doctorId, doctorServiceIds),
+        onSuccess: (data) => {
+            if (data?.status == "success") {
+                Message.success(data.message);
+                setSelectedRowKeyServices([]);
+                setIsOpenModalDeleteMany(false);
+                queryGetAllServicesByDoctor.refetch();
+            } else {
+                Message.error(data.message || "Xoá nhiều dịch vụ thất bại");
+            }
+        },
+        onError: (error) => {
+            Message.error(error.response.data.message || "Xoá nhiều dịch vụ thất bại");
+        }
+    });
     const { data: doctorServices, isLoading: isLoadingServicesByDoctor } = queryGetAllServicesByDoctor;
     const isPendingCreateDoctorService = mutationCreateDoctorService.isPending;
     const isPendingUpdateDoctorService = mutationUpdateDoctorService.isPending;
     const isPendingDeleteService = mutationDeleteDoctorService.isPending;
+    const isPendingDeleteMultipleServices = mutationDeleteMultipleDoctorService.isPending;
     const { data: specialties, isLoading: isLoadingSpecialties } = queryGetAllSpecialtiesByDoctor;
     const { data: services, isLoading: isLoadingServices } = queryGetAllServicesBySpecialty;
     const doctorServiceData = doctorServices?.data || [];
     const doctorSpecialtyData = specialties?.data || [];
     const serviceData = services?.data || [];
-    console.log("serviceData", serviceData);
     const columnServices = [
         {
             title: "STT",
@@ -181,17 +220,26 @@ const DoctorService = ({id}) => {
             setIsDrawerOpenService(true);
         }
     };
-    const handleCreateDoctorService = () => {
-        formCreateDoctorService.validateFields().then((values) => {
-            const payload = {
-                doctorId: id,
-                serviceId: values.serviceId,
-                price: values.price,
-            };
-            mutationCreateDoctorService.mutate(payload);
-        }).catch((info) => {
-            console.log('Validate Failed:', info);
+     // Cập nhật danh sách khi chọn dịch vụ
+    const handleServiceChange = (values) => {
+        const newServices = values.map((id) => {
+            const existing = selectedServices.find((item) => item.serviceId === id);
+            if (existing) return existing; // giữ giá trị cũ nếu có
+            const service = serviceData.find((sv) => sv.serviceId === id);
+            return { serviceId: id, name: service?.name, price: service?.price || 0 };
         });
+        setSelectedServices(newServices);
+    };
+      // Cập nhật giá tiền từng dịch vụ
+    const handlePriceChange = (id, value) => {
+        setSelectedServices((prev) =>
+            prev.map((s) =>
+                s.serviceId === id ? { ...s, price: value } : s
+            )
+        );
+    };
+    const handleCreateDoctorService = () => {
+        mutationCreateMultipleDoctorService.mutate({doctorId: id, data: selectedServices});
     };
 
     const handleCloseCreateDoctorService = () => {
@@ -212,7 +260,56 @@ const DoctorService = ({id}) => {
             price: values.price,
         };
         mutationUpdateDoctorService.mutate({id: rowSelectedService, data: payload});
-    }
+    };
+    const handleOkDeleteMany = () => {
+        mutationDeleteMultipleDoctorService.mutate({doctorId: id, doctorServiceIds: selectedRowKeyServices});
+    };
+    const handleCancelDeleteMany = () => {
+        setIsOpenModalDeleteMany(false);
+    };
+    const columns = [
+        {
+            title: "Dịch vụ",
+            dataIndex: "name",
+        },
+        {
+            title: "Giá tiền",
+            dataIndex: "price",
+            render: (price, record) => (
+                <InputNumber
+                    min={0}
+                    value={price}
+                    onChange={(value) => handlePriceChange(record.serviceId, value)}
+                    style={{ width: "100%" }}
+                />
+            ),
+        },
+    ];
+    const menuProps = {
+        items: [
+            {
+                key: "export",
+                label: "Xuất file",
+                icon: <ExportOutlined style={{ fontSize: 16 }} />,
+            },
+            {
+                type: "divider"
+            },
+            {
+                key: "delete",
+                label: <Text type="danger">Xoá tất cả</Text>,
+                icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
+                onClick: () => setIsOpenModalDeleteMany(true),
+            },
+        ],
+    };
+    const handleSelectedAll = () => {
+        if (selectedRowKeyServices.length === dataTableServices.length) {
+            setSelectedRowKeyServices([]);
+        } else {
+            setSelectedRowKeyServices(dataTableServices.map((item) => item.key));
+        }
+    };
     return (
         <Card
             title={
@@ -278,51 +375,49 @@ const DoctorService = ({id}) => {
                             />
                         </Form.Item>
 
-                        <Form.Item
+                         <Form.Item
                             label="Dịch vụ"
-                            name="serviceId"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng nhập tên!",
-                                },
-                            ]}
+                            name="serviceIds"
+                            rules={[{ required: true, message: "Vui lòng chọn ít nhất một dịch vụ!" }]}
                         >
-
                             <Select
-                                showSearch
+                                mode="multiple"
                                 placeholder="Chọn dịch vụ"
+                                showSearch
+                                allowClear
                                 optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
                                 notFoundContent={
-                                    isLoadingServices ? <Skeleton active title={false} paragraph={{ rows: 1 }} /> : "Không tìm thấy"
+                                    isLoadingServices ? (
+                                        <Skeleton active title={false} paragraph={{ rows: 1 }} />
+                                    ) : (
+                                        "Không tìm thấy dịch vụ"
+                                    )
+                                }
+                                filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase())
                                 }
                                 options={serviceData.map((sv) => ({
                                     label: sv.name,
-                                    value: sv.serviceId
+                                    value: sv.serviceId,
                                 }))}
-                                onChange={(value) => {
-                                    formCreateDoctorService.setFieldsValue({ serviceId: value });
-                                    const service = serviceData.find((sv) => sv.serviceId === value);
-                                    if (service) {
-                                        formCreateDoctorService.setFieldsValue({ price: service.price });
-                                    }
-                                }}
+                                onChange={handleServiceChange}
                             />
+                        </Form.Item>
 
-                        </Form.Item>
-                        <Form.Item
-                            label="Giá tiền"
-                            name="price"
-                            rules={[
-                                { required: true, message: "Vui lòng nhập giá tiền!" },
-                                { type: 'number', min: 0, message: 'Giá tiền phải là số dương!' }
-                            ]}
-                        >
-                            <InputNumber min={0} style={{ width: "100%" }} />
-                        </Form.Item>
+                        {selectedServices.length > 0 && (
+                            <Table
+                                columns={columns}
+                                dataSource={selectedServices.map((s) => ({
+                                    key: s.serviceId,
+                                    ...s,
+                                }))}
+                                pagination={false}
+                                bordered
+                                style={{ marginBottom: 16 }}
+                            />
+                        )}
                     </Form>
                 </ModalComponent>
             </LoadingComponent>
@@ -472,6 +567,40 @@ const DoctorService = ({id}) => {
                 </LoadingComponent>
 
             </DrawerComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá dịch vụ</span>
+                    </span>
+                }
+                open={isOpenModalDeleteMany}
+                onOk={handleOkDeleteMany}
+                okText="Xoá"
+                cancelText="Hủy"
+                onCancel={handleCancelDeleteMany}
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDeleteMultipleServices}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            {selectedRowKeyServices.length} dịch vụ đã chọn không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
+            <BulkActionBar
+                selectedRowKeys={selectedRowKeyServices}
+                handleSelectedAll={handleSelectedAll}
+                menuProps={menuProps}
+
+            />
             <TableStyle
                 rowSelection={rowSelectionServices}
                 columns={columnServices}

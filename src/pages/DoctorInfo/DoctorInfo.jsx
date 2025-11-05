@@ -160,7 +160,6 @@ const DoctorInfo = () => {
         <Card
           title={<Title level={4} style={{margin:0}}>Thông tin bác sĩ</Title>}
         >
-
           <Form
             form={formUpdateDoctor}
             layout='vertical'

@@ -8,7 +8,7 @@ import { DoctorWorkplaceService } from '@/services/DoctorWorkplaceService';
 import { WorkplaceService } from '@/services/WorkplaceService';
 import { PositionService } from '@/services/PositionService';
 import * as Message from '@/components/Message/Message';
-import TableStyle from '../../../components/TableStyle/TableStyle';
+import TableStyle from '@/components/TableStyle/TableStyle';
 import { PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { Typography, Divider, Form, Select, Radio, Space, Skeleton, Card } from 'antd';
 const { Title, Text } = Typography;

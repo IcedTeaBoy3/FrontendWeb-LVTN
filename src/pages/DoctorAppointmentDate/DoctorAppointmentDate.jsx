@@ -60,7 +60,7 @@ const DoctorAppointmentDate = () => {
     onSuccess: (data) => {
       Message.success(data.message || "Tạo kết quả khám thành công");
       setIsOpenModal(false);
-      setIsOpenDrawer(false);
+      if(isDrawerOpen) setIsDrawerOpen(false);
       formCreate.resetFields();
       queryGetAllDoctorAppointments.refetch();
     },

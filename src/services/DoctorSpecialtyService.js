@@ -19,5 +19,13 @@ export const DoctorSpecialtyService = {
     updateDoctorSpecialty: async (id, data) => {
         const response = await axiosInstance.put(`/doctorspecialty/update-doctorspecialty/${id}`, data);
         return response.data;
-    }
+    },
+    assignSpecialtiesToDoctor: async (doctorId, data) => {
+        const response = await axiosInstance.post(`/doctorspecialty/create-multiple-doctorspecialty/${doctorId}`, data);
+        return response.data;
+    },
+    removeManySpecialtiesFromDoctor: async (doctorId, doctorSpecialtyIds) => {
+        const response = await axiosInstance.post(`/doctorspecialty/delete-multiple-doctorspecialty/${doctorId}`, { doctorSpecialtyIds });
+        return response.data;
+    },
 };

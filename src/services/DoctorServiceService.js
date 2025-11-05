@@ -19,5 +19,13 @@ export const DoctorServiceService = {
     updateDoctorService: async (id, data) => {
         const response = await axiosInstance.put(`/doctorservice/update-doctorservice/${id}`, data);
         return response.data;
+    },
+    assignMultipleServicesToDoctor: async (doctorId, data) => {
+        const response = await axiosInstance.post(`/doctorservice/create-multiple-doctorservice/${doctorId}`, data);
+        return response.data;
+    },
+    removeMultipleServicesFromDoctor: async (doctorId, doctorServiceIds) => {
+        const response = await axiosInstance.post(`/doctorservice/delete-multiple-doctorservice/${doctorId}`, { doctorServiceIds });
+        return response.data;
     }
 };
