@@ -472,7 +472,12 @@ const PositionPage = () => {
                 </ModalComponent>
             </LoadingComponent>
             <DrawerComponent
-                title="Chi tiết chức vụ"
+                title={
+                    <>
+                        <EditOutlined style={{ marginRight: '8px' }} />
+                        Cập nhật chức vụ
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -485,7 +490,6 @@ const PositionPage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         labelAlign="left"
-                        style={{ maxWidth: 600, padding: "20px" }}
                         onFinish={handleOnUpdatePosition}
                         autoComplete="off"
                         form={formUpdate}
@@ -548,9 +552,10 @@ const PositionPage = () => {
                                 </ButtonComponent>
                                 <ButtonComponent
                                     type="primary"
+                                    ghost
                                     htmlType="submit"
                                 >
-                                    Lưu
+                                    Cập nhật
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>
@@ -588,7 +593,7 @@ const PositionPage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
                     <span>Thông tin chi tiết</span>
                     </span>
                 }

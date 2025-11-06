@@ -602,7 +602,12 @@ const SchedulePage = () => {
                 </LoadingComponent>
             </ModalComponent>
             <DrawerComponent
-                title="Chi tiết lịch làm việc"
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật lịch làm việc
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -614,7 +619,7 @@ const SchedulePage = () => {
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
+                        labelAlign="left"
                         onFinish={handleOnUpdateSchedule}
                         autoComplete="off"
                         form={formUpdate}

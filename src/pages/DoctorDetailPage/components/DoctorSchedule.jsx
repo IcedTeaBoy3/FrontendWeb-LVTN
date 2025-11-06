@@ -463,8 +463,13 @@ const DoctorSchedule = ({id}) => {
                     </div>
                 </LoadingComponent>
             </ModalComponent>
-                        <DrawerComponent
-                title="Chi tiết lịch làm việc"
+            <DrawerComponent
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật lịch làm việc
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -476,7 +481,7 @@ const DoctorSchedule = ({id}) => {
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
+                        labelAlign="left"
                         onFinish={handleOnUpdateSchedule}
                         autoComplete="off"
                         form={formUpdate}
@@ -528,9 +533,10 @@ const DoctorSchedule = ({id}) => {
                                 </ButtonComponent>
                                 <ButtonComponent
                                     type="primary"
+                                    ghost
                                     htmlType="submit"
                                 >
-                                    Lưu
+                                    Cập nhật
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>

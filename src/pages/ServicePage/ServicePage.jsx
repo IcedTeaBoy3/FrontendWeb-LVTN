@@ -555,7 +555,12 @@ const ServicePage = () => {
                 </ModalComponent>
             </LoadingComponent >
             <DrawerComponent
-                title="Chi tiết dịch vụ"
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật dịch vụ
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -568,7 +573,6 @@ const ServicePage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         labelAlign="left"
-                        style={{ maxWidth: 600, padding: "20px" }}
                         onFinish={handleOnUpdateService}
                         autoComplete="off"
                         form={formUpdate}
@@ -650,9 +654,10 @@ const ServicePage = () => {
                                 </ButtonComponent>
                                 <ButtonComponent
                                     type="primary"
+                                    ghost
                                     htmlType="submit"
                                 >
-                                    Lưu
+                                    Cập nhật
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>
@@ -690,7 +695,7 @@ const ServicePage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
                         <span>Thông tin chi tiết</span>
                     </span>
                 }

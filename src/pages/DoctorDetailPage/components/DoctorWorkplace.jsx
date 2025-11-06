@@ -345,7 +345,12 @@ const DoctorWorkplace = ({ id }) => {
                 </ModalComponent>
             </LoadingComponent>
             <DrawerComponent
-                title="Chi tiết nơi làm việc"
+                title={
+                    <>
+                        <EditOutlined style={{ marginRight: '8px' }} />
+                        Cập nhật nơi làm việc
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpenWorkplace}
                 onClose={() => setIsDrawerOpenWorkplace(false)}
@@ -358,7 +363,6 @@ const DoctorWorkplace = ({ id }) => {
                         name="formUpdateDoctorWorkplace"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "10px" }}
                         autoComplete="off"
                         onFinish={handleOnUpdateDoctorWorkplace}
                         form={formUpdateDoctorWorkplace}
@@ -443,9 +447,10 @@ const DoctorWorkplace = ({ id }) => {
                                 </ButtonComponent>
                                 <ButtonComponent
                                     type="primary"
+                                    ghost
                                     htmlType="submit"
                                 >
-                                    Lưu
+                                    Cập nhật
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>

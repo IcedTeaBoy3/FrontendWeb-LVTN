@@ -577,7 +577,12 @@ const PatientProfilePage = () => {
                 </LoadingComponent>
             </ModalComponent>
             <DrawerComponent
-                title="Chi tiết bệnh nhân"
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật hồ sơ bệnh nhân
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -590,7 +595,6 @@ const PatientProfilePage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         labelAlign="left"
-                       
                         onFinish={handleOnUpdatePatientProfile}
                         autoComplete="off"
                         form={formUpdate}
@@ -837,7 +841,7 @@ const PatientProfilePage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
                     <span>Thông tin chi tiết</span>
                     </span>
                 }

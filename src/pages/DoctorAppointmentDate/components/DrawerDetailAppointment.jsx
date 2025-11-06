@@ -25,7 +25,6 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
     const [isOpenModalDetailPatient, setIsOpenModalDetailPatient] = useState(false);
     return (
         <>
-           
             <DrawerComponent
                 title="Chi tiết lịch khám"
                 placement="right"

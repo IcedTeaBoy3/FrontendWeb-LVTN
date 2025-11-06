@@ -7,7 +7,7 @@ export const TableStyled = styled(Table)`
   /* ====== Header ====== */
   .ant-table-thead > tr > th {
     background: #e6f7ff;
-    color: #002766;
+    color: #000;
     font-weight: 600;
     text-align: center;
     border-bottom: 2px solid #bae7ff;

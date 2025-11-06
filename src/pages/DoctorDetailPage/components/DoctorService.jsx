@@ -450,7 +450,12 @@ const DoctorService = ({id}) => {
                 </LoadingComponent>
             </ModalComponent>
             <DrawerComponent
-                title="Chi tiết dịch vụ"
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật dịch vụ
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpenService}
                 onClose={() => setIsDrawerOpenService(false)}
@@ -463,7 +468,6 @@ const DoctorService = ({id}) => {
                         name="formUpdateDoctorSpecialty"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "10px" }}
                         autoComplete="off"
                         onFinish={handleOnUpdateDoctorService}
                         form={formUpdateDoctorService}
@@ -557,9 +561,10 @@ const DoctorService = ({id}) => {
                                 </ButtonComponent>
                                 <ButtonComponent
                                     type="primary"
+                                    ghost
                                     htmlType="submit"
                                 >
-                                    Lưu
+                                    Cập nhật
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>

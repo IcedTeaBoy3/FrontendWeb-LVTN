@@ -5,5 +5,5 @@ export const BackgroundContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f0f2f5;
+    background: linear-gradient(to bottom, white, white, #1976d2);
 `;

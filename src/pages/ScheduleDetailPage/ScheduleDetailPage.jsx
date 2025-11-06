@@ -666,7 +666,12 @@ const DetailSchedulePage = () => {
 
       </DrawerComponent>
       <DrawerComponent
-          title="Chi tiết ca làm việc"
+          title={
+            <>
+              <EditOutlined style={{marginRight:'8px'}}/>
+              Cập nhật ca làm việc
+            </>
+          }
           placement="right"
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
@@ -771,9 +776,10 @@ const DetailSchedulePage = () => {
                     </ButtonComponent>
                     <ButtonComponent
                       type="primary"
+                      ghost
                       htmlType="submit"
                     >
-                      Lưu
+                      Cập nhật
                     </ButtonComponent>
                   </Space>
                 </Form.Item>

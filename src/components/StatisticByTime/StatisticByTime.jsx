@@ -272,8 +272,13 @@ const StatisticByTime = ({
                                                         <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
                                                         <XAxis 
                                                             dataKey="date" 
-                                                            label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} 
-                                                            style={styleLabel}
+                                                            label={{ 
+                                                                value: 'Ngày', 
+                                                                position: 'insideBottomRight', 
+                                                                offset: 0,
+                                                                style: styleLabel
+                                                            }} 
+                                                        
                                                         />
                                                         <YAxis 
                                                             label={{ 
@@ -297,8 +302,15 @@ const StatisticByTime = ({
                                                 <ResponsiveContainer width="100%" height={400}>
                                                     <BarChart data={appointmentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                                         <CartesianGrid strokeDasharray="3 3" />
-                                                        <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0 }} />
-                                                        <YAxis label={{ value: 'Số lịch khám', angle: -90, position: 'insideLeft' }} />
+                                                        <XAxis dataKey="date" label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0, style: styleLabel }} />
+                                                        <YAxis label={{ 
+                                                            value: 'Số lịch khám', 
+                                                            angle: -90, 
+                                                            position: 'insideLeft' ,
+                                                            style: { textAnchor: 'middle', ...styleLabel}
+                                                        }}
+                                                            
+                                                        />
                                                         <Tooltip 
                                                             formatter={(value, name) => [value, statusNameMap[name]]} // đổi tên tooltip
                                                         />

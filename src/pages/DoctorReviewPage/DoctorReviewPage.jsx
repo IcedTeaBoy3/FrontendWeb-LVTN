@@ -426,7 +426,7 @@ const DoctorReviewPage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
                         <span>Thông tin chi tiết</span>
                     </span>
                 }

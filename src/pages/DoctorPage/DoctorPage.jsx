@@ -791,7 +791,12 @@ const DoctorPage = () => {
                 </ModalComponent>
             </LoadingComponent>
             <DrawerComponent
-                title="Chi tiết bác sĩ"
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật bác sĩ
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -803,7 +808,6 @@ const DoctorPage = () => {
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                      
                         onFinish={handleOnUpdateDoctor}
                         autoComplete="off"
                         labelAlign="left"

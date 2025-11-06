@@ -618,7 +618,12 @@ const DetailDoctorSchedulePage = () => {
 
       </DrawerComponent>
       <DrawerComponent
-          title="Chỉnh sửa ca làm việc"
+          title={
+            <>
+              <EditOutlined style={{marginRight:'8px'}}/>
+              Cập nhật ca làm việc
+            </>
+          }
           placement="right"
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
@@ -631,7 +636,6 @@ const DetailDoctorSchedulePage = () => {
             labelCol={{ span: 6 }}
             labelAlign="left"
             wrapperCol={{ span: 18 }}
-            style={{ maxWidth: 600 }}
             onFinish={handleOnUpdateShift}
             autoComplete="off"
             form={formUpdate}

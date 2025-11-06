@@ -520,7 +520,12 @@ const WorkplacePage = () => {
                 </ModalComponent>
             </LoadingComponent>
             <DrawerComponent
-                title="Chi tiết nơi làm việc"
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật nơi làm việc
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
@@ -531,9 +536,8 @@ const WorkplacePage = () => {
                     <Form
                         name="formUpdate"
                         labelCol={{ span: 6 }}
-                        labelAlign="left"
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px 10px" }}
+                        labelAlign="left"
                         onFinish={handleOnUpdateWorkplace}
                         autoComplete="off"
                         form={formUpdate}
@@ -623,9 +627,10 @@ const WorkplacePage = () => {
                                 </ButtonComponent>
                                 <ButtonComponent
                                     type="primary"
+                                    ghost
                                     htmlType="submit"
                                 >
-                                    Lưu
+                                    Cập nhật
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>
@@ -663,7 +668,7 @@ const WorkplacePage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                    <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
                     <span>Thông tin chi tiết</span>
                     </span>
                 }

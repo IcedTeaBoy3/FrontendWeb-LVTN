@@ -524,7 +524,7 @@ const AccountPage = () => {
             <ModalComponent
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <ExclamationCircleOutlined style={{ color: "#1890ff", fontSize: 20 }} />
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
                     <span>Thông tin chi tiết</span>
                     </span>
                 }
@@ -607,12 +607,18 @@ const AccountPage = () => {
                 </LoadingComponent>
             </ModalComponent>
             <DrawerComponent
-                title="Chi tiết tài khoản"
+                title={
+                    <>
+                        <EditOutlined style={{marginRight:'8px'}}/>
+                        Cập nhật tài khoản
+                    </>
+                }
                 placement="right"
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
                 width={window.innerWidth < 768 ? "100%" : 700}
                 forceRender
+                
             >
                 <LoadingComponent isLoading={isPendingUpdate}>
                     <Form
@@ -620,7 +626,6 @@ const AccountPage = () => {
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
                         labelAlign="left"
-                        style={{ maxWidth: 600, padding: "20px" }}
                         onFinish={handleOnUpdateAccount}
                         autoComplete="off"
                         form={formUpdate}
@@ -696,23 +701,13 @@ const AccountPage = () => {
                                 <Radio value={false}>Chưa xác thực</Radio>
                             </Radio.Group>
                         </Form.Item>
-                        
-                        <Form.Item
-                            label={null}
-                            wrapperCol={{ offset: 18, span: 6 }}
-                        >
+                        <Form.Item wrapperCol={{ offset: 18 }}>
                             <Space>
-                                <ButtonComponent
-                                    type="default"
-                                    onClick={() => setIsDrawerOpen(false)}
-                                >
-                                    Huỷ
+                                <ButtonComponent onClick={() => setIsDrawerOpen(false)}>
+                                    Hủy
                                 </ButtonComponent>
-                                <ButtonComponent
-                                    type="primary"
-                                    htmlType="submit"
-                                >
-                                    Lưu
+                                <ButtonComponent type="primary" ghost htmlType="submit">
+                                    Cập nhật
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>

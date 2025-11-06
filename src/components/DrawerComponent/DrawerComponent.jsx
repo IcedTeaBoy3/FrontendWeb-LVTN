@@ -7,7 +7,14 @@ const DrawerComponent = ({
     ...rests
 }) => {
     return (
-        <StyledDrawer title={title} open={isOpen} placement={placement} {...rests}>
+        <StyledDrawer 
+            title={title} 
+            open={isOpen} 
+            placement={placement} 
+            closable={{ placement: 'end' }}
+            {...rests}
+           
+        >
             {children}
         </StyledDrawer>
     );
