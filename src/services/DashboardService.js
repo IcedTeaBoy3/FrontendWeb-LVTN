@@ -152,4 +152,14 @@ export const DashboardService = {
             throw error.response.data;
         }
     },
+    getDoctorRevenuePerService: async (doctorId, specialtyId) => {
+        try {
+            const response = await axiosInstance.get(`/dashboard/doctor-revenue-per-service/${doctorId}`, {
+                params: { specialtyId }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
 }

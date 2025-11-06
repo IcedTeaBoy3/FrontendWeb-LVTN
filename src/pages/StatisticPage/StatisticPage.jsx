@@ -2,18 +2,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardService } from "@/services/DashboardService";
-import StatisticByTime from "@/components/StatisticByTime/StatisticByTime";
-import StatisticPatient from "@/components/StatisticPatient/StatisticPatient";
 import AppointmentPerService from "./components/AppointmentPerService";
 import AppointmentPerDoctor from "./components/AppointmentPerDoctor";
 import DoctorPerSpecialty from "./components/DoctorPerSpecialty";
 import ReviewPerDoctor from "./components/ReviewPerDoctor";
 import RevenuePerDoctor from "./components/RevenuePerDoctor";
+import StatisticByTime from "@/components/StatisticByTime/StatisticByTime";
+import StatisticPatient from "@/components/StatisticPatient/StatisticPatient";
+import RevenuePerService from "@/components/RevenuePerService/RevenuePerService";
 import { SpecialtyService } from "@/services/SpecialtyService";
-import { Select } from "antd";
+import { Select, Splitter } from "antd";
 import { StyleTabs} from "./style";
 import dayjs from "dayjs";
-import RevenuePerService from "./components/RevenuePerService";
 
 const StatisticPage = () => {
     const [tabKey, setTabKey] = useState('range');
@@ -169,7 +169,7 @@ const StatisticPage = () => {
     });
     const queryGetAllSpecialties = useQuery({
         queryKey: ['getAllSpecialties'],
-        queryFn: () => SpecialtyService.getAllSpecialties({ status: '', page: 1, limit: 1000 }),
+        queryFn: () => SpecialtyService.getAllSpecialties({ status: "active", page: 1, limit: 1000 }),
         refetchOnWindowFocus: false,
         retry: 1,
         keepPreviousData: true,
@@ -193,7 +193,6 @@ const StatisticPage = () => {
     const { data: specialtyPerDoctor, isLoading: isLoadingSpecialtyPerDoctor } = queryGetSpecialtyPerDoctor;
     const { data: revenuePerService, isLoading: isLoadingRevenuePerService } = queryGetAdminRevenuePerService;
     const { data: revenuePerDoctor, isLoading: isLoadingRevenuePerDoctor } = queryGetAdminRevenuePerDoctor;
-    console.log("revenuePerDoctor", revenuePerDoctor);
 
     const revenueData = revenue?.data || [];
     const appointmentData = appointment?.data || [];
@@ -203,7 +202,6 @@ const StatisticPage = () => {
     const avgRatingData = avgRating?.data || [];
     const specialtyPerDoctorData = specialtyPerDoctor?.data || [];
     const revenuePerDoctorData = revenuePerDoctor?.data || [];
-    console.log("revenuePerDoctorData", revenuePerDoctorData);
     return (
         <>
             <StyleTabs
@@ -296,15 +294,22 @@ const StatisticPage = () => {
                                     }
                                     allowClear
                                 />
-                                <AppointmentPerService
-                                    data={appointmentPerServiceStatsData}
-                                    isLoading={isLoadingAppointmentPerServiceStats}
-                                />
-                                <br/>
-                                <RevenuePerService
-                                    data={revenuePerService?.data || []}
-                                    isLoading={isLoadingRevenuePerService}
-                                />
+                                <Splitter 
+                                    style={{ height: 500, gap: '16px' }}
+                                >
+                                    <Splitter.Panel defaultSize="50%">
+                                        <AppointmentPerService
+                                            data={appointmentPerServiceStatsData}
+                                            isLoading={isLoadingAppointmentPerServiceStats}
+                                        />
+                                    </Splitter.Panel>
+                                    <Splitter.Panel defaultSize="50%">
+                                        <RevenuePerService
+                                            data={revenuePerService?.data || []}
+                                            isLoading={isLoadingRevenuePerService}
+                                        />
+                                    </Splitter.Panel>
+                                </Splitter>
                             </>
                             
                         )

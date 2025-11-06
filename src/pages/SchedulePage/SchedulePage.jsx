@@ -53,75 +53,88 @@ const SchedulePage = () => {
         pageSize: 5,
         total: 0,
     });
-    const getColumnSearchProps = (dataIndex) => ({
-        filterDropdown: ({
-            setSelectedKeys,
-            selectedKeys,
-            confirm,
-            clearFilters,
-        }) => (
-            <div style={{ padding: 8 }}>
-                <Input
-                    ref={searchInput}
-                    placeholder={`Tìm theo ${dataIndex}`}
-                    value={selectedKeys[0]}
-                    onChange={(e) =>
-                        setSelectedKeys(e.target.value ? [e.target.value] : [])
-                    }
-                    onPressEnter={() =>
-                        handleSearch(selectedKeys, confirm, dataIndex)
-                    }
-                    style={{ marginBottom: 8, display: "block" }}
-                />
-                <Space>
-                    <ButtonComponent
-                        type="primary"
-                        onClick={() =>
-                            handleSearch(selectedKeys, confirm, dataIndex)
-                        }
-                        icon={<SearchOutlined />}
-                        size="small"
-                        style={{ width: 90 }}
-                    >
-                        Tìm
-                    </ButtonComponent>
-                    <Button
-                        onClick={() => handleReset(clearFilters, confirm)}
-                        size="small"
-                        style={{ width: 90 }}
-                    >
-                        Xóa
-                    </Button>
-                </Space>
-            </div>
-        ),
-        filterIcon: (filtered) => (
-            <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-        ),
-        onFilter: (value, record) =>
-            record[dataIndex]
-                ?.toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-        filterDropdownProps: {
-            onOpenChange: (open) => {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
-            },
+    const getColumnSearchProps = (dataIndex, type = "text") => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+        {type === "date" ? (
+            // 🔹 Nếu là kiểu ngày
+            <DatePicker
+            format="DD/MM/YYYY"
+            value={selectedKeys[0] ? dayjs(selectedKeys[0], "DD/MM/YYYY") : null}
+            onChange={(date) =>
+                setSelectedKeys(date ? [date.format("DD/MM/YYYY")] : [])
+            }
+            style={{ marginBottom: 8, display: "block" }}
+            />
+        ) : (
+            // 🔹 Nếu là kiểu text (giữ nguyên ô search của bạn)
+            <Input
+            ref={searchInput}
+            placeholder={`Tìm theo ${dataIndex}`}
+            value={selectedKeys[0]}
+            onChange={(e) =>
+                setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            style={{ marginBottom: 8, display: "block" }}
+            />
+        )}
+
+        <Space>
+            <ButtonComponent
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+            >
+            Tìm
+            </ButtonComponent>
+            <Button
+            onClick={() => handleReset(clearFilters, confirm)}
+            size="small"
+            style={{ width: 90 }}
+            >
+            Xóa
+            </Button>
+        </Space>
+        </div>
+    ),
+    filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+    ),
+    onFilter: (value, record) => {
+        if (type === "date") {
+        return dayjs(record[dataIndex], "DD/MM/YYYY").isSame(
+            dayjs(value, "DD/MM/YYYY"),
+            "day"
+        );
+        }
+        return record[dataIndex]
+        ?.toString()
+        .toLowerCase()
+        .includes(value.toLowerCase());
+    },
+    filterDropdownProps: {
+        onOpenChange: (open) => {
+        if (open && type === "text") {
+            setTimeout(() => searchInput.current?.select(), 100);
+        }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }} // màu bạn chọn
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ""}
-                />
-            ) : (
-                text
-            ),
+    },
+    render: (text) =>
+        searchedColumn === dataIndex ? (
+        <Highlighter
+            highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+        />
+        ) : (
+        text
+        ),
     });
+
     // sửa lại để xóa cũng confirm luôn
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -250,23 +263,8 @@ const SchedulePage = () => {
             title: "Ngày làm việc",
             dataIndex: "workday",
             key: "workday",
-            // ...getColumnSearchProps("workday"),
             filterMultiple: false,
-            filters: [
-                { text: 'Hôm nay', value: dayjs().format("DD/MM/YYYY") },
-                { text: "Đã qua", value: 'past' },
-                { text: "Tương lai", value: 'future' },
-            
-            ],
-            onFilter: (value, record) => {
-                if (value === 'past') {
-                    return dayjs(record.workday, "DD/MM/YYYY").isBefore(dayjs(), 'day');
-                } else if (value === 'future') {
-                    return dayjs(record.workday, "DD/MM/YYYY").isAfter(dayjs(), 'day');
-                } else {
-                    return record.workday === value;
-                }
-            },
+            ...getColumnSearchProps("workday", "date"),
             sorter: (a, b) => dayjs(a.workday, "DD/MM/YYYY").unix() - dayjs(b.workday, "DD/MM/YYYY").unix(),
         },
         {

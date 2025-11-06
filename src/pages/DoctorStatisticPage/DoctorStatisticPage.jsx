@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from "react-redux";
 import { DashboardService } from '@/services/DashboardService';
-import dayjs from 'dayjs';
-import { Typography } from 'antd';
-import { StyleTabs } from './style';
 import StatisticByTime from '@/components/StatisticByTime/StatisticByTime';
 import StatisticPatient from '@/components/StatisticPatient/StatisticPatient';
-const { Title } = Typography;
+import RevenuePerService from '@/components/RevenuePerService/RevenuePerService';
+import dayjs from 'dayjs';
+import { StyleTabs } from './style';
+import { SpecialtyService } from '@/services/SpecialtyService';
+import { Select } from 'antd';
 
 const DoctorStatisticPage = () => {
     const [tabKey, setTabKey] = useState('range');
     const [tabKeyDetails, setTabKeyDetails] = useState('revenue');
+    const [selectedSpecialty, setSelectedSpecialty] = useState(null);
     const [dateRange, setDateRange] = useState([
         dayjs().startOf('month').toISOString(),
         dayjs().endOf('month').toISOString()
@@ -122,12 +124,28 @@ const DoctorStatisticPage = () => {
         queryFn: () => DashboardService.getDoctorStatisticPatient(doctorId),
         enabled: !!doctorId,
     });
+    const queryGetDoctorRevenuePerService = useQuery({
+        queryKey: ['getDoctorRevenuePerService', doctorId, selectedSpecialty],
+        queryFn: () => DashboardService.getDoctorRevenuePerService(doctorId, selectedSpecialty),
+        enabled: !!doctorId,
+    });
+     const queryGetAllSpecialties = useQuery({
+        queryKey: ['getAllSpecialties'],
+        queryFn: () => SpecialtyService.getAllSpecialties({ status: "active", page: 1, limit: 1000 }),
+        refetchOnWindowFocus: false,
+        retry: 1,
+        keepPreviousData: true,
+    });
+    const { data: dataSpecialties, isLoading: isLoadingSpecialties } = queryGetAllSpecialties;
+    const specialtiesData = dataSpecialties?.data?.specialties;
     const { data: doctorStatisticPatientData, isLoading: isLoadingDoctorStatisticPatient } = queryGetDoctorStatisticPatient;
     const { data: revenue, isLoading: isLoadingRevenue } = queryGetDoctorRevenue;
     const { data: appointment, isLoading: isLoadingAppointment } = queryGetDoctorAppointment;
+    const { data: revenuePerService, isLoading: isLoadingRevenuePerService } = queryGetDoctorRevenuePerService;
     const revenueData = revenue?.data || [];
     const appointmentData = appointment?.data || [];
     const statisticPatientData = doctorStatisticPatientData?.data || {};
+    const revenuePerServiceData = revenuePerService?.data || [];
     return (
         <>
             <StyleTabs
@@ -165,6 +183,36 @@ const DoctorStatisticPage = () => {
                                 statisticPatientData={statisticPatientData}
                                 isLoading={isLoadingDoctorStatisticPatient}
                             />
+                        ),
+                    },
+                    {
+                        key: "services",
+                        label: "Dịch vụ",
+                        children: (
+                            <>
+                                <Select
+                                    style={{ width: 250, marginBottom: 16 }}
+                                    placeholder="Chọn chuyên khoa"
+                                    loading={isLoadingSpecialties}
+                                    options={specialtiesData?.map((specialty) => ({
+                                        label: specialty.name,
+                                        value: specialty.specialtyId,
+                                    }))}
+                                    showSearch
+                                    onChange={(value) => {
+                                        setSelectedSpecialty(value);
+                                    }}
+                                    optionFilterProp="label"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                    }
+                                    allowClear
+                                />
+                                <RevenuePerService
+                                    data={revenuePerServiceData}
+                                    isLoading={isLoadingRevenuePerService}
+                                />
+                            </>
                         ),
                     }
                     
