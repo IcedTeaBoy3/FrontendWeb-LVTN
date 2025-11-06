@@ -95,6 +95,7 @@ const DoctorInfo = () => {
             : null,
         gender: doctorInfo?.person?.gender,
         address: doctorInfo?.person?.address,
+        notes: doctorInfo?.notes,
         avatar:
           [
             {
@@ -197,13 +198,13 @@ const DoctorInfo = () => {
               <Input placeholder="Nhập họ tên" style={{ width: "30%" }}/>
             </Form.Item>
             <Form.Item
-              label="Học vị"
+              label="Bằng cấp"
               name="degreeId"
-              rules={[{ required: true, message: "Vui lòng chọn học vị" }]}
+              rules={[{ required: true, message: "Vui lòng chọn bằng cấp" }]}
             >
               <Select
                 name="degreeId"
-                placeholder="Chọn học vị"
+                placeholder="Chọn bằng cấp"
                 showSearch
                 style={{ width: "30%" }}
                 optionFilterProp="children"
@@ -238,6 +239,9 @@ const DoctorInfo = () => {
                 editorData={editorData}
                 onChange={(data) => formUpdateDoctor.setFieldsValue({ bio: data })}
               />
+            </Form.Item>
+            <Form.Item label="Ghi chú" name="notes">
+              <Input.TextArea rows={2} placeholder="Nhập ghi chú" style={{ width: "50%" }}/>
             </Form.Item>
 
             <Form.Item label="Ngày sinh" name="dateOfBirth">

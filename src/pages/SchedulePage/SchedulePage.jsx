@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { ScheduleService } from '@/services/ScheduleService'
 import { DoctorService } from '@/services/DoctorService'
-import { Space, Input, DatePicker, TimePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown, ConfigProvider} from "antd";
+import { Space, Input, DatePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -33,6 +33,7 @@ const SchedulePage = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
     const rowSelection = {
@@ -139,15 +140,14 @@ const SchedulePage = () => {
         retry: 1,
         refetchOnWindowFocus: false,
     });
-    // const queryGetAllShifts = useQuery({
-    //     queryKey: ['getAllShifts'],
-    //     queryFn: ShiftService.getAllShifts,
-    //     retry: 1,
-    //     refetchOnWindowFocus: false,
-    // });
     const queryGetAllSchedules = useQuery({
-        queryKey: ['getAllSchedules'],
-        queryFn: ScheduleService.getAllSchedules,
+        queryKey: ['getAllSchedules', selectedDate],
+        queryFn: () => ScheduleService.getAllSchedules({
+            page: 1,
+            limit: 100,
+            month: selectedDate?.month() + 1,
+            year: selectedDate?.year(),
+        }),
         retry: 1,
         refetchOnWindowFocus: false,
     });
@@ -250,8 +250,23 @@ const SchedulePage = () => {
             title: "Ngày làm việc",
             dataIndex: "workday",
             key: "workday",
-            ...getColumnSearchProps("workday"),
+            // ...getColumnSearchProps("workday"),
             filterMultiple: false,
+            filters: [
+                { text: 'Hôm nay', value: dayjs().format("DD/MM/YYYY") },
+                { text: "Đã qua", value: 'past' },
+                { text: "Tương lai", value: 'future' },
+            
+            ],
+            onFilter: (value, record) => {
+                if (value === 'past') {
+                    return dayjs(record.workday, "DD/MM/YYYY").isBefore(dayjs(), 'day');
+                } else if (value === 'future') {
+                    return dayjs(record.workday, "DD/MM/YYYY").isAfter(dayjs(), 'day');
+                } else {
+                    return record.workday === value;
+                }
+            },
             sorter: (a, b) => dayjs(a.workday, "DD/MM/YYYY").unix() - dayjs(b.workday, "DD/MM/YYYY").unix(),
         },
         {
@@ -259,7 +274,6 @@ const SchedulePage = () => {
             dataIndex: "doctor",
             key: "doctor",
             ...getColumnSearchProps("doctor"),
-            sorter: (a, b) => a.doctor?.length - b.doctor?.length,
         },
         {
             title: "Thời gian khám (phút) / lượt",
@@ -422,6 +436,15 @@ const SchedulePage = () => {
                     <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
                 </ButtonComponent>
             </div>
+            <DatePicker
+                picker="month"
+                onChange={(date) => setSelectedDate(date)}
+                placeholder="Chọn tháng"
+                value={selectedDate}
+                allowClear
+                size="large"
+                style={{ marginBottom: 20 }}
+            />
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 handleSelectedAll={handleSelectedAll}

@@ -1,8 +1,10 @@
 import axiosInstance from '@/config/axiosInstance';
 
 export const ScheduleService = {
-    getAllSchedules: async () => {
-        const response = await axiosInstance.get('/schedule/get-all-schedules');
+    getAllSchedules: async ({ page, limit, month, year }) => {
+        const response = await axiosInstance.get('/schedule/get-all-schedules', {
+            params: { page, limit, month, year }
+        });
         return response.data;
     },
     getDoctorSchedules: async ({ month, year }) => {

@@ -79,6 +79,7 @@ const InfoDoctor = ({ id }) => {
                     : null,
                 gender: doctorData?.person?.gender,
                 address: doctorData?.person?.address,
+                notes: doctorData?.notes,
                 avatar:
                     [
                         {
@@ -118,6 +119,7 @@ const InfoDoctor = ({ id }) => {
             gender: values.gender,
             address: values.address,
             bio: values.bio,
+            notes: values.notes,
         };
 
         Object.entries(dataToAppend).forEach(([key, value]) => {
@@ -250,6 +252,12 @@ const InfoDoctor = ({ id }) => {
                                         editorData={editorData}
                                         onChange={(data) => formUpdateDoctor.setFieldsValue({ bio: data })}
                                     />
+                                </Form.Item>
+                                <Form.Item
+                                    label="Ghi chú"
+                                    name="notes"
+                                >
+                                    <Input.TextArea rows={2} placeholder="Nhập ghi chú" />
                                 </Form.Item>
 
                                 <Form.Item label="Ngày sinh" name="dateOfBirth">
