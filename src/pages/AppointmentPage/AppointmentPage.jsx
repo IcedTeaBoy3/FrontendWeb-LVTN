@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AppointmentService } from '@/services/AppointmentService';
 import { PaymentService } from '@/services/PaymentService';
-import { Space, Input, Button, Typography, Dropdown, Tag } from "antd";
+import { Space, Input, Button, Typography, Dropdown, Tag, DatePicker } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -23,6 +23,7 @@ import {
     ExportOutlined,
     CheckCircleFilled
 } from "@ant-design/icons";
+import dayjs from 'dayjs';
 const { Text,Title } = Typography;
 const AppointmentPage = () => {
 
@@ -51,75 +52,88 @@ const AppointmentPage = () => {
         pageSize: 5,
         total: 0,
     });
-    const getColumnSearchProps = (dataIndex) => ({
-        filterDropdown: ({
-            setSelectedKeys,
-            selectedKeys,
-            confirm,
-            clearFilters,
-        }) => (
+    const getColumnSearchProps = (dataIndex, type = "text") => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
             <div style={{ padding: 8 }}>
-                <Input
-                    ref={searchInput}
-                    placeholder={`Tìm theo ${dataIndex}`}
-                    value={selectedKeys[0]}
-                    onChange={(e) =>
-                        setSelectedKeys(e.target.value ? [e.target.value] : [])
-                    }
-                    onPressEnter={() =>
-                        handleSearch(selectedKeys, confirm, dataIndex)
-                    }
-                    style={{ marginBottom: 8, display: "block" }}
+            {type === "date" ? (
+                // 🔹 Nếu là kiểu ngày
+                <DatePicker
+                format="DD/MM/YYYY"
+                value={selectedKeys[0] ? dayjs(selectedKeys[0], "DD/MM/YYYY") : null}
+                onChange={(date) =>
+                    setSelectedKeys(date ? [date.format("DD/MM/YYYY")] : [])
+                }
+                style={{ marginBottom: 8, display: "block" }}
                 />
-                <Space>
-                    <ButtonComponent
-                        type="primary"
-                        onClick={() =>
-                            handleSearch(selectedKeys, confirm, dataIndex)
-                        }
-                        icon={<SearchOutlined />}
-                        size="small"
-                        style={{ width: 90 }}
-                    >
-                        Tìm
-                    </ButtonComponent>
-                    <Button
-                        onClick={() => handleReset(clearFilters, confirm)}
-                        size="small"
-                        style={{ width: 90 }}
-                    >
-                        Xóa
-                    </Button>
-                </Space>
+            ) : (
+                // 🔹 Nếu là kiểu text (giữ nguyên ô search của bạn)
+                <Input
+                ref={searchInput}
+                placeholder={`Tìm theo ${dataIndex}`}
+                value={selectedKeys[0]}
+                onChange={(e) =>
+                    setSelectedKeys(e.target.value ? [e.target.value] : [])
+                }
+                onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                style={{ marginBottom: 8, display: "block" }}
+                />
+            )}
+
+            <Space>
+                <ButtonComponent
+                type="primary"
+                onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                icon={<SearchOutlined />}
+                size="small"
+                style={{ width: 90 }}
+                >
+                Tìm
+                </ButtonComponent>
+                <Button
+                onClick={() => handleReset(clearFilters, confirm)}
+                size="small"
+                style={{ width: 90 }}
+                >
+                Xóa
+                </Button>
+            </Space>
             </div>
         ),
         filterIcon: (filtered) => (
             <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
         ),
-        onFilter: (value, record) =>
-            record[dataIndex]
-                ?.toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
+        onFilter: (value, record) => {
+            if (type === "date") {
+            return dayjs(record[dataIndex], "DD/MM/YYYY").isSame(
+                dayjs(value, "DD/MM/YYYY"),
+                "day"
+            );
+            }
+            return record[dataIndex]
+            ?.toString()
+            .toLowerCase()
+            .includes(value.toLowerCase());
+        },
         filterDropdownProps: {
             onOpenChange: (open) => {
-                if (open) {
-                    setTimeout(() => searchInput.current?.select(), 100);
-                }
+            if (open && type === "text") {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
             },
         },
         render: (text) =>
             searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }} // màu bạn chọn
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ""}
-                />
+            <Highlighter
+                highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+            />
             ) : (
-                text
+            text
             ),
-    });
+        });
+
     // sửa lại để xóa cũng confirm luôn
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -133,7 +147,11 @@ const AppointmentPage = () => {
     };
     const queryGetAllAppointments = useQuery({
         queryKey: ['getAllAppointments'],
-        queryFn: () => AppointmentService.getAllAppointments({ page: 1, limit: 1000}),
+        queryFn: () => AppointmentService.getAllAppointments({ 
+            page: 1, 
+            limit: 1000,
+          
+        }),
         retry: 1,
     });
     const mutationDeleteAppointment = useMutation({
@@ -216,8 +234,8 @@ const AppointmentPage = () => {
         appointmentCode: item.appointmentCode,
         doctorName: item.doctorService?.doctor?.person?.fullName,
         patientName: item.patientProfile?.person?.fullName,
-        appointmentDate: item.schedule?.workday,
-        appointmentTime: item.slot,
+        appointmentDate: DatetimeUtils.formatDate(item.schedule?.workday),
+        appointmentTime: DatetimeUtils.formatTime(item.slot),
         description: item.description,
         paymentStatus: item.payment?.status,
         paymentId: item.payment?.paymentId,
@@ -240,45 +258,16 @@ const AppointmentPage = () => {
             title: "Ngày khám",
             dataIndex: "appointmentDate",
             key: "appointmentDate",
-            filters: [
-                { text: "Tất cả", value: "all" },
-                { text: "Từ hôm nay", value: "fromToday" },
-                { text: "Đã qua", value: "utilToday"}
-            ],
-            onFilter: (value, record) => {
-                if (value === "all") return true;
-                const today = new Date().setHours(0, 0, 0, 0);
-                const date = new Date(record.appointmentDate).setHours(0, 0, 0, 0);
-                if (value === "fromToday") {
-                    return date >= today;
-                }
-                if (value === "untilToday") {
-                    return date < today;
-                }
-                return true;
-            },
+            ...getColumnSearchProps("appointmentDate", "date"),
            
         
-            render: (text) => (
-                text ? (
-                    DatetimeUtils.formatDate(text)
-                ) : (
-                    "Chưa có ngày khám"
-                )
-            )
+            
         },
         {
             title: "Giờ khám",
             dataIndex: "appointmentTime",
             key: "appointmentTime",
-            
-            render: (text) => (
-                text ? (
-                    DatetimeUtils.formatTime(text)
-                ) : (
-                    "Chưa có giờ khám"
-                )
-            )
+            ...getColumnSearchProps("appointmentTime"),
         },
         {
            title: "Bác sĩ",
@@ -297,7 +286,7 @@ const AppointmentPage = () => {
             dataIndex: "status",
             key: "status",
             render: (text) => (
-            <Tag color={getStatusColor(text)}>{convertStatusAppointment(text)}</Tag>
+                <Tag color={getStatusColor(text)}>{convertStatusAppointment(text)}</Tag>
             ),
             filters: [
                 { text: "Chờ xác nhận", value: "pending" },
@@ -313,8 +302,8 @@ const AppointmentPage = () => {
             dataIndex: "paymentStatus",
             key: "paymentStatus",
             render: (text) => (
-                <Tag color={text === "paid" ? "green" : "red"}>
-                    {text === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}
+                <Tag color={getStatusPaymentColor(text)}>
+                    {convertStatusPayment(text)}
                 </Tag>
             ),
             filters: [

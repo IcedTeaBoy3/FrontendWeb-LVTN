@@ -6,7 +6,7 @@ import { MedicalResultService } from '@/services/MedicalResultService';
 import LoadingCompoent from '@/components/LoadingComponent/LoadingComponent';
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent';
 import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
-import AttachmentsSection from '@/pages/DetailAppointmentPage/components/AttachmentsSection';
+import AttachmentsSection from '@/components/AttachmentsSection/AttachmentsSection';
 
 import { convertGender} from '@/utils/gender_utils';
 import { ArrowLeftOutlined } from '@ant-design/icons';

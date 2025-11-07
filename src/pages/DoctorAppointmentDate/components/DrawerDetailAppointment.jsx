@@ -1,6 +1,6 @@
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
-import AttachmentsSection from '@/pages/DetailAppointmentPage/components/AttachmentsSection';
+import AttachmentsSection from '@/components/AttachmentsSection/AttachmentsSection';
 import {convertStatusPayment, getStatusPaymentColor} from '@/utils/status_payment_utils';
 import { convertPaymentType } from '@/utils/paymentType_utils';
 import { convertMethodPayment } from '@/utils/method_utils';

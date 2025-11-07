@@ -54,86 +54,86 @@ const SchedulePage = () => {
         total: 0,
     });
     const getColumnSearchProps = (dataIndex, type = "text") => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-        {type === "date" ? (
-            // 🔹 Nếu là kiểu ngày
-            <DatePicker
-            format="DD/MM/YYYY"
-            value={selectedKeys[0] ? dayjs(selectedKeys[0], "DD/MM/YYYY") : null}
-            onChange={(date) =>
-                setSelectedKeys(date ? [date.format("DD/MM/YYYY")] : [])
-            }
-            style={{ marginBottom: 8, display: "block" }}
-            />
-        ) : (
-            // 🔹 Nếu là kiểu text (giữ nguyên ô search của bạn)
-            <Input
-            ref={searchInput}
-            placeholder={`Tìm theo ${dataIndex}`}
-            value={selectedKeys[0]}
-            onChange={(e) =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            style={{ marginBottom: 8, display: "block" }}
-            />
-        )}
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+            {type === "date" ? (
+                // 🔹 Nếu là kiểu ngày
+                <DatePicker
+                format="DD/MM/YYYY"
+                value={selectedKeys[0] ? dayjs(selectedKeys[0], "DD/MM/YYYY") : null}
+                onChange={(date) =>
+                    setSelectedKeys(date ? [date.format("DD/MM/YYYY")] : [])
+                }
+                style={{ marginBottom: 8, display: "block" }}
+                />
+            ) : (
+                // 🔹 Nếu là kiểu text (giữ nguyên ô search của bạn)
+                <Input
+                ref={searchInput}
+                placeholder={`Tìm theo ${dataIndex}`}
+                value={selectedKeys[0]}
+                onChange={(e) =>
+                    setSelectedKeys(e.target.value ? [e.target.value] : [])
+                }
+                onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                style={{ marginBottom: 8, display: "block" }}
+                />
+            )}
 
-        <Space>
-            <ButtonComponent
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{ width: 90 }}
-            >
-            Tìm
-            </ButtonComponent>
-            <Button
-            onClick={() => handleReset(clearFilters, confirm)}
-            size="small"
-            style={{ width: 90 }}
-            >
-            Xóa
-            </Button>
-        </Space>
-        </div>
-    ),
-    filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value, record) => {
-        if (type === "date") {
-        return dayjs(record[dataIndex], "DD/MM/YYYY").isSame(
-            dayjs(value, "DD/MM/YYYY"),
-            "day"
-        );
-        }
-        return record[dataIndex]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase());
-    },
-    filterDropdownProps: {
-        onOpenChange: (open) => {
-        if (open && type === "text") {
-            setTimeout(() => searchInput.current?.select(), 100);
-        }
-        },
-    },
-    render: (text) =>
-        searchedColumn === dataIndex ? (
-        <Highlighter
-            highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }}
-            searchWords={[searchText]}
-            autoEscape
-            textToHighlight={text ? text.toString() : ""}
-        />
-        ) : (
-        text
+            <Space>
+                <ButtonComponent
+                type="primary"
+                onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                icon={<SearchOutlined />}
+                size="small"
+                style={{ width: 90 }}
+                >
+                Tìm
+                </ButtonComponent>
+                <Button
+                onClick={() => handleReset(clearFilters, confirm)}
+                size="small"
+                style={{ width: 90 }}
+                >
+                Xóa
+                </Button>
+            </Space>
+            </div>
         ),
-    });
+        filterIcon: (filtered) => (
+            <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+        ),
+        onFilter: (value, record) => {
+            if (type === "date") {
+            return dayjs(record[dataIndex], "DD/MM/YYYY").isSame(
+                dayjs(value, "DD/MM/YYYY"),
+                "day"
+            );
+            }
+            return record[dataIndex]
+            ?.toString()
+            .toLowerCase()
+            .includes(value.toLowerCase());
+        },
+        filterDropdownProps: {
+            onOpenChange: (open) => {
+            if (open && type === "text") {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
+            },
+        },
+        render: (text) =>
+            searchedColumn === dataIndex ? (
+            <Highlighter
+                highlightStyle={{ backgroundColor: "#91d5ff", padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={text ? text.toString() : ""}
+            />
+            ) : (
+            text
+            ),
+        });
 
     // sửa lại để xóa cũng confirm luôn
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -417,15 +417,18 @@ const SchedulePage = () => {
         <>
             <Title level={4}>Danh sách lịch làm việc</Title>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+               
 
+                    <ButtonComponent
+                        type="primary"
+                        onClick={() => setIsModalOpenCreate(true)}
+                        icon={<PlusOutlined />}
+                    >
+                        Thêm mới
+                    </ButtonComponent>
+                    
+                
 
-                <ButtonComponent
-                    type="primary"
-                    onClick={() => setIsModalOpenCreate(true)}
-                    icon={<PlusOutlined />}
-                >
-                    Thêm mới
-                </ButtonComponent>
                 <ButtonComponent    
                     type="default"
                 
@@ -439,8 +442,9 @@ const SchedulePage = () => {
                 onChange={(date) => setSelectedDate(date)}
                 placeholder="Chọn tháng"
                 value={selectedDate}
+                format="MM/YYYY"
                 allowClear
-                size="large"
+                size="middle"
                 style={{ marginBottom: 20 }}
             />
             <BulkActionBar

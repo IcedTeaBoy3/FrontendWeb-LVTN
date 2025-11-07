@@ -1,9 +1,9 @@
 import axiosInstance from '@/config/axiosInstance';
 
 export const AppointmentService = {
-    getAllAppointments: async ({page, limit}) => {
+    getAllAppointments: async ({page, limit, month, year}) => {
         try {
-            const response = await axiosInstance.get('/appointment/get-all-appointments', { params: { page, limit } });
+            const response = await axiosInstance.get('/appointment/get-all-appointments', { params: { page, limit, month, year } });
             return response.data;
         } catch (error) {
             throw error.response.data;
