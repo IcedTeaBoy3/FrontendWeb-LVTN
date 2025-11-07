@@ -1,5 +1,6 @@
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
+import AttachmentsSection from '@/pages/DetailAppointmentPage/components/AttachmentsSection';
 import {convertStatusPayment, getStatusPaymentColor} from '@/utils/status_payment_utils';
 import { convertPaymentType } from '@/utils/paymentType_utils';
 import { convertMethodPayment } from '@/utils/method_utils';
@@ -30,7 +31,7 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                 placement="right"
                 isOpen={visible}
                 onClose={onClose}
-                width={window.innerWidth < 768 ? "100%" : 800}
+                width={window.innerWidth < 768 ? "100%" : "800px"}
                 forceRender
             >
                  <ModalDetailPatient
@@ -188,22 +189,11 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                     <Descriptions.Item label="Chẩn đoán">{medicalResult.diagnosis || "—"}</Descriptions.Item>
                     <Descriptions.Item label="Toa thuốc">{medicalResult.prescription || "—"}</Descriptions.Item>
                     <Descriptions.Item label="Ghi chú">{medicalResult.notes || "—"}</Descriptions.Item>
-                    {medicalResult.attachments && (
-                        <Descriptions.Item label="Tài liệu đính kèm" span={2}>
-                        <Image.PreviewGroup>
-                            {medicalResult.attachments.map((attachment, index) => (
-                                <Image
-                                    key={index}
-                                    src={`${import.meta.env.VITE_APP_BACKEND_URL}${attachment}`}
-                                    alt={`Attachment ${index + 1}`}
-                                    width={150}
-                                    style={{ borderRadius: 8, marginRight: 8 }}
-                                />
-                            ))}
-                        </Image.PreviewGroup>
-                        </Descriptions.Item>
-                    )}
+                    <Descriptions.Item label="Tệp đính kèm">
+                        <AttachmentsSection attachments={medicalResult.attachments} twoLevel={true} />
+                    </Descriptions.Item>
                     
+
                 </Descriptions>
                 ) : (
                     <Tag color="orange">Chưa có kết quả khám</Tag>

@@ -458,7 +458,7 @@ const AccountPage = () => {
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
                 <ButtonComponent
                     type="primary"
-                    
+                    disabled={true}
                     icon={<PlusOutlined />}
                     style={{ marginRight: 8 }}
                 >

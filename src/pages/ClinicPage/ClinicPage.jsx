@@ -1,4 +1,4 @@
-import { Form, Input, Button, Upload, Card, Row, Col, Select, Typography, Divider } from "antd";
+import { Form, Input, Button, Upload, Row, Col, Select, Typography, Space } from "antd";
 import * as Message from '@/components/Message/Message';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { UploadOutlined } from "@ant-design/icons";
@@ -8,6 +8,7 @@ import { ServiceService } from "@/services/ServiceService";
 import { StyledCard } from "./style";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import CKEditorComponent from "@/components/CKEditorComponent/CKEditorComponent";
+import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import AddressService from '@/services/AddressService'
 import { useState} from "react";
 const { Title } = Typography;
@@ -150,7 +151,6 @@ const ClinicPage = () => {
             }
         });
         const fullAddress = `${values.specificAddress}, ${getNameByCode(wards, values.ward)}, ${getNameByCode(districts, values.district)}, ${getNameByCode(provinces, values.province)}`;
-        console.log('fullAddress', fullAddress);
         formData.append("address", fullAddress);
         formData.append("name", values.name);
         formData.append("description", values.description);
@@ -181,20 +181,34 @@ const ClinicPage = () => {
                         title="Thông tin cơ bản"
                         style={{ marginBottom: 20 }}
                         hoverable={true}
+                        extra={
+                            <Space size="middle">
+                                <ButtonComponent
+                                    type="default"
+                                    onClick={() => { formUpdate.resetFields(); }}
+                                    
+                                > Huỷ </ButtonComponent>
+                                <ButtonComponent
+                                    type="primary"
+                                    ghost
+                                    htmlType="submit"
+                                > Cập nhật </ButtonComponent>
+                            </Space>
+                        }
                     >
                         <Form.Item
                             label="Tên phòng khám"
                             name="name"
                             rules={[{ required: true, message: "Vui lòng nhập tên phòng khám" }]}
                         >
-                            <Input placeholder="Nhập tên phòng khám" />
+                            <Input placeholder="Nhập tên phòng khám" style={{width:"50%"}} />
                         </Form.Item>
                         <Form.Item
-                            label="Phương châm"
+                            label="Tiêu chí"
                             name="criteria"
 
                         >
-                            <Input placeholder="Nhập phương châm" />
+                            <Input placeholder="Nhập tiêu chí" style={{width:"50%"}}/>
                         </Form.Item>
 
                         <Form.Item
@@ -285,7 +299,25 @@ const ClinicPage = () => {
                         </Form.Item>
                     </StyledCard>
                     {/* Địa chỉ & Liên hệ */}
-                    <StyledCard title="Địa chỉ & Liên hệ" style={{ marginBottom: 20 }} hoverable={true}>
+                    <StyledCard 
+                        title="Địa chỉ & Liên hệ" 
+                        style={{ marginBottom: 20 }} 
+                        hoverable={true}
+                        extra={
+                            <Space size="middle">
+                                <ButtonComponent
+                                    type="default"
+                                    onClick={() => { formUpdate.resetFields(); }}
+                                    
+                                > Huỷ </ButtonComponent>
+                                <ButtonComponent
+                                    type="primary"
+                                    ghost
+                                    htmlType="submit"
+                                > Cập nhật </ButtonComponent>
+                            </Space>
+                        }
+                    >
                         <Title level={5}>Địa chỉ</Title>
                         <Row gutter={16}>
                             <Col span={8}>
@@ -383,7 +415,25 @@ const ClinicPage = () => {
                         </Form.Item>
                     </StyledCard>
                     {/* Thông tin khác */}
-                    <StyledCard title="Thông tin khác" style={{ marginBottom: 20 }} hoverable={true}>
+                    <StyledCard 
+                        title="Thông tin khác" 
+                        style={{ marginBottom: 20 }}
+                        hoverable={true}
+                        extra={
+                            <Space size="middle">
+                                <ButtonComponent
+                                    type="default"
+                                    onClick={() => { formUpdate.resetFields(); }}
+                                    
+                                > Huỷ </ButtonComponent>
+                                <ButtonComponent
+                                    type="primary"
+                                    ghost
+                                    htmlType="submit"
+                                > Cập nhật </ButtonComponent>
+                            </Space>
+                        }
+                    >
                         <Row gutter={16}>
                             <Col span={12}>
                                 <Form.Item label="Giờ làm việc" name="workHours">
@@ -413,14 +463,6 @@ const ClinicPage = () => {
                             </Col>
                         </Row>
                     </StyledCard>
-
-                    {/* Buttons */}
-                    <Form.Item style={{ textAlign: "right" }}>
-                        <Button style={{ marginRight: 8 }}>Hủy</Button>
-                        <Button type="primary" htmlType="submit">
-                            Cập nhật
-                        </Button>
-                    </Form.Item>
                 </Form >
             </LoadingComponent>
         </>

@@ -23,7 +23,7 @@ export const StyledSider = styled(Sider)`
     background-color: #fff !important;
     /* ví dụ file global.css hoặc styled-component */
     .ant-layout-sider-trigger {
-        background-color: #1890ff !important; /* 🔵 màu bạn muốn */
+        background-color: #1976D2 !important; /* 🔵 màu bạn muốn */
         color: #fff !important;
         font-size: 18px;
         border-top: 1px solid #e8e8e8;
@@ -54,8 +54,7 @@ export const LogoText = styled(Paragraph)`
 `;
 
 export const StyledHeader = styled(Header)`
-    /* background: rgb(25 117 220); */
-    background-color: #1890ff;
+    background-color: #1976D2;
     padding: 0;
     text-align: right;
     padding-right: 20px;

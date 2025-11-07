@@ -486,6 +486,7 @@ const PatientProfilePage = () => {
                 <ButtonComponent
                     type="primary"
                     // onClick={() => setIsModalOpenCreate(true)}
+                    disabled={true}
                     icon={<PlusOutlined />}
                     style={{ marginRight: 8 }}
                 >

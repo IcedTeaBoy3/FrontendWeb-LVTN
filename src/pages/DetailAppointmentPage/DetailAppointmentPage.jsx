@@ -5,6 +5,7 @@ import { PaymentService } from '@/services/PaymentService';
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent';
 import ModalComponent from '@/components/ModalComponent/ModalComponent';
+import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import * as Message from "@/components/Message/Message";
 import {Row, Col, Typography, Divider, Tag, Descriptions, Space, Image} from 'antd';
@@ -22,11 +23,14 @@ import {
     CheckOutlined,
 } from "@ant-design/icons";
 import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
+import AttachmentsSection from '@/components/AttachmentsSection/AttachmentsSection';
 const { Title,Text } = Typography;
 const DetailAppointmentPage = () => {
     const [isOpenModalDetailPatient, setIsOpenModalDetailPatient] = useState(false);
     const [isOpenModalConfirm, setIsOpenModalConfirm] = useState(false);
     const [isOpenModalPaymentConfirm, setIsOpenModalPaymentConfirm] = useState(false);
+    const [isOpenModalViewPDF, setIsOpenModalViewPDF] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
     const navigate = useNavigate();
     const { id } = useParams();
     const handleBack = () => {
@@ -86,6 +90,10 @@ const DetailAppointmentPage = () => {
     };
     const handleCancelConfirm = () => {
         setIsOpenModalConfirm(false);
+    };
+    const handleViewPDF = (fileUrl) => () => {
+        setSelectedFile(fileUrl);
+        setIsOpenModalViewPDF(true);
     };
 
     
@@ -162,6 +170,21 @@ const DetailAppointmentPage = () => {
                     </div>
                 </LoadingComponent>
             </ModalComponent>
+            <DrawerComponent    
+                title="Xem file PDF"
+                width="60%"
+                open={isOpenModalViewPDF}
+                onClose={() => setIsOpenModalViewPDF(false)}
+            >
+                {selectedFile && (
+                    <iframe
+                        src={selectedFile}
+                        width="100%"
+                        height="600px"
+                        title="Xem file PDF"
+                    />
+                )}
+            </DrawerComponent>
             <LoadingComponent isLoading={isLoadingAppointment}>
                 <Row gutter={[16, 16]}>
                     {/* THÔNG TIN LỊCH KHÁM */}
@@ -356,16 +379,9 @@ const DetailAppointmentPage = () => {
                                     <Descriptions.Item label="Ghi chú">
                                         {medicalResult?.note || "Chưa cập nhật"}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label="File đính kèm">
 
-                                        {medicalResult?.attachments.map((file, index) => 
-                                            <Image
-                                                key={index}
-                                                width={100}
-                                                src={`${import.meta.env.VITE_APP_BACKEND_URL}${file}`}
-                                            />
-                                        
-                                        ) || "Chưa cập nhật"}
+                                    <Descriptions.Item label="Tệp đính kèm">
+                                        <AttachmentsSection attachments={medicalResult?.attachments} />
                                     </Descriptions.Item>
                                 </Descriptions>
                             </StyledCard>

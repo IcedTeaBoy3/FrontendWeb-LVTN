@@ -293,22 +293,34 @@ const DoctorAppointmentDate = () => {
     setIsOpenModal(true);
   };
   const handleCreateMedicalResult = async () => {
-    formCreate
-      .validateFields()
-      .then((values) => {
-        const formData = new FormData();
-        formData.append("appointment", rowSelected);
-        formData.append("diagnosis", values.diagnosis);
-        formData.append("prescription", values.prescription || "");
-        formData.append("notes", values.notes || "");
-        values.attachments?.forEach((file) => {
-          formData.append("attachments", file.originFileObj);
+    try {
+      // ✅ Validate form trước khi gửi
+      const values = await formCreate.validateFields();
+
+      const formData = new FormData();
+      formData.append("appointment", rowSelected);
+      formData.append("diagnosis", values.diagnosis);
+      formData.append("prescription", values.prescription || "");
+      formData.append("notes", values.notes || "");
+
+      // ✅ Xử lý file đính kèm (nếu có)
+      if (Array.isArray(values.attachments)) {
+        values.attachments.forEach((file) => {
+          if (file.originFileObj) {
+            formData.append("attachments", file.originFileObj);
+          }
         });
-        mutationCreateMedicalResult.mutate(formData);
-      });
+      }
+
+      // ✅ Gọi mutation (axios/fetch/RTK query,...)
+      mutationCreateMedicalResult.mutate(formData);
+
+    } catch (error) {
+      console.error("Lỗi khi gửi form:", error);
+    }
   };
+
   const handleOkCancelConfirm = () => {
-    console.log("Huỷ appointmentId:", rowSelected);
     mutationCancelAppointment.mutate(rowSelected);
   };
   const handleCancelConfirm = () => {
@@ -394,18 +406,11 @@ const DoctorAppointmentDate = () => {
                     return Promise.reject(new Error("Chỉ được chọn tối đa 5 tệp"));
                   }
 
-                  const tooLarge = value.some(
-                    (file) => file.originFileObj && file.originFileObj.size > 2 * 1024 * 1024
-                  );
-                  if (tooLarge) {
-                    return Promise.reject(new Error("Mỗi tệp phải nhỏ hơn 2MB"));
-                  }
-
                   return Promise.resolve();
                 },
               },
             ]}
-            extra="Chọn tối đa 5 ảnh hoặc file PDF, dung lượng ≤ 2MB/tệp"
+            extra="Chọn tối đa 5 ảnh hoặc file PDF"
           >
             <Upload
               listType="picture-card"
@@ -424,14 +429,7 @@ const DoctorAppointmentDate = () => {
                 if (!isValidType) {
                   Message.error("Chỉ được chọn file ảnh hoặc PDF!");
                   return Upload.LIST_IGNORE;
-                }
-
-                const isLt2M = file.size / 1024 / 1024 < 2;
-                if (!isLt2M) {
-                  Message.error("Tệp phải nhỏ hơn 2MB!");
-                  return Upload.LIST_IGNORE;
-                }
-
+                } 
                 if (fileList.length > 5) {
                   Message.error("Bạn chỉ được chọn tối đa 5 tệp!");
                   return Upload.LIST_IGNORE;

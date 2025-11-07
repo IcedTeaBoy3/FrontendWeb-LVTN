@@ -54,7 +54,6 @@ export const LogoText = styled(Paragraph)`
 `;
 
 export const StyledHeader = styled(Header)`
-    /* background: rgb(25 117 220); */
     background-color: #1976D2;
     padding: 0;
     text-align: right;

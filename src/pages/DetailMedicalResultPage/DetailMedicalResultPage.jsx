@@ -6,9 +6,11 @@ import { MedicalResultService } from '@/services/MedicalResultService';
 import LoadingCompoent from '@/components/LoadingComponent/LoadingComponent';
 import ButtonComponent from '@/components/ButtonComponent/ButtonComponent';
 import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
+import AttachmentsSection from '@/pages/DetailAppointmentPage/components/AttachmentsSection';
+
 import { convertGender} from '@/utils/gender_utils';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Typography ,Descriptions, Row, Col, Image, Divider} from 'antd';
+import { Typography ,Descriptions, Row, Col, Divider} from 'antd';
 import  dayjs from 'dayjs';
 const { Title, Text } = Typography;
 const DetailMedicalResultPage = () => {
@@ -97,26 +99,7 @@ const DetailMedicalResultPage = () => {
                                 <Text>{medicalResult.notes}</Text>
                             </Descriptions.Item>
                             <Descriptions.Item label="Tệp đính kèm">
-                                {medicalResult.attachments && medicalResult.attachments.length > 0 ? (
-                                    <Image.PreviewGroup
-                                    preview={{
-                                        onChange: (current, prev) =>
-                                        console.log(`Xem ảnh: ${prev} -> ${current}`),
-                                    }}
-                                    >
-                                    {medicalResult.attachments.map((attachment, index) => (
-                                        <Image
-                                        key={index}
-                                        width={100}
-                                        style={{ marginRight: 8, borderRadius: 6 }}
-                                        src={`${import.meta.env.VITE_APP_BACKEND_URL}${attachment}`}
-                                        alt={`Attachment ${index + 1}`}
-                                        />
-                                    ))}
-                                    </Image.PreviewGroup>
-                                ) : (
-                                    <Text>Không có tệp đính kèm</Text>
-                                )}
+                                <AttachmentsSection attachments={medicalResult.attachments} />
                             </Descriptions.Item>
                         </Descriptions>
                     </Col>
