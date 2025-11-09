@@ -32,6 +32,7 @@ import DoctorInfo from "@/pages/DoctorInfo/DoctorInfo";
 import DetailMedicalResultPage from "@/pages/DetailMedicalResultPage/DetailMedicalResultPage";
 import StatisticPage from "@/pages/StatisticPage/StatisticPage";
 import DoctorStatisticPage from "@/pages/DoctorStatisticPage/DoctorStatisticPage";
+import SliderPage from "@/pages/SliderPage/SliderPage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 import DoctorLayout from "@/layouts/DoctorLayout/DoctorLayout";
@@ -51,6 +52,7 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 >
+                    <Route path="sliders" element={<SliderPage/>} />
                     <Route path="personinfo" element={<PersonInfo />} />
                     <Route path="services" element={<ServicePage />} />
                     <Route path="clinics" element={<ClinicPage />} />

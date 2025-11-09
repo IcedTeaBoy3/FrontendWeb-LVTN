@@ -37,12 +37,12 @@ const AuthPage = () => {
                         accessToken
                     };
                     dispatch(setUser(newAccount));
-                    console.log('account.role',account.role);
-                    if(account.role =='admin'){
-                        navigate("/admin/dashboard");
-                        return;
+                    if(account.role =='doctor'){
+                        navigate("/doctor/dashboard");
                     }
-                    navigate("/doctor/dashboard");
+                    else{
+                        navigate("/admin/dashboard");
+                    }
                 } else {
                     setIsRegister(!isRegister);
                 }

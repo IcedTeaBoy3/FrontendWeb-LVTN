@@ -29,12 +29,18 @@ import {
     MedicineBoxOutlined,
     SolutionOutlined,
     AppstoreOutlined,
+    PictureOutlined,
 } from "@ant-design/icons";
 const menuItems = [
     {
         key: "/admin/dashboard",
         icon: <DashboardOutlined />,
         label: "Tổng quan",
+    },
+    {
+        key: "/admin/sliders",
+        icon: <PictureOutlined/>,
+        label: "Slider",
     },
     {
         key: "/admin/accounts",
@@ -120,6 +126,7 @@ const AdminLayout = () => {
     const breadcrumbNameMap = {
         "/admin": "Quản trị",
         "/admin/accounts": "Tài khoản",
+        "/admin/sliders": "Slider",
         "/admin/workplaces": "Nơi làm việc",
         "/admin/positions": "Chức vụ",
         "/admin/degrees": "Học vị",
@@ -265,8 +272,8 @@ const AdminLayout = () => {
                     ></Breadcrumb>
                     <ContentContainer
                         style={{
-                        background: colorBgContainer,
-                        borderRadius: borderRadiusLG,
+                            background: colorBgContainer,
+                            borderRadius: borderRadiusLG,
                         }}
                     >
                         <Outlet />

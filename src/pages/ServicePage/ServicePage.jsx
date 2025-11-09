@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
 import { ServiceService } from '@/services/ServiceService'
-import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Divider, Dropdown, Tag, InputNumber, Row, Col, Descriptions } from "antd";
+import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Dropdown, Tag, InputNumber,  Descriptions } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -497,10 +497,7 @@ const ServicePage = () => {
                         name="formCreate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
-                        initialValues={{
-                            shiftDuration: 30,
-                        }}
+                        labelAlign="left"
                         autoComplete="off"
                         form={formCreate}
                     >
