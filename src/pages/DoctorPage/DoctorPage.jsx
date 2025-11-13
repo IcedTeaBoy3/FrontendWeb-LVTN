@@ -12,7 +12,7 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import TabsComponent from '@/components/TabsComponent/TabsComponent';
-import AddressForm from '@/components/AddressForm/AddressForm';
+import AddressFields from '@/components/AddressFields/AddressFields';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
@@ -1048,7 +1048,7 @@ const DoctorPage = () => {
                                             </Form.Item>
                                             <Title level={5}>Địa chỉ</Title>
                                             <Divider style={{margin: '8px 0'}}/>
-                                            <AddressForm
+                                            <AddressFields
                                                 provinces={provinces}
                                                 districts={districts}
                                                 wards={wards}

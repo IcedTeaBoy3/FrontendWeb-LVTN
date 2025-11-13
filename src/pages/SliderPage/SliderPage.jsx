@@ -654,7 +654,7 @@ const SliderPage = () => {
                                 accept=".jpg, .jpeg, .png, .gif, .webp"
                                 onRemove={() => formUpdate.setFieldsValue({ image: [] })}
                                 fileList={formUpdate.getFieldValue("image") || []}
-                                listType="picture"
+                                listType="picture-card"
                             >
                                 <ButtonComponent icon={<UploadOutlined />}>
                                     Chọn file

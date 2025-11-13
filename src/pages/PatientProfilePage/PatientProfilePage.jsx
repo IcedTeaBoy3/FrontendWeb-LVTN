@@ -9,7 +9,7 @@ import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
-import AddressForm from '@/components/AddressForm/AddressForm';
+import AddressFields from '@/components/AddressFields/AddressFields';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import TabsComponent from '@/components/TabsComponent/TabsComponent';
 import * as Message from "@/components/Message/Message";
@@ -731,8 +731,8 @@ const PatientProfilePage = () => {
                                             </Form.Item>
                                             <Title level={5}>Địa chỉ</Title>
                                             <Divider style={{margin: '16px 0'}}/>
-                                            <AddressForm
-                                                form={formUpdate}
+                                            <AddressFields
+                                               
                                                 provinces={provinces}
                                                 districts={districts}
                                                 wards={wards}

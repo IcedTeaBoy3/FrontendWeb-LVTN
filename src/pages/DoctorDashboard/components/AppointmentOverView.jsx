@@ -31,7 +31,7 @@ const AppointmentOverView = ({doctorId}) => {
     const appointmentStatus = doctorAppointmentStatus?.data || [];
     const recentAppointmentData = appointment?.map(app => ({
         key: app.id,
-        patientName: app.patientProfile.person?.fullName ?? '--',
+        patientName: app.patientProfile?.person?.fullName ?? '--',
         doctorName: app.doctorService?.doctor?.person?.fullName ?? '--',
         date: dayjs(app.schedule?.workday).format('DD/MM/YYYY'),
         time: dayjs(app.slot?.startTime).format('HH:mm') + ' - ' + dayjs(app.slot?.endTime).format('HH:mm'),
