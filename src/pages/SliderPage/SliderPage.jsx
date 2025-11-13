@@ -7,7 +7,22 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import TableStyle from '@/components/TableStyle/TableStyle';
 import * as Message from "@/components/Message/Message";
-import { Space, Input, Radio, Button, Form, Image,Popover, Typography, Select, Dropdown, Tag, InputNumber, Upload,  Descriptions, Row, Col } from "antd";
+import { 
+    Space, 
+    Input, 
+    Radio, 
+    Button, 
+    Form, 
+    Image, 
+    Typography, 
+    Dropdown, 
+    Tag,
+    Upload,  
+    Descriptions, 
+    Row, 
+    Col, 
+    DatePicker
+} from "antd";
 
 import {
     EditOutlined,
@@ -24,6 +39,7 @@ import {
 import { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import defaultImage from "@/assets/default_image.png";
+import dayjs from 'dayjs';
 
 const { Text, Title } = Typography;
 const SliderPage = () => {
@@ -138,7 +154,7 @@ const SliderPage = () => {
     };
     const queryGetAllSliders = useQuery({
         queryKey: ['getAllSliders'],
-        queryFn: () => SliderService.getAllSliders({ page: 1, limit: 1000 }),
+        queryFn: () => SliderService.getAllSliders({ page: 1, limit: 100 }),
         retry: 1,
     });
     const mutationCreateSlider = useMutation({
@@ -185,16 +201,31 @@ const SliderPage = () => {
             Message.error(error?.response?.data?.message || "Xoá slider thất bại. Vui lòng thử lại!");
         }
     });
+    const mutationDeleteManySliders = useMutation({
+        mutationKey: ['deleteManySliders'],
+        mutationFn: (ids) => SliderService.deleteManySliders(ids),
+        onSuccess: (data) => {
+            Message.success(data?.message || "Xoá nhiều slider thành công!");
+            queryGetAllSliders.refetch();
+            setSelectedRowKeys([]);
+            setIsModalOpenDeleteMany(false);
+        },
+        onError: (error) => {
+            Message.error(error?.response?.data?.message || "Xoá nhiều slider thất bại. Vui lòng thử lại!");
+        }
+    });
     const { data: sliders, isLoading: isLoadingSliders } = queryGetAllSliders;
     const { isPending: isPendingCreate } = mutationCreateSlider;
     const { isPending: isPendingDelete } = mutationDeleteSlider;
     const { isPending: isPendingUpdate } = mutationUpdateSlider;
+    const { isPending: isPendingDeleteMany } = mutationDeleteManySliders;
     const sliderData = sliders?.data?.sliders || [];
     const dataTable = sliderData?.map((item, index) => ({
         key: item.sliderId,
         index: index + 1,
         caption: item.caption,
         imageUrl: `${import.meta.env.VITE_APP_BACKEND_URL}${item.imageUrl}`,
+        expireAt: item.expireAt ? dayjs(item.expireAt).format('HH:mm giờ, ngày DD/MM/YYYY') : 'Chưa đặt',
         status: item.status,
     }));
     const columns = [
@@ -225,6 +256,13 @@ const SliderPage = () => {
                     />
                 );
             }
+        },
+        {
+            title: "Ngày hết hạn",
+            dataIndex: "expireAt",
+            key: "expireAt",
+            render: (text) => text || 'Chưa đặt',
+            ...getColumnSearchProps("expireAt"),
         },
         {
             title: "Trạng thái",
@@ -302,6 +340,9 @@ const SliderPage = () => {
             const formData = new FormData();
             formData.append("caption", values.caption);
             formData.append("status", values.status);
+            if(values.expireAt){
+                formData.append("expireAt", dayjs(values.expireAt).format('YYYY-MM-DD HH:mm'));
+            }
             formData.append("image", image);
             mutationCreateSlider.mutate(formData);
         })
@@ -342,6 +383,7 @@ const SliderPage = () => {
         formUpdate.setFieldsValue({
             caption: slider.caption,
             status: slider.status,
+            expireAt: slider.expireAt ? dayjs(slider.expireAt) : null,
             image: [
                 {
                     uid: "-1",
@@ -371,12 +413,46 @@ const SliderPage = () => {
             }
             formData.append("caption", values.caption);
             formData.append("status", values.status);
+            if(values.expireAt){
+                formData.append("expireAt", dayjs(values.expireAt).format('YYYY-MM-DD HH:mm'));
+            }
             mutationUpdateSlider.mutate({ sliderId: rowSelected, data: formData });
         })
         .catch((info) => {
             console.log("Validate Failed:", info);
         });
-    }
+    };
+    const handleCancelDeleteMany = () => {
+        setIsModalOpenDeleteMany(false);
+    };
+    const handleOkDeleteMany = () => {
+        mutationDeleteManySliders.mutate(selectedRowKeys);
+    };
+    const menuProps = {
+        items: [
+            {
+                key: "export",
+                label: "Xuất file",
+                icon: <ExportOutlined style={{ fontSize: 16 }} />,
+            },
+            {
+                type: "divider"
+            },
+            {
+                key: "delete",
+                label: <Text type="danger">Xoá tất cả</Text>,
+                icon: <DeleteOutlined style={{ color: "red", fontSize: 16 }} />,
+                onClick: () => setIsModalOpenDeleteMany(true),
+            },
+        ],
+    };
+    const handleSelectedAll = () => {
+        if (selectedRowKeys.length === dataTable.length) {
+            setSelectedRowKeys([]);
+        } else {
+            setSelectedRowKeys(dataTable.map(item => item.key));
+        }
+    };
     return (
         <>
             <Title level={4}>Danh sách slider</Title>
@@ -398,6 +474,11 @@ const SliderPage = () => {
                     <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
                 </ButtonComponent>
             </div>
+            <BulkActionBar
+                selectedRowKeys={selectedRowKeys}
+                handleSelectedAll={handleSelectedAll}
+                menuProps={menuProps}
+            />
             <LoadingComponent isLoading={isPendingCreate}>
                 <ModalComponent
                     title="Thêm mới slider"
@@ -426,6 +507,20 @@ const SliderPage = () => {
                         </Form.Item>
                     
                     
+                       
+                        {/* Ngày hết hạn */}
+                        <Form.Item
+                            label={<b>Thời gian hết hạn</b>}
+                            name="expireAt"
+                        >
+                            <DatePicker
+                                style={{ width: '50%' }}
+                                format="HH:mm giờ, ngày DD/MM/YYYY"
+                                showTime={{ format: 'HH:mm' }} 
+                                disabledDate={(current) => current && current < dayjs().endOf('day')}
+                                placeholder="Chọn thời gian hết hạn"
+                            />
+                        </Form.Item>
                         <Form.Item
                             label={<b>Trạng thái</b>}
                             name="status"
@@ -437,72 +532,72 @@ const SliderPage = () => {
                                 <Radio value="inactive">Không hoạt động</Radio>
                             </Radio.Group>
                         </Form.Item>
-                    {/* Upload ảnh */}
-                    <Form.Item
-                        label={<b>Ảnh slider</b>}
-                        name="image"
-                        rules={[{ required: true, message: "Vui lòng tải ảnh slider" }]}
-                        valuePropName="fileList"
-                        getValueFromEvent={(e) => {
-                            if (Array.isArray(e)) return e;
-                            return e?.fileList || [];
-                        }}
-                    >
-                        <Upload
-                            listType="picture-card"
-                            showUploadList={true}
-                            maxCount={1}
-                            accept=".jpg,.jpeg,.png,.gif,.webp"
-                            beforeUpload={() => false}
-                            onChange={handleUploadChange}
-                            className="slider-upload"
+                        {/* Upload ảnh */}
+                        <Form.Item
+                            label={<b>Ảnh slider</b>}
+                            name="image"
+                            rules={[{ required: true, message: "Vui lòng tải ảnh slider" }]}
+                            valuePropName="fileList"
+                            getValueFromEvent={(e) => {
+                                if (Array.isArray(e)) return e;
+                                return e?.fileList || [];
+                            }}
                         >
-                        
-                            <div>
-                                {uploading ? (
-                                    <LoadingOutlined style={{ fontSize: 28 }} />
-                                ) : (
-                                    <PlusOutlined style={{ fontSize: 28 }} />
-                                )}
-                            <div style={{ marginTop: 8 }}>Tải ảnh</div>
-                            </div>
-                        
-                        </Upload>
-                    </Form.Item>
+                            <Upload
+                                listType="picture-card"
+                                showUploadList={true}
+                                maxCount={1}
+                                accept=".jpg,.jpeg,.png,.gif,.webp"
+                                beforeUpload={() => false}
+                                onChange={handleUploadChange}
+                                className="slider-upload"
+                            >
+                            
+                                <div>
+                                    {uploading ? (
+                                        <LoadingOutlined style={{ fontSize: 28 }} />
+                                    ) : (
+                                        <PlusOutlined style={{ fontSize: 28 }} />
+                                    )}
+                                <div style={{ marginTop: 8 }}>Tải ảnh</div>
+                                </div>
+                            
+                            </Upload>
+                        </Form.Item>
 
-                    {/* Xem trước ảnh */}
-                    {imageUrl && (
-                        <div
-                        style={{
-                            marginTop: 16,
-                            border: "1px solid #f0f0f0",
-                            borderRadius: 8,
-                            padding: 12,
-                            background: "#fafafa",
-                        }}
-                        >
-                        <div
+                        {/* Xem trước ảnh */}
+                        {imageUrl && (
+                            <div
                             style={{
-                            fontWeight: 500,
-                            marginBottom: 8,
-                            color: "#555",
+                                marginTop: 16,
+                                border: "1px solid #f0f0f0",
+                                borderRadius: 8,
+                                padding: 12,
+                                background: "#fafafa",
                             }}
-                        >
-                            Ảnh xem trước:
-                        </div>
-                        <img
-                            src={imageUrl}
-                            alt="Preview"
-                            style={{
-                            width: "100%",
-                            maxHeight: 300,
-                            objectFit: "cover",
-                            borderRadius: 6,
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                            }}
-                        />
-                        </div>
-                    )}
+                            >
+                            <div
+                                style={{
+                                fontWeight: 500,
+                                marginBottom: 8,
+                                color: "#555",
+                                }}
+                            >
+                                Ảnh xem trước:
+                            </div>
+                            <img
+                                src={imageUrl}
+                                alt="Preview"
+                                style={{
+                                width: "100%",
+                                maxHeight: 300,
+                                objectFit: "cover",
+                                borderRadius: 6,
+                                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                                }}
+                            />
+                            </div>
+                        )}
                     </Form>
                 </ModalComponent>
             </LoadingComponent>
@@ -567,6 +662,19 @@ const SliderPage = () => {
                             </Upload>
 
                         </Form.Item>
+                        {/* Ngày hết hạn */}
+                        <Form.Item
+                            label="Ngày hết hạn"
+                            name="expireAt"
+                        >
+                            <DatePicker
+                                style={{ width: '100%' }}
+                                format="HH:mm giờ, ngày DD/MM/YYYY"
+                                showTime={{ format: 'HH:mm' }}
+                                disabledDate={(current) => current && current < dayjs().endOf('day')}
+                                placeholder="Chọn ngày hết hạn"
+                            />
+                        </Form.Item>
                         <Form.Item
                             label="Trạng thái"
                             name="status"
@@ -614,6 +722,34 @@ const SliderPage = () => {
                         <span>Xoá slider</span>
                     </span>
                 }
+                open={isModalOpenDeleteMany}
+                onOk={handleOkDeleteMany}
+                okText="Xoá"
+                cancelText="Hủy"
+                onCancel={handleCancelDeleteMany}
+                okButtonProps={{ danger: true }}
+                centered
+                style={{ borderRadius: 8 }}
+            >
+                <LoadingComponent isLoading={isPendingDeleteMany}>
+                    <div style={{ textAlign: "center", padding: "8px 0" }}>
+                        <Text>
+                            Bạn có chắc chắn muốn{" "}
+                            <Text strong type="danger">
+                                xoá
+                            </Text>{" "}
+                            {selectedRowKeys.length} slider đã chọn không?
+                        </Text>
+                    </div>
+                </LoadingComponent>
+            </ModalComponent>
+            <ModalComponent
+                title={
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+                        <span>Xoá slider</span>
+                    </span>
+                }
                 open={isModalOpenDelete}
                 onOk={handleOkDelete}
                 onCancel={handleCancelDelete}
@@ -654,7 +790,7 @@ const SliderPage = () => {
                     size='middle'
                 >
                     <Descriptions.Item label="Tên slider">
-                        {sliderDetail?.name || <Text type="secondary">Chưa cập nhật</Text>}
+                        {sliderDetail?.caption || <Text type="secondary">Chưa cập nhật</Text>}
                     </Descriptions.Item>
                     <Descriptions.Item label="Trạng thái">
                         {sliderDetail?.status === "active" ? (

@@ -21,5 +21,9 @@ export const SliderService = {
     deleteSlider: async (id) => {
         const response = await axiosInstance.delete(`/slider/delete-slider/${id}`);
         return response.data;
+    },
+    deleteManySliders: async (ids) => {
+        const response = await axiosInstance.post('/slider/delete-many-sliders', { ids });
+        return response.data;
     }
 };

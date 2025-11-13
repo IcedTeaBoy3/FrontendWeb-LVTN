@@ -228,7 +228,7 @@ const DoctorReviewPage = () => {
         rating: review.rating,
         comment: review.comment,
         isVisible: review.isVisible,
-        createdAt: dayjs(review.createdAt).format("DD/MM/YYYY HH:mm"),
+        createdAt: dayjs(review.createdAt).format("HH:mm giờ, ngày DD/MM/YYYY"),
     }));
     const columns = [
         {
@@ -323,6 +323,7 @@ const DoctorReviewPage = () => {
                         label: record.isVisible ? "Ẩn đánh giá" : "Hiện đánh giá",
                         icon: record.isVisible ? <EyeOutlined style={{ fontSize: 16 }} /> : <EyeOutlined style={{ fontSize: 16, opacity: 0.5 }} />
                     },
+                    { type: "divider" },
                     { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
                     { type: "divider" },
                 ];
