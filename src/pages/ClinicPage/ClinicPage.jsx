@@ -388,7 +388,7 @@ const ClinicPage = () => {
                             name="specificAddress"
                             rules={[{ required: true, message: "Vui lòng nhập địa chỉ cụ thể" }]}
                         >
-                            <Input placeholder="Nhập địa chỉ cụ thể" />
+                            <Input.TextArea placeholder="Nhập địa chỉ cụ thể" rows={3} />
                         </Form.Item>
 
                         <Row gutter={16}>

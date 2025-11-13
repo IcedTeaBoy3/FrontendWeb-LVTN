@@ -143,6 +143,7 @@ const DoctorPatientPage = () => {
     insuranceCode : patient?.insuranceCode,
     patientProfileCode: patient?.patientProfileCode,
     fullName: patient?.person?.fullName,
+    dateOfBirth: dayjs(patient?.person?.dateOfBirth).format('DD/MM/YYYY'),
     gender: convertGender(patient?.person?.gender),
   }));
   const handleCloseModalDetailPatient = () => {

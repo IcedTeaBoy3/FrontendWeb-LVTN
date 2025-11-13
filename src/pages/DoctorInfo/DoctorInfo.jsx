@@ -1,14 +1,7 @@
 
-import { Space, Input, Form, Select, Radio, Typography, Divider, Dropdown, DatePicker, Upload, Tag, Popover, Row, Col, Card } from "antd";
+import { Space, Input, Form, Select, Radio, Typography, Divider, DatePicker, Upload, Row, Col, Card } from "antd";
 import dayjs from 'dayjs';
 import {
-    EditOutlined,
-    DeleteOutlined,
-    SearchOutlined,
-    MoreOutlined,
-    EyeOutlined,
-    ExclamationCircleOutlined,
-    ExportOutlined,
     PlusOutlined,
     UploadOutlined,
 } from "@ant-design/icons";
@@ -24,14 +17,20 @@ import { DegreeService } from "@/services/DegreeService";
 import DoctorWorkplace from "../DoctorDetailPage/components/DoctorWorkplace";
 import DoctorSpecialty from "../DoctorDetailPage/components/DoctorSpecialty";
 import DoctorService from "../DoctorDetailPage/components/DoctorService";
+import AddressFields from "@/components/AddressFields/AddressFields";
+import AddressService from "@/services/AddressService";
 import ModalCreateDegree from '@/components/ModalCreateDegree/ModalCreateDegree';
 const { Text, Title } = Typography;
 const DoctorInfo = () => {
   const user = useSelector((state) => state.auth.user);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
   const [editorData, setEditorData] = useState("");
   const [isOpenModalCreateDegree, setIsOpenModalCreateDegree] = useState(false);
   const [formCreate] = Form.useForm();
   const [formUpdateDoctor] = Form.useForm();
+ const getNameByCode = (list, code) => list.find(i => i.code === code)?.name || '';
   const queryGetDoctor = useQuery({
     queryKey: ['doctor-info', user?.doctor?.doctorId],
     queryFn: () => DoctorServiceService.getDoctor(user?.doctor?.doctorId),
@@ -83,33 +82,112 @@ const DoctorInfo = () => {
   const isPendingCreate = mutationCreateDegree.isPending;
   const doctorInfo = doctorData?.data || {};
   const degreeData = degrees?.data?.degrees || [];
+  // Gọi API lấy tỉnh
   useEffect(() => {
-    if (doctorData) {
+    const res = AddressService.getAllProvinces();
+    res.then((data) => { setProvinces(data); });
+  }, [doctorInfo]);
+  const handleProvinceChange = async (provinceCode) => {
+    const res = await AddressService.getDistrictsByProvince(provinceCode);
+    setDistricts(res);
+    setWards([]);
+    // Reset trong form nếu cần
+    formUpdateDoctor.setFieldsValue({
+      district: undefined,
+      ward: undefined,
+    });
+  };
+  const handleDistrictChange = async (districtCode) => {
+
+    const res = await AddressService.getWardsByDistrict(districtCode);
+    setWards(res);
+    formUpdateDoctor.setFieldsValue({
+      ward: undefined,
+    });
+  };
+  const handleWardChange = (wardCode) => {
+    // Không cần làm gì thêm ở đây, chỉ cần cập nhật ward trong form
+    formUpdateDoctor.setFieldsValue({
+      ward: wardCode,
+    });
+
+  };
+  useEffect(() => {
+    const fetchAddressData = async () => {
+    if (!doctorInfo) return;
+
+    try {
+      const rawAddress = doctorInfo.person?.address || '';
+      const parts = typeof rawAddress === 'string'
+          ? rawAddress.split(',').map(p => p.trim())
+          : [];
+      const [specificAddress = '', wardName = '', districtName = '', provinceName = ''] = parts;
+
+      // --- Tìm mã ---
+      const provinceObj = provinces?.find((p) => p.name === provinceName);
+      const provinceCode = provinceObj?.code;
+
+      let districtObj, wardObj;
+      let districtCode, wardCode;
+      let districtsData = [], wardsData = [];
+
+      // --- Lấy danh sách quận/huyện ---
+      if (provinceCode) {
+        districtsData = await AddressService.getDistrictsByProvince(provinceCode);
+        setDistricts(districtsData);
+        districtObj = districtsData.find((d) => d.name === districtName);
+        districtCode = districtObj?.code;
+      }
+
+      // --- Lấy danh sách phường/xã ---
+      if (districtCode) {
+        wardsData = await AddressService.getWardsByDistrict(districtCode);
+        setWards(wardsData);
+        wardObj = wardsData.find((w) => w.name === wardName);
+        wardCode = wardObj?.code;
+      }
+
+      // --- Gán giá trị vào form ---
       formUpdateDoctor.setFieldsValue({
         email: doctorInfo?.account?.email,
         phone: doctorInfo?.account?.phone,
         fullName: doctorInfo?.person?.fullName,
-        degreeId: doctorInfo?.degree?.degreeId, // hoặc doctorData.degree?.degreeId
+        degreeId: doctorInfo?.degree?.degreeId,
         dateOfBirth: doctorInfo?.person?.dateOfBirth
             ? dayjs(doctorInfo?.person?.dateOfBirth)
             : null,
         gender: doctorInfo?.person?.gender,
-        address: doctorInfo?.person?.address,
+        specificAddress: specificAddress || undefined,
+        province: provinceObj ? provinceObj.code : undefined,
+        district: districtObj ? districtObj.code : undefined,
+        ward: wardObj ? wardObj.code : undefined,
+        bio: doctorInfo?.bio,
         notes: doctorInfo?.notes,
-        avatar:
-          [
+        avatar: doctorInfo?.person?.avatar
+          ? [
             {
               uid: '-1',
               name: doctorInfo?.person?.avatar,
               status: 'done',
               url: `${import.meta.env.VITE_APP_BACKEND_URL}${doctorInfo?.person?.avatar}`,
             },
-          ],
+          ]
+          : [],
       });
-      setEditorData(doctorInfo?.bio || ""); // Cập nhật dữ liệu ban đầu cho CKEditor
-    }
-  }, [doctorData, formUpdateDoctor]);
+      setEditorData(doctorInfo?.bio || '');
+      } catch (error) {
+        console.error('Lỗi khi load địa chỉ bác sĩ:', error);
+      }
+    };
+
+    fetchAddressData();
+  }, [doctorInfo, formUpdateDoctor, provinces]);
   const handleOnUpdateDoctor = (values) => {
+    const hasAddressChange =
+      values.specificAddress ||
+      values.ward ||
+      values.district ||
+      values.province;
     const formData = new FormData();
     const fileObj = values.avatar?.[0]?.originFileObj;
     if (fileObj instanceof File) {
@@ -125,15 +203,15 @@ const DoctorInfo = () => {
     // --- Các field khác ---
     const dataToAppend = {
       email: values.email,
-      // phone: values.phone,
-      // password: values.password, // chỉ append nếu có
       fullName: values.fullName,
       degreeId: values.degreeId,
       dateOfBirth: values.dateOfBirth
           ? dayjs(values.dateOfBirth).format("YYYY-MM-DD")
           : null,
       gender: values.gender,
-      address: values.address,
+      address: hasAddressChange
+          ? `${values.specificAddress || ''}, ${getNameByCode(wards, values.ward) || ''}, ${getNameByCode(districts, values.district) || ''}, ${getNameByCode(provinces, values.province) || ''}`
+          : doctorInfo?.person?.address,
       bio: values.bio,
     };
     Object.entries(dataToAppend).forEach(([key, value]) => {
@@ -146,6 +224,7 @@ const DoctorInfo = () => {
   const handleCancelUpdateDoctor = () => {
     formUpdateDoctor.resetFields();
     setEditorData("");
+    
   };
   const handleCreateDegree = () => {
     formCreate.validateFields().then((values) => {
@@ -195,7 +274,7 @@ const DoctorInfo = () => {
 
               rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
             >
-              <Input placeholder="Nhập họ tên" style={{ width: "30%" }}/>
+              <Input placeholder="Nhập họ tên" style={{ width: "50%" }}/>
             </Form.Item>
             <Form.Item
               label="Bằng cấp"
@@ -206,7 +285,7 @@ const DoctorInfo = () => {
                 name="degreeId"
                 placeholder="Chọn bằng cấp"
                 showSearch
-                style={{ width: "30%" }}
+                style={{ width: "50%" }}
                 optionFilterProp="children"
                 filterOption={(input, option) =>
                   (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -241,11 +320,11 @@ const DoctorInfo = () => {
               />
             </Form.Item>
             <Form.Item label="Ghi chú" name="notes">
-              <Input.TextArea rows={2} placeholder="Nhập ghi chú" style={{ width: "50%" }}/>
+              <Input.TextArea rows={3} placeholder="Nhập ghi chú"/>
             </Form.Item>
 
             <Form.Item label="Ngày sinh" name="dateOfBirth">
-              <DatePicker format="DD/MM/YYYY" style={{ width: "30%" }} />
+              <DatePicker format="DD/MM/YYYY" style={{ width: "50%" }} />
             </Form.Item>
 
             <Form.Item label="Giới tính" name="gender">
@@ -255,10 +334,17 @@ const DoctorInfo = () => {
                 <Radio value="other">Khác</Radio>
               </Radio.Group>
             </Form.Item>
+            <Title level={5}>Địa chỉ</Title>
 
-            <Form.Item label="Địa chỉ" name="address">
-              <Input.TextArea rows={2} placeholder="Nhập địa chỉ" style={{ width: "50%" }}/>
-            </Form.Item>
+            <AddressFields
+              provinces={provinces}
+              districts={districts}
+              wards={wards}
+              onProvinceChange={handleProvinceChange}
+              onDistrictChange={handleDistrictChange}
+              onWardChange={handleWardChange}
+              layout="horizontal"
+            />
             <Row>
               <Col span={24} style={{ textAlign: "right" }}>
 
@@ -272,6 +358,7 @@ const DoctorInfo = () => {
                   <ButtonComponent
                     type="primary"
                     htmlType="submit"
+
                   >
                     Lưu thay đổi
                   </ButtonComponent>

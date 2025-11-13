@@ -2,19 +2,20 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { PatientProfileService } from '@/services/PatientProfileService'
 import AddressService from '@/services/AddressService'
-import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col,DatePicker,Select, Descriptions  } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col,DatePicker,Select, Descriptions  } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
+import AddressForm from '@/components/AddressForm/AddressForm';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
+import TabsComponent from '@/components/TabsComponent/TabsComponent';
 import * as Message from "@/components/Message/Message";
 import ethnicGroups from '@/data/ethnicGroups.js'
 import dayjs from 'dayjs';
 import { convertGender } from '@/utils/gender_utils';
-import { StyledCard } from '../DoctorPage/style';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -26,6 +27,7 @@ import {
     UploadOutlined,
     ExportOutlined,
 } from "@ant-design/icons";
+import { Children } from 'react';
 const { Text, Title } = Typography;
 const PatientProfilePage = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -38,6 +40,7 @@ const PatientProfilePage = () => {
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
     const [patientProfile, setPatientProfile] = useState(null);
+    const [activeTabKey, setActiveTabKey] = useState("1");
     const [formUpdate] = Form.useForm();
     const getNameByCode = (list, code) => list.find(i => i.code === code)?.name || '';
 
@@ -138,7 +141,7 @@ const PatientProfilePage = () => {
         setSearchText("");
         confirm(); // refresh bảng sau khi clear
     };
-     // Gọi API lấy tỉnh
+    // Gọi API lấy tỉnh
     useEffect(() => {
         const res = AddressService.getAllProvinces();
         res.then((data) => { setProvinces(data); });
@@ -147,7 +150,7 @@ const PatientProfilePage = () => {
         const res = await AddressService.getDistrictsByProvince(provinceCode);
 
         setDistricts(res);
-        setWards([]); // Reset xã vì huyện mới chưa được chọn
+        setWards([]);
 
         // Reset trong form nếu cần
         formUpdate.setFieldsValue({
@@ -354,9 +357,12 @@ const PatientProfilePage = () => {
         if(patient){
             setIsDrawerOpen(true);
             setPatientProfile(patient);
-           // Tách địa chỉ
-            const parts = patient.person.address.split(',')?.map((p) => p.trim());
-            const [specificAddress, wardName, districtName, provinceName] = parts;
+            // Tách địa chỉ
+            // ✅ Kiểm tra địa chỉ hợp lệ
+            const rawAddress = patient.person?.address || '';
+            const parts = typeof rawAddress === 'string' ? rawAddress.split(',').map(p => p.trim()) : [];
+            // Đảm bảo luôn có 4 phần tử (địa chỉ cụ thể, phường, quận, tỉnh)
+            const [specificAddress = '', wardName = '', districtName = '', provinceName = ''] = parts;
 
             // Tìm mã
             const provinceObj = provinces?.find((p) => p.name === provinceName);
@@ -601,220 +607,151 @@ const PatientProfilePage = () => {
                         form={formUpdate}
                     >
 
-                        <StyledCard style={{ marginBottom: 16 }}
-                            title="Thông tin tài khoản"
+                        <TabsComponent
+                            defaultActiveKey="1"
+                            activeKey={activeTabKey}
+                            type="card"
+                            onChange={(key) => setActiveTabKey(key)}
+                            items={[
+                                { 
+                                    key: '1', 
+                                    label: 'Thông tin tài khoản' ,
+                                    
+                                    children: (
+                                        <Descriptions column={1} bordered size='small' style={{ marginBottom: 16 }}>
+                                            <Descriptions.Item label="Email">{patientProfile?.account?.email || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                                            <Descriptions.Item label="Tên tài khoản">{patientProfile?.account?.userName || <Text type="secondary">Chưa cập nhật</Text>}</Descriptions.Item>
+                                        </Descriptions>
+                                    )
+                                },
+                                { 
+                                    key: '2', 
+                                    label: 'Thông tin bệnh nhân',
+                                    children: (
+                                        <>
+                                            <Form.Item
+                                                label="Mã hồ sơ"
+                                                name="patientProfileCode"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Vui lòng nhập mã hồ sơ!",
+                                                    },
+                                                ]}
+                                            >
+                                                <Input name="patientProfileCode" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="CCCD"
+                                                name="idCard"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Vui lòng nhập CCCD!",
+                                                    },
+                                                ]}
+                                            >
+                                                <Input name="idCard" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Mã bảo hiểm"
+                                                name="insuranceCode"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Vui lòng nhập mã bảo hiểm!",
+                                                    },
+                                                ]}
+                                            >
+                                                <Input name="insuranceCode" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Họ và tên"
+                                                name="fullName"
+                                            
+                                            >
+                                                <Input name="fullName" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Ngày sinh"
+                                                name="dateOfBirth"
+                                                
+                                            >
+                                                <DatePicker 
+                                                    style={{ width: '100%' }}  
+                                                    format={"DD/MM/YYYY"}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Giới tính"
+                                                name="gender"
+                                            
+                                            >
+                                                <Radio.Group>
+                                                    <Radio value="male">Nam</Radio>
+                                                    <Radio value="female">Nữ</Radio>
+                                                    <Radio value="other">Khác</Radio>
+                                                </Radio.Group>
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="SĐT"
+                                                name="phone"
+                                            >
+                                                <Input name="phone" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Dân tộc"
+                                                name="ethnicGroup"
+                                            >
+                                                <Select
+                                                    options={ethnicGroups?.map(group => ({
+                                                        label: group.name,
+                                                        value: group.code
+                                                    }))}
+                                                    placeholder="Chọn dân tộc"
+                                                    notFoundContent="Chưa có dữ liệu"
+                                                    filterOption={(input, option) =>
+                                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                                    }
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Mối quan hệ"
+                                                name="relation"
+                                            >
+                                                <Radio.Group direction="vertical">
+                                                    <Radio value="self">Bản thân</Radio>
+                                                    <Radio value="parent">Cha/Mẹ</Radio>
+                                                    <Radio value="spouse">Vợ/Chồng</Radio>
+                                                    <Radio value="sibling">Anh/Chị/Em</Radio>
+                                                    <Radio value="child">Con</Radio>
+                                                    <Radio value="other">Khác</Radio>
+                                                </Radio.Group>
+
+                                            </Form.Item>
+                                            <Title level={5}>Địa chỉ</Title>
+                                            <Divider style={{margin: '16px 0'}}/>
+                                            <AddressForm
+                                                form={formUpdate}
+                                                provinces={provinces}
+                                                districts={districts}
+                                                wards={wards}
+                                                onProvinceChange={handleProvinceChange}
+                                                onDistrictChange={handleDistrictChange}
+                                                onWardChange={handleWardChange}
+                                            />
+
+                                        </>
+                                    ),
+                                },
+                            ]}
+                        />
                             
-                        >
                             
-                            {/* Hiển thị thông tin tài khoản email, user name */}
-                            <Row gutter={16} style={{ marginBottom: 16 }}>
-                                <Col span={8}>
-                                    <Text strong>Email:</Text>
-                                </Col>
-                                <Col span={16}>
-                                    <Text>{patientProfile?.account?.email || 'Chưa cập nhật'}</Text>
-                                </Col>
-                            </Row>
-                            <Row gutter={16} style={{ marginBottom: 16 }}>
-                                <Col span={8}>
-                                    <Text strong>Tên tài khoản:</Text>
-                                </Col>
-                                <Col span={16}>
-                                    <Text>{patientProfile?.account?.userName || 'Chưa cập nhật'}</Text>
-                                </Col>
-                            </Row>
                                   
-                        </StyledCard>
-                        <StyledCard 
-                            style={{
-                                border: '1px solid #e0e0e0',
-                                borderRadius: 12,
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                overflow: 'hidden',
-                            }}
-                            title="Thông tin bệnh nhân"
-                        >
+                       
 
-                            <Form.Item
-                                label="Mã hồ sơ"
-                                name="patientProfileCode"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập mã hồ sơ!",
-                                    },
-                                ]}
-                            >
-                                <Input name="patientProfileCode" />
-                            </Form.Item>
-                            <Form.Item
-                                label="CCCD"
-                                name="idCard"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập CCCD!",
-                                    },
-                                ]}
-                            >
-                                <Input name="idCard" />
-                            </Form.Item>
-                            <Form.Item
-                                label="Mã bảo hiểm"
-                                name="insuranceCode"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập mã bảo hiểm!",
-                                    },
-                                ]}
-                            >
-                                <Input name="insuranceCode" />
-                            </Form.Item>
-                            <Form.Item
-                                label="Họ và tên"
-                                name="fullName"
                             
-                            >
-                                <Input name="fullName" />
-                            </Form.Item>
-                            <Form.Item
-                                label="Ngày sinh"
-                                name="dateOfBirth"
-                                
-                            >
-                                <DatePicker 
-                                    style={{ width: '100%' }}  
-                                    format={"DD/MM/YYYY"}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Giới tính"
-                                name="gender"
-                            
-                            >
-                                <Radio.Group>
-                                    <Radio value="male">Nam</Radio>
-                                    <Radio value="female">Nữ</Radio>
-                                    <Radio value="other">Khác</Radio>
-                                </Radio.Group>
-                            </Form.Item>
-                            <Form.Item
-                                label="SĐT"
-                                name="phone"
-                            >
-                                <Input name="phone" />
-                            </Form.Item>
-                            <Form.Item
-                                label="Dân tộc"
-                                name="ethnicGroup"
-                            >
-                                <Select
-                                    options={ethnicGroups?.map(group => ({
-                                        label: group.name,
-                                        value: group.code
-                                    }))}
-                                    placeholder="Chọn dân tộc"
-                                    notFoundContent="Chưa có dữ liệu"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Mối quan hệ"
-                                name="relation"
-                            >
-                                <Radio.Group direction="vertical">
-                                    <Radio value="self">Bản thân</Radio>
-                                    <Radio value="parent">Cha/Mẹ</Radio>
-                                    <Radio value="spouse">Vợ/Chồng</Radio>
-                                    <Radio value="sibling">Anh/Chị/Em</Radio>
-                                    <Radio value="child">Con</Radio>
-                                    <Radio value="other">Khác</Radio>
-                                </Radio.Group>
-
-                            </Form.Item>
-                            <Title level={5}>Địa chỉ</Title>
-                            <Divider style={{margin: '16px 0'}}/>
-                            <Form.Item
-                                label="Tỉnh/Thành phố"
-                                name="province"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng chọn tỉnh/thành phố!",
-                                    }
-                                ]}
-                            >
-                                <Select
-                                    options={provinces?.map(province => ({
-                                        label: province.name,
-                                        value: province.code
-                                    }))}
-                                    showSearch
-                                    placeholder="Chọn quận/huyện"
-                                    notFoundContent="Chưa có dữ liệu"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
-                                    onChange={handleProvinceChange}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Quận/Huyện"
-                                name="district"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng chọn quận/huyện!",
-                                    }
-                                ]}
-                            >
-                                <Select
-                                    options={districts?.map(district => ({
-                                        label: district.name,
-                                        value: district.code
-                                    }))}
-                                    showSearch
-                                    placeholder="Chọn quận/huyện"
-                                    notFoundContent="Chưa có dữ liệu"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
-                                    onChange={handleDistrictChange}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Phường/Xã"
-                                name="ward"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng chọn phường/xã!",
-                                    }
-                                ]}
-                            >
-                                <Select
-                                    options={wards?.map(ward => ({
-                                        label: ward.name,
-                                        value: ward.code
-                                    }))}
-                                    showSearch
-                                    placeholder="Chọn quận/huyện"
-                                    notFoundContent="Chưa có dữ liệu"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                    }
-                                    onChange={handleWardChange}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Địa chỉ cụ thể"
-                                name="specificAddress"
-                            >
-                                <Input.TextArea name="specificAddress" rows={3} />
-                            </Form.Item>
                             <Form.Item
                                 label={null}
                                 wrapperCol={{ offset: 18, span: 6 }}
@@ -834,7 +771,7 @@ const PatientProfilePage = () => {
                                     </ButtonComponent>
                                 </Space>
                             </Form.Item>
-                        </StyledCard>  
+                        
                                      
                     </Form>
                 </LoadingComponent>

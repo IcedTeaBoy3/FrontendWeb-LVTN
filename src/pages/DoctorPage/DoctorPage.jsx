@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom';
 import { DoctorService } from '@/services/DoctorService';
 import { DegreeService } from '@/services/DegreeService';
+import AddressService from '@/services/AddressService';
 import { Space, Input, Form, Select, Radio, Typography, Divider, Dropdown, DatePicker, Upload, Tag, Popover } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
@@ -10,10 +11,11 @@ import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
+import TabsComponent from '@/components/TabsComponent/TabsComponent';
+import AddressForm from '@/components/AddressForm/AddressForm';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
-import { StyledCard } from './style';
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -36,6 +38,11 @@ const DoctorPage = () => {
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isOpenModelCreateDegree, setIsOpenModelCreateDegree] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
+    const [activeTabKey, setActiveTabKey] = useState('1');
+    const [doctor, setDoctor] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
     const [formCreateDegree] = Form.useForm();
@@ -57,6 +64,7 @@ const DoctorPage = () => {
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const searchInput = useRef(null);
+    const getNameByCode = (list, code) => list.find(i => i.code === code)?.name || '';
 
     const queryGetAllDoctors = useQuery({
         queryKey: ['getAllDoctors'],
@@ -373,7 +381,6 @@ const DoctorPage = () => {
             },
         },
     ].filter(Boolean);
-    console.log('data', data);
     const dataTable = data?.map((item, index) => {
         return {
             key: item.doctorId || item.id,
@@ -386,12 +393,72 @@ const DoctorPage = () => {
             workplace: item.doctorWorkplaces.find((work) => work.isPrimary === true),
         };
     });
+     // Gọi API lấy tỉnh
+    useEffect(() => {
+        const res = AddressService.getAllProvinces();
+        res.then((data) => { setProvinces(data); });
+    }, [doctor]);
+    const handleProvinceChange = async (provinceCode) => {
+        const res = await AddressService.getDistrictsByProvince(provinceCode);
+
+        setDistricts(res);
+        setWards([]);
+
+        // Reset trong form nếu cần
+        formUpdate.setFieldsValue({
+            district: undefined,
+            ward: undefined,
+        });
+    };
+    const handleDistrictChange = async (districtCode) => {
+
+        const res = await AddressService.getWardsByDistrict(districtCode);
+        setWards(res);
+        formUpdate.setFieldsValue({
+            ward: undefined,
+        });
+    };
+    const handleWardChange = (wardCode) => {
+        // Không cần làm gì thêm ở đây, chỉ cần cập nhật ward trong form
+        formUpdate.setFieldsValue({
+            ward: wardCode,
+        });
+
+    };
     const handleViewDoctor = (key) => {
         navigate(`/admin/doctors/${key}`);
     };
-    const handleEditDoctor = (key) => {
+    const handleEditDoctor = async (key) => {
         const doctor = data?.find(doc => doc.doctorId === key);
         if (doctor) {
+            setIsDrawerOpen(true);
+            setDoctor(doctor);
+            // ✅ Kiểm tra địa chỉ hợp lệ
+            const rawAddress = doctor.person?.address || '';
+            const parts = typeof rawAddress === 'string' ? rawAddress.split(',').map(p => p.trim()) : [];
+            // Đảm bảo luôn có 4 phần tử (địa chỉ cụ thể, phường, quận, tỉnh)
+            const [specificAddress = '', wardName = '', districtName = '', provinceName = ''] = parts;
+            // Tìm mã
+            const provinceObj = provinces?.find((p) => p.name === provinceName);
+            const provinceCode = provinceObj?.code;
+
+            let districtObj, wardObj;
+            let districtCode, wardCode;
+            let districtsData = [], wardsData = [];
+
+            if (provinceCode) {
+                districtsData = await AddressService.getDistrictsByProvince(provinceCode);
+                setDistricts(districtsData);
+                districtObj = districtsData.find((d) => d.name === districtName);
+                districtCode = districtObj?.code;
+            }
+
+            if (districtCode) {
+                wardsData = await AddressService.getWardsByDistrict(districtCode);
+                setWards(wardsData);
+                wardObj = wardsData.find((w) => w.name === wardName);
+                wardCode = wardObj?.code;
+            }
             formUpdate.setFieldsValue({
                 email: doctor.account?.email,
                 phone: doctor.account?.phone,
@@ -399,7 +466,10 @@ const DoctorPage = () => {
                 degreeId: doctor.degree?.degreeId,
                 dateOfBirth: doctor.person?.dateOfBirth ? dayjs(doctor.person?.dateOfBirth) : null,
                 gender: doctor.person?.gender,
-                address: doctor.person?.address,
+                specificAddress: specificAddress,
+                province: provinceCode || null,
+                district: districtCode || null,
+                ward: wardCode || null,
                 avatar: [
                     {
                         uid: "-1",
@@ -409,7 +479,7 @@ const DoctorPage = () => {
                     },
                 ],
             });
-            setIsDrawerOpen(true);
+            
         }
     };
     const handleShowConfirmDelete = () => {
@@ -441,6 +511,11 @@ const DoctorPage = () => {
         setRowSelected(null);
     };
     const handleOnUpdateDoctor = (values) => {
+        const hasAddressChange =
+                values.specificAddress ||
+                values.ward ||
+                values.district ||
+                values.province;
         const formData = new FormData();
         const fileObj = values.avatar?.[0]?.originFileObj;
         if (fileObj instanceof File) {
@@ -464,7 +539,9 @@ const DoctorPage = () => {
                 ? dayjs(values.dateOfBirth).format("YYYY-MM-DD")
                 : null,
             gender: values.gender,
-            address: values.address,
+            address: hasAddressChange
+                ? `${values.specificAddress || ''}, ${getNameByCode(wards, values.ward) || ''}, ${getNameByCode(districts, values.district) || ''}, ${getNameByCode(provinces, values.province) || ''}`
+                : doctor?.person?.address,
         };
 
         Object.entries(dataToAppend).forEach(([key, value]) => {
@@ -814,184 +891,203 @@ const DoctorPage = () => {
                         scrollToFirstError
                         form={formUpdate}
                     >
-                        <StyledCard
-                            title="Thông tin tài khoản"
-                            style={{ marginBottom: 16}}
-                        >
-                            <Form.Item
-                                label="Email"
-                                name="email"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập email!",
-                                    },
-                                    {
-                                        type: "email",
-                                        message: "Email không hợp lệ!",
-                                    }
-                                ]}
-                            >
-                                <Input
-                                    name="email"
-                                    placeholder="Nhập vào email"
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Số điện thoại"
-                                name="phone"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập số điện thoại!",
-                                    },
-                                    {
-                                        pattern: /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-4|6-9])[0-9]{7}$/,
-                                        message: "Số điện thoại không hợp lệ!",
-                                    }
-                                ]}
-                            >
-                                <Input
-                                    name="phone"
-                                    placeholder="Nhập vào số điện thoại"
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Mật khẩu"
-                                name="password"
-
-                            >
-                                <Input.Password
-                                    name="password"
-                                    placeholder="Nhập vào mật khẩu"
-                                    autoComplete="new-password"
-                                />
-                            </Form.Item>
-                        </StyledCard>
-                         <StyledCard
-                            title="Thông tin cá nhân"
-                        >
-                            <Form.Item
-                                label="Họ và tên"
-                                name="fullName"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng nhập họ và tên!",
-                                    }
-                                ]}
-                            >
-                                <Input
-                                    name="fullName"
-                                    placeholder="Nhập vào họ và tên"
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Bằng cấp"
-                                name="degreeId"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Vui lòng chọn bằng cấp!",
-                                    }
-                                ]}
-                            >
-                                <Select
-                                    name="degreeId"
-                                    placeholder="Chọn bằng cấp"
-                                    showSearch
-                                    optionFilterProp="children"
-                                    filterOption={(input, option) =>
-                                        (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                                    }
-                                    popupRender={menu => (
-                                        <LoadingComponent isLoading={isLoadingDegrees}>
-                                            {menu}
-                                            <Divider style={{ margin: '4px 0' }} />
-                                            <div
-                                                style={{
-                                                    padding: '8px',
-                                                    color: '#1890ff',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={() => setIsOpenModelCreateDegree(true)}
+                        <TabsComponent
+                            defaultActiveKey="1"
+                            activeKey={activeTabKey}
+                            type="card"
+                            onChange={(key) => setActiveTabKey(key)}
+                            items={[
+                                { 
+                                    key: '1', 
+                                    label: 'Thông tin tài khoản' ,
+                                    children: (
+                                        <>
+                                            <Form.Item
+                                                label="Email"
+                                                name="email"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Vui lòng nhập email!",
+                                                    },
+                                                    {
+                                                        type: "email",
+                                                        message: "Email không hợp lệ!",
+                                                    }
+                                                ]}
                                             >
-                                                <PlusOutlined /> Thêm bằng cấp mới
-                                            </div>
-                                        </LoadingComponent>
-                                    )}
-                                    options={degrees?.map(degree => ({
-                                        label: degree.title,
-                                        value: degree.degreeId
-                                    }))}
+                                                <Input
+                                                    name="email"
+                                                    placeholder="Nhập vào email"
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Số điện thoại"
+                                                name="phone"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Vui lòng nhập số điện thoại!",
+                                                    },
+                                                    {
+                                                        pattern: /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-4|6-9])[0-9]{7}$/,
+                                                        message: "Số điện thoại không hợp lệ!",
+                                                    }
+                                                ]}
+                                            >
+                                                <Input
+                                                    name="phone"
+                                                    placeholder="Nhập vào số điện thoại"
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Mật khẩu"
+                                                name="password"
 
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Ngày sinh"
-                                name="dateOfBirth"
-                                rules={[
-                                    {
-                                        validator(_, value) {
-                                            if (!value || dayjs(value).isBefore(dayjs(), 'day')) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error("Ngày sinh không hợp lệ!"));
-                                        }
-                                    }
-                                ]}
-                            >
-                                <DatePicker
-                                    name="dateOfBirth"
-                                    format="DD/MM/YYYY"
-                                    placeholder="Chọn ngày sinh"
-                                    style={{ width: '100%' }}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Giới tính"
-                                name="gender"
-                            >
-                                <Radio.Group name="gender">
-                                    <Radio value="male">Nam</Radio>
-                                    <Radio value="female">Nữ</Radio>
-                                    <Radio value="other">Khác</Radio>
-                                </Radio.Group>
-                            </Form.Item>
-                            <Form.Item
-                                label="Địa chỉ"
-                                name="address"
-                            >
-                                <Input.TextArea
-                                    name="address"
-                                    placeholder="Nhập vào địa chỉ"
-                                    autoSize={{ minRows: 2, maxRows: 4 }}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Ảnh đại diện"
-                                name="avatar"
-                                valuePropName="fileList"
-                                getValueFromEvent={(e) =>
-                                    Array.isArray(e) ? e : e && e.fileList
+                                            >
+                                                <Input.Password
+                                                    name="password"
+                                                    placeholder="Nhập vào mật khẩu"
+                                                    autoComplete="new-password"
+                                                />
+                                            </Form.Item>
+                                        </>
+                                    )
+                                },
+                                {
+                                    key: '2', 
+                                    label: 'Thông tin cá nhân' ,
+                                    children: (
+                                        <>
+                                            <Form.Item
+                                                label="Họ và tên"
+                                                name="fullName"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Vui lòng nhập họ và tên!",
+                                                    }
+                                                ]}
+                                            >
+                                                <Input
+                                                    name="fullName"
+                                                    placeholder="Nhập vào họ và tên"
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Bằng cấp"
+                                                name="degreeId"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Vui lòng chọn bằng cấp!",
+                                                    }
+                                                ]}
+                                            >
+                                                <Select
+                                                    name="degreeId"
+                                                    placeholder="Chọn bằng cấp"
+                                                    showSearch
+                                                    optionFilterProp="children"
+                                                    filterOption={(input, option) =>
+                                                        (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                                    }
+                                                    popupRender={menu => (
+                                                        <LoadingComponent isLoading={isLoadingDegrees}>
+                                                            {menu}
+                                                            <Divider style={{ margin: '4px 0' }} />
+                                                            <div
+                                                                style={{
+                                                                    padding: '8px',
+                                                                    color: '#1890ff',
+                                                                    cursor: 'pointer',
+                                                                }}
+                                                                onClick={() => setIsOpenModelCreateDegree(true)}
+                                                            >
+                                                                <PlusOutlined /> Thêm bằng cấp mới
+                                                            </div>
+                                                        </LoadingComponent>
+                                                    )}
+                                                    options={degrees?.map(degree => ({
+                                                        label: degree.title,
+                                                        value: degree.degreeId
+                                                    }))}
+
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Ngày sinh"
+                                                name="dateOfBirth"
+                                                rules={[
+                                                    {
+                                                        validator(_, value) {
+                                                            if (!value || dayjs(value).isBefore(dayjs(), 'day')) {
+                                                                return Promise.resolve();
+                                                            }
+                                                            return Promise.reject(new Error("Ngày sinh không hợp lệ!"));
+                                                        }
+                                                    }
+                                                ]}
+                                            >
+                                                <DatePicker
+                                                    name="dateOfBirth"
+                                                    format="DD/MM/YYYY"
+                                                    placeholder="Chọn ngày sinh"
+                                                    style={{ width: '100%' }}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Giới tính"
+                                                name="gender"
+                                            >
+                                                <Radio.Group name="gender">
+                                                    <Radio value="male">Nam</Radio>
+                                                    <Radio value="female">Nữ</Radio>
+                                                    <Radio value="other">Khác</Radio>
+                                                </Radio.Group>
+                                            </Form.Item>
+                                            <Title level={5}>Địa chỉ</Title>
+                                            <Divider style={{margin: '8px 0'}}/>
+                                            <AddressForm
+                                                provinces={provinces}
+                                                districts={districts}
+                                                wards={wards}
+                                                onProvinceChange={handleProvinceChange}
+                                                onDistrictChange={handleDistrictChange}
+                                                onWardChange={handleWardChange}
+                                            />
+                                            <Form.Item
+                                                label="Ảnh đại diện"
+                                                name="avatar"
+                                                valuePropName="fileList"
+                                                getValueFromEvent={(e) =>
+                                                    Array.isArray(e) ? e : e && e.fileList
+                                                }
+                                                extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
+                                            >
+                                                <Upload
+                                                    name="file"
+                                                    beforeUpload={() => false}
+                                                    maxCount={1}
+                                                    accept=".jpg, .jpeg, .png, .gif, .webp"
+                                                    onRemove={() => formUpdate.setFieldsValue({ file: [] })}
+                                                    fileList={formUpdate.getFieldValue("file") || []}
+                                                    listType="picture-card"
+                                                >
+                                                    <ButtonComponent icon={<UploadOutlined />}>
+
+                                                    </ButtonComponent>
+                                                </Upload>
+
+                                            </Form.Item>
+                                        
+                                        </>
+                                    )
                                 }
-                                extra="Chọn ảnh chuyên khoa (jpg, jpeg, png, gif, webp) tối đa 1 file"
-                            >
-                                <Upload
-                                    name="file"
-                                    beforeUpload={() => false}
-                                    maxCount={1}
-                                    accept=".jpg, .jpeg, .png, .gif, .webp"
-                                    onRemove={() => formUpdate.setFieldsValue({ file: [] })}
-                                    fileList={formUpdate.getFieldValue("file") || []}
-                                    listType="picture-card"
-                                >
-                                    <ButtonComponent icon={<UploadOutlined />}>
-
-                                    </ButtonComponent>
-                                </Upload>
-
-                            </Form.Item>
+                            ]}
+                        />
+                            
+                            
 
 
                             <Form.Item
@@ -1013,7 +1109,7 @@ const DoctorPage = () => {
                                     </ButtonComponent>
                                 </Space>
                             </Form.Item>
-                        </StyledCard>
+                        
                     </Form>
                 </LoadingComponent>
             </DrawerComponent>

@@ -60,7 +60,7 @@ const DoctorDetailPage = () => {
                 type="text"
                 icon={<ArrowLeftOutlined />}
                 onClick={handleBack}
-                style={{ fontSize: 18, padding: 0 }}
+                style={{ fontSize: 20, padding: 0 }}
             >Chi tiết bác sĩ</ButtonComponent>
             <div style={{ padding: '16px', background: '#fff', marginTop: '16px 0' }}>
 
