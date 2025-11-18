@@ -6,7 +6,7 @@ const  AddressService = {
             const response = await axios.get('http://provinces.open-api.vn/api/p/');
             return response.data;
         } catch (error) {
-            console.error(error);
+            // console.error(error);
         }
     },
     // Lây danh sách huyện theo tỉnh
@@ -15,7 +15,7 @@ const  AddressService = {
             const response = await axios.get(`http://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
             return response.data.districts;
         } catch (error) {
-            console.error(error);
+            // console.error(error);
         }
     },
     // Lấy danh sách xã theo huyện
@@ -24,7 +24,7 @@ const  AddressService = {
             const response = await axios.get(`http://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
             return response.data.wards;
         } catch (error) {
-            console.error(error);
+            // console.error(error);
         }
     },
 }

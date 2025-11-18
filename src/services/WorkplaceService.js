@@ -24,7 +24,6 @@ export const WorkplaceService = {
             const response = await axiosInstance.delete(`/workplace/delete-workplace/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Error deleting workplace:", error);
             throw error;
         }
     },

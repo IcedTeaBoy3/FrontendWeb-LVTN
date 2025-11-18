@@ -409,7 +409,7 @@ const ServicePage = () => {
         formCreate.validateFields().then((values) => {
             mutationCreateService.mutate(values);
         }).catch((info) => {
-            console.log('Validate Failed:', info);
+            // console.log('Validate Failed:', info);
         });
     };
     const handleCloseCreateService = () => {

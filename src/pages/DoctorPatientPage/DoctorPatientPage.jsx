@@ -135,7 +135,6 @@ const DoctorPatientPage = () => {
   const { data: doctorPatientHistoryData, isLoading: isLoadingDoctorPatientHistory } = queryGetDoctorPatientHistory;
   const patients = doctorPatientsData?.data || [];
   const historyRecords = doctorPatientHistoryData?.data || [];
-  // console.log("historyRecords", historyRecords);
   const dataTable = patients.map((patient, index) => ({
     key: patient.patientProfileId,
     index: index + 1,

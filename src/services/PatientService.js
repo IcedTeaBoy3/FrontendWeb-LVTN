@@ -18,7 +18,6 @@ export const PatientService = {
     },
     updatePatient: async (userId, data) => {
         try {
-            console.log('updatePatient', userId, data);
             const response = await axiosInstance.put(`/user/update-user/${userId}`, data);
             return response.data;
         } catch (error) {

@@ -347,7 +347,7 @@ const SliderPage = () => {
             mutationCreateSlider.mutate(formData);
         })
         .catch((info) => {
-            console.log("Validate Failed:", info);
+            // console.log("Validate Failed:", info);
         });
     }
     const handleUploadChange = (info) => {
@@ -419,7 +419,7 @@ const SliderPage = () => {
             mutationUpdateSlider.mutate({ sliderId: rowSelected, data: formData });
         })
         .catch((info) => {
-            console.log("Validate Failed:", info);
+            // console.log("Validate Failed:", info);
         });
     };
     const handleCancelDeleteMany = () => {

@@ -169,7 +169,7 @@ const InfoDoctor = ({ id }) => {
 
                 setEditorData(doctorData?.bio || '');
             } catch (error) {
-                console.error('Lỗi khi load địa chỉ bác sĩ:', error);
+                // console.error('Lỗi khi load địa chỉ bác sĩ:', error);
             }
         };
 

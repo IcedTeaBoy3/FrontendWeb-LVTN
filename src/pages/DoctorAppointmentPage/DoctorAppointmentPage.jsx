@@ -62,7 +62,6 @@ const DoctorAppointmentPage = () => {
     const listData = calenderData.filter((item) =>
       item.date === value.format('DD/MM/YYYY')
     );
-    console.log('listData', listData);
     setSelectedDate({ date: value, list: listData });
   };
   const handleViewDetails = () => {

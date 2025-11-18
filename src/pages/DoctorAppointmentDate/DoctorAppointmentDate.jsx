@@ -67,7 +67,6 @@ const DoctorAppointmentDate = () => {
     },
     onError: (error) => {
       Message.error("Tạo kết quả khám thất bại: " + (error?.message || "Lỗi không xác định"));
-      console.log("Error creating medical result:", error);
     },
   });
   const mutationCancelAppointment = useMutation({
@@ -332,7 +331,7 @@ const DoctorAppointmentDate = () => {
       mutationCreateMedicalResult.mutate(formData);
 
     } catch (error) {
-      console.error("Lỗi khi gửi form:", error);
+      // console.error("Lỗi khi gửi form:", error);
     }
   };
 

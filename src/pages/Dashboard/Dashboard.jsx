@@ -84,7 +84,7 @@ const Dashboard = () => {
    
     const recentAppointmentData = appointmentData.map(appointment => ({
         key: appointment.id,
-        patientName: appointment.patientProfile.person?.fullName ?? '--',
+        patientName: appointment.patientProfile?.person?.fullName ?? '--',
         doctorName: appointment.doctorService?.doctor?.person?.fullName ?? '--',
         date: dayjs(appointment.schedule?.workday).format('DD/MM/YYYY'),
         time: dayjs(appointment.slot?.startTime).format('HH:mm') + ' - ' + dayjs(appointment.slot?.endTime).format('HH:mm'),

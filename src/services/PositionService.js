@@ -11,7 +11,6 @@ export const PositionService = {
             });
             return response.data;
         } catch (error){
-            console.error("Error fetching positions:", error);
             throw error;
         }
     },
@@ -20,7 +19,7 @@ export const PositionService = {
             const response = await axiosInstance.post('/position/create-position', data);
             return response.data;
         } catch (error) {
-            console.error("Error creating position:", error);
+
             throw error;
         }
     },
@@ -29,7 +28,7 @@ export const PositionService = {
             const response = await axiosInstance.put(`/position/update-position/${id}`, data);
             return response.data;
         } catch (error) {
-            console.error("Error updating position:", error);
+
             throw error;
         }
     },
@@ -38,7 +37,7 @@ export const PositionService = {
             const response = await axiosInstance.delete(`/position/delete-position/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Error deleting position:", error);
+
             throw error;
         }
     },
@@ -47,7 +46,7 @@ export const PositionService = {
             const response = await axiosInstance.post('/position/delete-many-positions', { positionIds });
             return response.data;
         } catch (error) {
-            console.error("Error deleting positions:", error);
+  
             throw error;
         }
     }

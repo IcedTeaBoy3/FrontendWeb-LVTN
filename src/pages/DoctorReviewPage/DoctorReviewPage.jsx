@@ -186,9 +186,7 @@ const DoctorReviewPage = () => {
         mutationKey: ["toggle-doctor-review"],
         mutationFn: DoctorReviewService.toggleDoctorView,
         onSuccess: (data) => {
-            console.log("toggle review data:", data);
             if(data?.status == "success") {
-                console.log("toggle review success");
                 Message.success(data?.message || "Cập nhật trạng thái đánh giá thành công");
                 setRowSelected(null);
                 queryGetAllDoctorReviews.refetch();
@@ -377,8 +375,8 @@ const DoctorReviewPage = () => {
         mutationToggleDoctorReview.mutate(reviewId);
     };
     const handleEditReview = (reviewId) => {
-        // mở drawer sửa
-        console.log("edit review:", reviewId);
+        // // mở drawer sửa
+        // console.log("edit review:", reviewId);
     };
     const handleOkDeleteMany = () => {
         mutationDeleteManyReviews.mutate(selectedRowKeys);
