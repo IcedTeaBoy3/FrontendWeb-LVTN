@@ -178,10 +178,8 @@ const DoctorAppointmentDate = () => {
   const columns = [
     {
       title: "STT",
-      dataIndex: "appointmentNumber",
-      key: "appointmentNumber",
-      width: 80,
-      ...getColumnSearchProps("appointmentNumber"),
+      dataIndex: "stt",
+      key: "stt",
     },
     {
       title: "Mã lịch khám",
@@ -288,7 +286,7 @@ const DoctorAppointmentDate = () => {
   const dataTable = appointmentsData?.map((appointment, index) => {
     return {
       key: appointment.appointmentId,
-      appointmentNumber: appointment.appointmentNumber,
+      stt: index +1,
       appointmentCode: appointment.appointmentCode,
       patientName: appointment.patientProfile?.person?.fullName || '--',
       date: formatDate(appointment.schedule.workday),

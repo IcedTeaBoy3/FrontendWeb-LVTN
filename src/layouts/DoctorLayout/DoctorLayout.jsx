@@ -161,7 +161,7 @@ const AdminLayout = () => {
                 <LogoContainer onClick={() => navigate("/")}>
                     <StyledImage
                         width={55}
-                        src={`${import.meta.env.VITE_APP_FRONTEND_URL}/mylogo.webp`}
+                        src="mylogo.webp"
                         preview={false}
                         alt="Logo Medicare"
                     />
