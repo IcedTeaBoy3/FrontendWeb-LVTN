@@ -33,6 +33,7 @@ import DetailMedicalResultPage from "@/pages/DetailMedicalResultPage/DetailMedic
 import StatisticPage from "@/pages/StatisticPage/StatisticPage";
 import DoctorStatisticPage from "@/pages/DoctorStatisticPage/DoctorStatisticPage";
 import SliderPage from "@/pages/SliderPage/SliderPage";
+import DoctorChatPage from "@/pages/DoctorChatPage/DoctorChatPage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 import DoctorLayout from "@/layouts/DoctorLayout/DoctorLayout";
@@ -87,6 +88,7 @@ const AppRoutes = () => {
                     <Route path="personinfo" element={<PersonInfo />} />
                     <Route path="doctorinfo" element={<DoctorInfo />} />
                     <Route path="statistics" element={<DoctorStatisticPage />} />
+                    <Route path="chat" element={<DoctorChatPage />} />
                     <Route index path="dashboard" element={<DoctorDashboard />} />
                     
                 </Route>

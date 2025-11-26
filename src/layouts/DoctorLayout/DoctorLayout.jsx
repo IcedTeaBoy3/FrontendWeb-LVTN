@@ -44,6 +44,11 @@ const menuItems = [
         label: "Bệnh nhân",
     },
     {
+        key: "/doctor/chat",
+        icon: <UserOutlined />,
+        label: "Trò chuyện",
+    },
+    {
         key: "/doctor/schedules",
         icon: <MedicineBoxOutlined />,
         label: "Lịch làm việc",
@@ -92,6 +97,7 @@ const AdminLayout = () => {
         "/doctor/dashboard": "Tổng quan",
         "/doctor/doctorinfo": "Thông tin bác sĩ",
         "/doctor/patients": "Bệnh nhân",
+        "/doctor/chat": "Trò chuyện",
         "/doctor/schedules": "Lịch làm việc",
         "/doctor/appointments": "Lịch khám",
         "/doctor/appointments/date": "Ngày khám",
