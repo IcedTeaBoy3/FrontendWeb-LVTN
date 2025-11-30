@@ -25,9 +25,9 @@ export const AppointmentService = {
             throw error.response.data;
         }
     },
-    cancelAppointment: async (appointmentId) => {
+    cancelAppointment: async (appointmentId, cancelReason) => {
         try {
-            const response = await axiosInstance.put(`/appointment/cancel-appointment/${appointmentId}`);
+            const response = await axiosInstance.put(`/appointment/cancel-appointment/${appointmentId}`, { cancelReason });
             return response.data;
         } catch (error) {
             throw error.response.data;

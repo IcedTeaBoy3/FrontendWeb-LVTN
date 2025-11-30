@@ -5,6 +5,7 @@ import {convertStatusPayment, getStatusPaymentColor} from '@/utils/status_paymen
 import { convertPaymentType } from '@/utils/paymentType_utils';
 import { convertMethodPayment } from '@/utils/method_utils';
 import { Descriptions, Image, Space, Tag,Button, Typography } from 'antd';
+import { convertRole } from '@/utils/role_utils';
 import { useState } from 'react';
 import dayjs from 'dayjs';
 const { Text,Title } = Typography;
@@ -22,6 +23,9 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
         payment,
         medicalResult,
         createdAt,
+        cancelledBy,
+        cancelReason,
+        cancelledAt,
     } = appointmentDetail || {};
     const [isOpenModalDetailPatient, setIsOpenModalDetailPatient] = useState(false);
     return (
@@ -60,10 +64,7 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                         {slot ? `${dayjs(slot.startTime).format("HH:mm")} - ${dayjs(slot.endTime).format("HH:mm")} (${slot?.shift?.name})` : "—"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Triệu chứng" span={2}>
-                        <Text>{symptoms || "Không có"}</Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Ngày tạo">
-                    {dayjs(createdAt).format("DD/MM/YYYY HH:mm")}
+                        {symptoms || <Text type="secondary">Không có</Text>}
                     </Descriptions.Item>
 
                     {symptomsImage && (
@@ -77,6 +78,21 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                         />
                         </Descriptions.Item>
                     )}
+                    <Descriptions.Item label="Ngày tạo">
+                    {createdAt ? dayjs(createdAt).format("DD/MM/YYYY HH:mm") : "—"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Người huỷ lịch khám">
+                        {cancelledBy ? convertRole(cancelledBy) : <Text type="secondary">Chưa huỷ</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Lý do huỷ lịch khám">
+                        {cancelReason || <Text type="secondary">Không có</Text>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Ngày huỷ lịch khám">
+                        {cancelledAt
+                            ? dayjs(cancelledAt).format("DD/MM/YYYY HH:mm")
+                            : <Text type="secondary">Chưa huỷ</Text>}
+                    </Descriptions.Item>
+
                 </Descriptions>
             
                 <Title level={5} style={{margin:'12px 0'}}>Thông tin bệnh nhân</Title>

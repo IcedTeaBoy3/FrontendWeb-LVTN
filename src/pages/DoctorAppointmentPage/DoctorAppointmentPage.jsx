@@ -81,6 +81,7 @@ const DoctorAppointmentPage = () => {
           onOk={handleViewDetails}
           okText="Xem chi tiết"
           cancelText="Đóng"
+          width={700}
         >
           {selectedDate?.list?.length ? (
             <AppointmentList

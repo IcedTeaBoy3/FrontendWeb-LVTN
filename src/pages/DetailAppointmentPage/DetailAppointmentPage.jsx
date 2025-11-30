@@ -18,6 +18,7 @@ import {convertStatusPayment,getStatusPaymentColor} from '@/utils/status_payment
 import { convertPaymentType } from '@/utils/paymentType_utils';
 import { convertGender } from '@/utils/gender_utils';
 import { convertMethodPayment } from '@/utils/method_utils';
+import { convertRole } from '@/utils/role_utils';
 import {
     ArrowLeftOutlined,
     CheckOutlined,
@@ -256,6 +257,18 @@ const DetailAppointmentPage = () => {
                                     ? dayjs(appointmentData.createdAt).format("DD/MM/YYYY HH:mm")
                                     : "Chưa cập nhật"}
                             </Descriptions.Item>
+                            <Descriptions.Item label="Người huỷ lịch khám">
+                                {appointmentData.cancelledBy ? convertRole(appointmentData.cancelledBy) : <Text type="secondary">Chưa huỷ</Text>}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Lý do huỷ lịch khám">
+                                {appointmentData.cancelReason || <Text type="secondary">Không có</Text>}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Ngày huỷ lịch khám">
+                                {appointmentData.cancelledAt
+                                    ? dayjs(appointmentData.cancelledAt).format("DD/MM/YYYY HH:mm")
+                                    : <Text type="secondary">Chưa huỷ</Text>}
+                            </Descriptions.Item>
+
                         </Descriptions>
                         <Title level={5} style={{ margin: "16px 0 8px 0" }}>
                             Thông tin bệnh nhân

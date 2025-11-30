@@ -33,6 +33,7 @@ const DoctorAppointmentDate = () => {
   const [rowSelected, setRowSelected] = useState(null);
   const [appointmentDetail, setAppointmentDetail] = useState(null);
   const [isOpenModalCancel, setIsOpenModalCancel] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -71,7 +72,7 @@ const DoctorAppointmentDate = () => {
   });
   const mutationCancelAppointment = useMutation({
     mutationKey: ['cancel-appointment'],
-    mutationFn: AppointmentService.cancelAppointment,
+    mutationFn: ({id, cancelReason}) => AppointmentService.cancelAppointment(id, cancelReason),
     onSuccess: (data) => {
       Message.success(data.message || "Huỷ lịch khám thành công");
       setIsOpenModalCancel(false);
@@ -79,7 +80,7 @@ const DoctorAppointmentDate = () => {
       queryGetAllDoctorAppointments.refetch();
     },
     onError: (error) => {
-      Message.error(error?.response?.data?.message || "Huỷ lịch khám thất bại: Lỗi không xác định");
+      Message.error("Huỷ lịch khám thất bại: " + (error?.message || "Lỗi không xác định"));
     }
   });
   const getColumnSearchProps = (dataIndex, type = "text") => ({
@@ -333,8 +334,12 @@ const DoctorAppointmentDate = () => {
     }
   };
 
-  const handleOkCancelConfirm = () => {
-    mutationCancelAppointment.mutate(rowSelected);
+  const handleOkCancelConfirm = (cancelReason) => {
+    mutationCancelAppointment.mutate({
+      id: rowSelected,
+      cancelReason: cancelReason,
+    });
+    setCancelReason(""); // reset lại sau khi gửi
   };
   const handleCancelConfirm = () => {
     setIsOpenModalCancel(false);
@@ -370,6 +375,7 @@ const DoctorAppointmentDate = () => {
         onOk={handleCreateMedicalResult}
         okText="Xác nhận"
         cancelText="Hủy"
+        width={750}
       >
         <Form
           name="formCreateMedicalResult"
@@ -466,28 +472,46 @@ const DoctorAppointmentDate = () => {
           </span>
         }
         open={isOpenModalCancel}
-        onOk={handleOkCancelConfirm}
+        onOk={() => handleOkCancelConfirm(cancelReason)}
         onCancel={handleCancelConfirm}
         okText="Xác nhận"
         cancelText="Hủy"
-        okButtonProps={{ 
-          type: "primary", 
-          danger: true, 
+        okButtonProps={{
+          type: "primary",
+          danger: true,
+          disabled: cancelReason.trim().length < 5, // yêu cầu tối thiểu 5 ký tự
         }}
         centered
         style={{ borderRadius: 12 }}
-    >
-      <LoadingComponent isLoading={mutationCancelAppointment.isPending} >
-        <div style={{ textAlign: "center", padding: "12px 0" }}>
-          <Text style={{ fontSize: 16 }}>
-            Bạn có chắc chắn muốn{" "}
-            <Text strong type="danger">
-              huỷ
-            </Text>{" "}
-            lịch khám này không ( bệnh nhân không đến khám )?
-          </Text>
-        </div>
-      </LoadingComponent>
+      >
+        <LoadingComponent isLoading={mutationCancelAppointment.isPending}>
+          <div style={{ padding: "8px 0" }}>
+            <Text style={{ fontSize: 16 }}>
+              Bạn có chắc chắn muốn{" "}
+              <Text strong type="danger">
+                huỷ
+              </Text>{" "}
+              lịch khám này không?
+            </Text>
+          </div>
+
+          {/* ======================== */}
+          {/*  Ô nhập lý do hủy lịch   */}
+          {/* ======================== */}
+          <div style={{ marginTop: 16 }}>
+            <Text strong>Lý do huỷ lịch</Text>
+
+            <Input.TextArea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Nhập lý do huỷ lịch..."
+              autoSize={{ minRows: 3 }}
+              style={{ marginTop: 6, borderRadius: 8 }}
+              maxLength={300}
+              showCount
+            />
+          </div>
+        </LoadingComponent>
       </ModalComponent>
       <DrawerDetailAppointment
         visible={isDrawerOpen}
