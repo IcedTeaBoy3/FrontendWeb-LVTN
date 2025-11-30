@@ -167,7 +167,7 @@ const AdminLayout = () => {
                 <LogoContainer onClick={() => navigate("/")}>
                     <StyledImage
                         width={55}
-                        src="mylogo.webp"
+                        src="/mylogo.webp"
                         preview={false}
                         alt="Logo Medicare"
                     />
