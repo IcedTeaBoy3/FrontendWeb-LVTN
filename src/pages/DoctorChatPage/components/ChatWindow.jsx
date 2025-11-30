@@ -1,5 +1,6 @@
 import { Avatar, Input, Button } from "antd";
 import { useEffect, useRef, useState } from "react";
+import { UserOutlined } from "@ant-design/icons";
 
 const ChatWindow = ({ selectedConversation, messages, onSend }) => {
     const [text, setText] = useState("");
@@ -18,7 +19,7 @@ const ChatWindow = ({ selectedConversation, messages, onSend }) => {
       
             {/* Header */}
             <div style={{ padding: 16, borderBottom: "1px solid #e8e8e8", display: "flex", alignItems: "center" }}>
-                <Avatar src={selectedConversation.patient.avatar} />
+                <Avatar size={48} icon={<UserOutlined />} src={`${import.meta.env.VITE_BACKEND_URL}${selectedConversation.patient?.person?.avatar}`} />
                 <span style={{ marginLeft: 10, fontSize: 16, fontWeight: 500 }}>
                 {selectedConversation.patient?.person?.fullName}
                 </span>

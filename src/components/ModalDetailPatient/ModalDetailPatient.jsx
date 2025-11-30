@@ -12,9 +12,9 @@ const ModalDetailPatient = ({patientProfile, isOpenModalDetailPatient, handleClo
       footer={null}
     >
       <Descriptions bordered column={1} size="middle">
-        <Descriptions.Item label="Mã bệnh nhân">{patientProfile?.patientProfileCode}</Descriptions.Item>
-        <Descriptions.Item label="Số CMND/CCCD">{patientProfile?.idCard}</Descriptions.Item>
-        <Descriptions.Item label="Mã bảo hiểm y tế">{patientProfile?.insuranceCode}</Descriptions.Item>
+        <Descriptions.Item label="Mã bệnh nhân">{patientProfile?.patientProfileCode ?? '--'}</Descriptions.Item>
+        <Descriptions.Item label="Số CMND/CCCD">{patientProfile?.idCard ?? '--'}</Descriptions.Item>
+        <Descriptions.Item label="Mã bảo hiểm y tế">{patientProfile?.insuranceCode ?? '--'}</Descriptions.Item>
         <Descriptions.Item label="Họ và tên">{patientProfile?.person?.fullName ?? '--'}</Descriptions.Item>
         <Descriptions.Item label="Ngày sinh">{dayjs(patientProfile?.person?.dateOfBirth).format('DD/MM/YYYY') ?? '--'}</Descriptions.Item>
         <Descriptions.Item label="Giới tính">{convertGender(patientProfile?.person?.gender) ?? '--'}</Descriptions.Item>

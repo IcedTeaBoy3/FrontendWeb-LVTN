@@ -58,6 +58,9 @@ const DoctorChatPage = () => {
                     socket.emit("join_conversation", {
                         conversationId: conv.conversationId,
                     });
+                    // Đánh dấu tin nhắn đã đọc
+                    // socket.emit("mark_as_read", { conversationId: conv.conversationId });
+                    
                 }}
             />
 

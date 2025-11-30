@@ -136,11 +136,11 @@ const DoctorPatientPage = () => {
   const patients = doctorPatientsData?.data || [];
   const historyRecords = doctorPatientHistoryData?.data || [];
   const dataTable = patients.map((patient, index) => ({
-    key: patient.patientProfileId,
+    key: patient._id,
     index: index + 1,
-    idCard: patient?.idCard,
-    insuranceCode : patient?.insuranceCode,
-    patientProfileCode: patient?.patientProfileCode,
+    idCard: patient?.idCard || "Chưa cập nhật",
+    insuranceCode : patient?.insuranceCode || "Chưa cập nhật",
+    patientProfileCode: patient?.patientProfileCode || "Chưa cập nhật",
     fullName: patient?.person?.fullName,
     dateOfBirth: dayjs(patient?.person?.dateOfBirth).format('DD/MM/YYYY'),
     gender: convertGender(patient?.person?.gender),
@@ -171,6 +171,8 @@ const DoctorPatientPage = () => {
       dataIndex: 'insuranceCode',
       key: 'insuranceCode',
       ...getColumnSearchProps('insuranceCode'),
+      
+
     },
     {
       title: 'Họ và tên',
