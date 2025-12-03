@@ -13,8 +13,11 @@ import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import * as Message from "@/components/Message/Message";
 import Highlighter from 'react-highlight-words';
-import { CalendarCell, ShiftTag, ShiftTime, EmptyText } from './style';
+import { CalendarCell, ShiftTag, ShiftTime, EmptyText, StyledCalendar } from './style';
+import { ThemeProvider } from "styled-components";
+import { theme } from '@/styles/theme';
 import { getColorForShiftName } from '@/utils/shiftName_utils';
+
 import dayjs from "dayjs";
 dayjs.locale("vi");
 const { Text, Title } = Typography;
@@ -397,11 +400,13 @@ const DoctorSchedulePage = () => {
             label: 'Lịch làm việc', 
             children: (    
               <LoadingComponent isLoading={isLoadingSchedules} >
-                <Calendar 
-                  cellRender={dateCellRender} 
-                  onSelect={onSelect} 
-                  onPanelChange={onPanelChange}
-                />
+                <ThemeProvider theme={theme}>
+                  <StyledCalendar 
+                    cellRender={dateCellRender} 
+                    onSelect={onSelect} 
+                    onPanelChange={onPanelChange}
+                  />
+                </ThemeProvider>
                 <ModalComponent
                   title={`Lịch làm việc ngày ${selectedDate ? selectedDate.format("DD/MM/YYYY") : ""}`}
                   open={isModalOpen}

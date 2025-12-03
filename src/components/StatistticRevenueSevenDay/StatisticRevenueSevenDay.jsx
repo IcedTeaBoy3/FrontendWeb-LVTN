@@ -19,14 +19,19 @@ const StatisticRevenueSevenDay = ({data, isLoading}) => {
                         <CartesianGrid strokeDasharray="4 4" stroke="#f0f0f0"/>
                         <XAxis 
                             dataKey="date" 
-                            label={{ value: 'Ngày', position: 'insideBottomRight', offset: 0, style: styleLabel }} 
+                            label={{ 
+                                value: 'Ngày', 
+                                position: 'insideBottomRight',
+                                offset: 0,
+                                style: styleLabel
+                            }} 
                         />
                         <YAxis 
                             label={{ 
                                 value: 'Doanh thu (VND)', 
                                 angle: -90, 
-                                position: 'insideLeft',
-                                
+                                offset: -15,
+                                position: 'insideLeft',         
                                 style: styleLabel
                             }} 
                         />

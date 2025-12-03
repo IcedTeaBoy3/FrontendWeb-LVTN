@@ -13,9 +13,9 @@ const DoctorOverview = ({ overview, isLoading }) => {
                         <UserOutlined style={{ color: 'white', fontSize: '22px' }} />
                         </div>
                         <Statistic
-                        title="Tổng số bệnh nhân"
-                        value={overview.totalPatients || 0}
-                        valueStyle={{ color: "#1890ff", fontWeight: 700 }}
+                            title="Tổng số bệnh nhân"
+                            value={overview.totalPatients || 0}
+                            valueStyle={{ color: "#1890ff", fontWeight: 700 }}
                         />
                     </StyledCard>
                 </Col>

@@ -1,6 +1,7 @@
 
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import { Statistic } from "antd";
+import { StyledCard } from "./style";
 import {
     CalendarOutlined,
     DollarOutlined,
@@ -22,7 +23,7 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
     <LoadingComponent isLoading={isLoadingOverview} >
         <Row gutter={[16, 16]}>
             <Col span={6}>
-                <Card>
+                <StyledCard>
                     <div className="icon-wrapper" style={{ background: colorMap.users }}>
                         <UserOutlined />
                     </div>
@@ -31,11 +32,11 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                         value={overviewData.totalPatients || 0}
                         valueStyle={{ color: colorMap.users, fontWeight: 700 }}
                     />
-                </Card>
+                </StyledCard>
             </Col>
 
             <Col span={6}>
-                <Card>
+                <StyledCard>
                     <div className="icon-wrapper" style={{ background: colorMap.doctors }}>
                         <UserSwitchOutlined />
                     </div>
@@ -44,11 +45,11 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                         value={overviewData.totalDoctors || 0}
                         valueStyle={{ color: colorMap.doctors, fontWeight: 700 }}
                     />
-                </Card>
+                </StyledCard>
             </Col>
 
             <Col span={6}>
-                <Card>
+                <StyledCard>
                     <div className="icon-wrapper" style={{ background: colorMap.appointments }}>
                         <CalendarOutlined />
                     </div>
@@ -57,11 +58,11 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                         value={overviewData.totalAppointments || 0}
                         valueStyle={{ color: colorMap.appointments, fontWeight: 700 }}
                     />
-                </Card>
+                </StyledCard>
             </Col>
 
             <Col span={6}>
-                <Card>
+                <StyledCard>
                     <div className="icon-wrapper" style={{ background: colorMap.revenue }}>
                         <DollarOutlined />
                     </div>
@@ -74,7 +75,7 @@ const Overview = ({ isLoadingOverview, overviewData }) => {
                             value.toLocaleString("vi-VN", { minimumFractionDigits: 0 })
                         }
                     />
-                </Card>
+                </StyledCard>
             </Col>
         </Row>
     </LoadingComponent>

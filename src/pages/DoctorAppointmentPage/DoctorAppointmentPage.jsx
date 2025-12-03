@@ -8,6 +8,9 @@ import { convertStatusAppointment, getStatusColor } from '@/utils/status_appoint
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent';
 import ModalComponent from '@/components/ModalComponent/ModalComponent';
 import { CalendarCell, CalendarItem, CalendarText, CalendarTime, CalendarPatient, AppointmentList, AppointmentItem,EmptyText } from './style';
+import { StyledCalendar } from '../DoctorSchedulePage/style';
+import { ThemeProvider } from "styled-components";
+import { theme } from '@/styles/theme';
 import viVN from 'antd/locale/vi_VN';
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
@@ -73,7 +76,9 @@ const DoctorAppointmentPage = () => {
     <ConfigProvider locale={viVN}>
       <Title level={4}>Quản lý lịch khám</Title>
       <LoadingComponent isLoading={isLoadingDoctorAppointments} >
-        <Calendar cellRender={dateCellRender} onSelect={onSelect} />
+        <ThemeProvider theme={theme}>
+          <StyledCalendar cellRender={dateCellRender} onSelect={onSelect} />
+        </ThemeProvider>
         <ModalComponent
           title={`Lịch khám ngày ${selectedDate ? selectedDate.date.format("DD/MM/YYYY") : ""}`}
           open={isModalOpen}

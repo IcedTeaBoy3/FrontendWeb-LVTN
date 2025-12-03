@@ -5,6 +5,8 @@ export const convertStatusPayment = (status) => {
             return "Đã thanh toán";
         case "unpaid":
             return "Chưa thanh toán";
+        case "expired":
+            return "Hết hạn";
         case "refunded":
             return "Đã hoàn tiền";
         default:
@@ -17,6 +19,8 @@ export const getStatusPaymentColor = (status) => {
             return "green";
         case "unpaid":
             return "red";
+        case "expired":
+            return "gray";
         case "refunded":
             return "orange";
         default:

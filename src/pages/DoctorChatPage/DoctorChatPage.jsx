@@ -1,5 +1,6 @@
 import ChatSidebar from "./components/ChatSidebar";
 import ChatWindow from "./components/ChatWindow";
+import { notification } from "antd";
 import { useState, useEffect } from "react";
 import { socket,connectSocket } from "@/services/SocketService";
 import { ChatDoctorService } from "@/services/ChatDoctorService";
@@ -36,11 +37,18 @@ const DoctorChatPage = () => {
         connectSocket(user?.role, user?.accountId);
         if (!selectedConversation) return;
         loadMessages(selectedConversation.conversationId);
-
         socket.on("new_message", (message) => {
+            if(message.senderModel === 'PatientProfile'){
+                notification.info({
+                    message: "Tin nhắn mới",
+                    description: `Bạn có tin nhắn mới từ bệnh nhân ${message.sender.person.fullName}`,
+                    placement: "topRight",
+                });
+            }
             if (message.conversation !== selectedConversation.conversationId) return;
             setMessages((prev) => [...prev, message]);
         });
+        
 
         return () => {
             socket.off("new_message");
