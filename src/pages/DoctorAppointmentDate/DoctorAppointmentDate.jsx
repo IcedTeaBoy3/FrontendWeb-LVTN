@@ -1,12 +1,12 @@
 
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { Space, Input, Form, Typography, Dropdown, Upload, Tag, Button, DatePicker } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import * as Message from "@/components/Message/Message";
-import { SearchOutlined, EyeOutlined, MoreOutlined, ExclamationCircleOutlined ,UploadOutlined, CheckCircleFilled  } from "@ant-design/icons";
+import { SearchOutlined, EyeOutlined, MoreOutlined, ExclamationCircleOutlined ,UploadOutlined, CheckCircleFilled, VideoCameraOutlined  } from "@ant-design/icons";
 import { useState, useRef} from "react";
 import { useSelector } from "react-redux";
 import { useQuery,useMutation } from '@tanstack/react-query';
@@ -40,6 +40,7 @@ const DoctorAppointmentDate = () => {
     total: 0,
   });
   const location = useLocation();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const doctorId = user?.doctor?.doctorId;
   const { state } = location;
@@ -111,22 +112,22 @@ const DoctorAppointmentDate = () => {
         )}
 
         <Space>
-            <ButtonComponent
+          <ButtonComponent
             type="primary"
             onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
-            >
+          >
             Tìm
-            </ButtonComponent>
-            <Button
+          </ButtonComponent>
+          <Button
             onClick={() => handleReset(clearFilters, confirm)}
             size="small"
             style={{ width: 90 }}
-            >
+          >
             Xóa
-            </Button>
+          </Button>
         </Space>
         </div>
     ),
@@ -247,12 +248,17 @@ const DoctorAppointmentDate = () => {
           
         ];
         if(record.status == "confirmed"){
+
           itemActions.push({ type: "divider" });
           itemActions.push({ key: "complete", label: "Hoàn thành", icon: <CheckCircleFilled style={{ fontSize: 16,color:'green' }} /> });
           itemActions.push({ type: "divider" });
           itemActions.push({ key: "cancel", label: "Huỷ lịch khám", icon: <ExclamationCircleOutlined style={{ fontSize: 16,color:'red' }} /> });
-
+          itemActions.push({ type: "divider" });
+          if(record.type == "telehealth"){
+            itemActions.push({ key: "startCall", label: "Bắt đầu cuộc gọi", icon: <VideoCameraOutlined style={{ fontSize: 16 }} /> });
+          }
         }
+        
 
         const onMenuClick = ({ key, domEvent }) => {
           setRowSelected(record.key);
@@ -260,6 +266,9 @@ const DoctorAppointmentDate = () => {
           if (key === "detail") return handleViewAppointment(record.key);
           if (key === "complete") return handleCompleteAppointment(record.key);
           if (key === "cancel") return setIsOpenModalCancel(true);
+          if (key === "startCall") {
+            navigate('/doctor/consultant', { state: { appointmentCode: record.appointmentCode } });
+          }
         };
 
         return (
@@ -294,6 +303,7 @@ const DoctorAppointmentDate = () => {
       time: formatTime(appointment?.slot),
       paymentStatus: appointment.payment?.status,
       status: appointment.status,
+      type: appointment.type ?? 'in-person',
     };
   });
   const handleViewAppointment = (appointmentId) => {
@@ -512,6 +522,15 @@ const DoctorAppointmentDate = () => {
             />
           </div>
         </LoadingComponent>
+      </ModalComponent>
+      <ModalComponent
+        title="Đang xử lý..."
+        open={mutationCreateMedicalResult.isPending}
+        footer={null}
+        closable={false}
+        centered
+      >
+        <LoadingComponent isLoading={mutationCreateMedicalResult.isPending} />
       </ModalComponent>
       <DrawerDetailAppointment
         visible={isDrawerOpen}

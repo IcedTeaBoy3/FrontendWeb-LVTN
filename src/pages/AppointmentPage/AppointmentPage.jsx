@@ -185,6 +185,7 @@ const AppointmentPage = () => {
             }
         },
         onError: (error) => {
+           
             Message.error(error?.response?.data?.message || "Xác nhận lịch khám thất bại");
         }
     });
