@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AppointmentService } from '@/services/AppointmentService';
 import { PaymentService } from '@/services/PaymentService';
-import { Space, Input, Button, Typography, Dropdown, Tag, DatePicker } from "antd";
+import { Space, Input, Button, Typography, Dropdown, Tag, DatePicker,Select } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -33,6 +33,7 @@ const AppointmentPage = () => {
     const [isModalConfirmOpen, setIsModalConfirmOpen] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [isModalConfirmPaymentOpen, setIsModalConfirmPaymentOpen] = useState(false);
+    const [typeFilter, setTypeFilter] = useState(null);
     const navigate = useNavigate();
 
     const rowSelection = {
@@ -146,11 +147,11 @@ const AppointmentPage = () => {
         confirm(); // refresh bảng sau khi clear
     };
     const queryGetAllAppointments = useQuery({
-        queryKey: ['getAllAppointments'],
+        queryKey: ['getAllAppointments', typeFilter],
         queryFn: () => AppointmentService.getAllAppointments({ 
             page: 1, 
             limit: 1000,
-          
+            type: typeFilter
         }),
         retry: 1,
     });
@@ -241,6 +242,7 @@ const AppointmentPage = () => {
         paymentStatus: item.payment?.status,
         paymentId: item.payment?.paymentId,
         status: item.status,
+        type: item.type,
     }));
     const columns = [
         {
@@ -430,6 +432,19 @@ const AppointmentPage = () => {
                 setSelectedRowKeys={handleSelectedAll}
                 menuProps={menuProps}
                 handleSelectedAll={handleSelectedAll}
+            />
+            <Select
+                placeholder="Lọc theo loại lịch khám"
+                allowClear
+                style={{ width: 220, marginBottom: 12 }}
+                onChange={(value) => {
+                   setTypeFilter(value);
+                }}
+                options={[
+                    { label: "Tất cả", value: null },
+                    { label: "Khám trực tiếp", value: "in-person" },
+                    { label: "Tư vấn", value: "telehealth" }      
+                ]}
             />
             
             <TableStyle

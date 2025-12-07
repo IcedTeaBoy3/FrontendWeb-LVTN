@@ -81,17 +81,21 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                     <Descriptions.Item label="Ngày tạo">
                     {createdAt ? dayjs(createdAt).format("DD/MM/YYYY HH:mm") : "—"}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Người huỷ lịch khám">
-                        {cancelledBy ? convertRole(cancelledBy) : <Text type="secondary">Chưa huỷ</Text>}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Lý do huỷ lịch khám">
-                        {cancelReason || <Text type="secondary">Không có</Text>}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Ngày huỷ lịch khám">
-                        {cancelledAt
-                            ? dayjs(cancelledAt).format("DD/MM/YYYY HH:mm")
-                            : <Text type="secondary">Chưa huỷ</Text>}
-                    </Descriptions.Item>
+                    { status === "cancelled" && (
+                        <>
+                            <Descriptions.Item label="Người huỷ lịch khám">
+                                {cancelledBy ? convertRole(cancelledBy) : <Text type="secondary">Chưa huỷ</Text>}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Lý do huỷ lịch khám">
+                                {cancelReason || <Text type="secondary">Không có</Text>}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Ngày huỷ lịch khám">
+                                {cancelledAt
+                                    ? dayjs(cancelledAt).format("DD/MM/YYYY HH:mm")
+                                    : <Text type="secondary">Chưa huỷ</Text>}
+                            </Descriptions.Item>
+                        </>
+                    )}
 
                 </Descriptions>
             

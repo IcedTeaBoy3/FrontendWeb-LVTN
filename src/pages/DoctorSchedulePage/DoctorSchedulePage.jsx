@@ -319,7 +319,8 @@ const DoctorSchedulePage = () => {
       </CalendarCell>
     );
   };
-  const onSelect = (value) => {
+  const onSelect = (value, info) => {
+    if (info.source !== "date") return;
     const cellData = calendarData.find(
       (item) => item.date === value.format("DD/MM/YYYY")
     );

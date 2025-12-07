@@ -1,4 +1,4 @@
-import { ConfigProvider, Typography, Tag, Calendar, Badge, List  } from "antd";
+import {Typography, Tag, Badge, List  } from "antd";
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
@@ -11,10 +11,8 @@ import { CalendarCell, CalendarItem, CalendarText, CalendarTime, CalendarPatient
 import { StyledCalendar } from '../DoctorSchedulePage/style';
 import { ThemeProvider } from "styled-components";
 import { theme } from '@/styles/theme';
-import viVN from 'antd/locale/vi_VN';
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
-// Thiết lập ngôn ngữ cho dayjs
 dayjs.locale("vi");
 
 const { Text, Title } = Typography;
@@ -60,24 +58,30 @@ const DoctorAppointmentPage = () => {
     );
   };
    // ✅ Khi click vào 1 ngày trong calendar
-  const onSelect = (value) => {
+  const onSelect = (value, info) => {
+    if (info.source !== "date") return; 
+
     setIsModalOpen(true);
     const listData = calenderData.filter((item) =>
       item.date === value.format('DD/MM/YYYY')
     );
     setSelectedDate({ date: value, list: listData });
   };
+
   const handleViewDetails = () => {
     if(selectedDate.list.length == 0 ) return;
     navigate('/doctor/appointments/date', { state: selectedDate });
     
   }
   return (
-    <ConfigProvider locale={viVN}>
+    <>
       <Title level={4}>Quản lý lịch khám</Title>
       <LoadingComponent isLoading={isLoadingDoctorAppointments} >
         <ThemeProvider theme={theme}>
-          <StyledCalendar cellRender={dateCellRender} onSelect={onSelect} />
+          <StyledCalendar 
+            cellRender={dateCellRender} 
+            onSelect={onSelect} 
+          />
         </ThemeProvider>
         <ModalComponent
           title={`Lịch khám ngày ${selectedDate ? selectedDate.date.format("DD/MM/YYYY") : ""}`}
@@ -117,7 +121,7 @@ const DoctorAppointmentPage = () => {
           )}
         </ModalComponent>
       </LoadingComponent>
-    </ConfigProvider>
+    </>
   )
 }
 

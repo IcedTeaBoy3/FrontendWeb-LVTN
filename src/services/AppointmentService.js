@@ -1,9 +1,9 @@
 import axiosInstance from '@/config/axiosInstance';
 
 export const AppointmentService = {
-    getAllAppointments: async ({page, limit, month, year}) => {
+    getAllAppointments: async ({page, limit, type}) => {
         try {
-            const response = await axiosInstance.get('/appointment/get-all-appointments', { params: { page, limit, month, year } });
+            const response = await axiosInstance.get('/appointment/get-all-appointments', { params: { page, limit, type } });
             return response.data;
         } catch (error) {
             throw error.response.data;
@@ -50,9 +50,9 @@ export const AppointmentService = {
 
         }
     },
-    getDoctorAppointments: async (doctorId,{page = 1, limit = 100, date}) => {
+    getDoctorAppointments: async (doctorId,{page = 1, limit = 100, date, type}) => {
         try {
-            const response = await axiosInstance.get(`/appointment/get-doctor-appointments/${doctorId}`, { params: { page, limit, date } });
+            const response = await axiosInstance.get(`/appointment/get-doctor-appointments/${doctorId}`, { params: { page, limit, date, type } });
             return response.data;
         } catch (error) {
             throw error.response.data;

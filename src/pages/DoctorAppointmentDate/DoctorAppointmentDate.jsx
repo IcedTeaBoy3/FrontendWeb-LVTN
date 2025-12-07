@@ -1,6 +1,6 @@
 
 import { useLocation, useNavigate } from "react-router-dom"
-import { Space, Input, Form, Typography, Dropdown, Upload, Tag, Button, DatePicker } from "antd";
+import { Space, Input, Form, Typography, Dropdown, Upload, Tag, Button, DatePicker, Select } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -34,6 +34,7 @@ const DoctorAppointmentDate = () => {
   const [appointmentDetail, setAppointmentDetail] = useState(null);
   const [isOpenModalCancel, setIsOpenModalCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [typeFilter, setTypeFilter] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -53,8 +54,11 @@ const DoctorAppointmentDate = () => {
   };
 
   const queryGetAllDoctorAppointments = useQuery({
-    queryKey: ['doctor-appointments', state?.list[0]?.date],
-    queryFn: () => AppointmentService.getDoctorAppointments(doctorId, { date: dayjs(state?.list[0]?.date,"DD/MM/YYYY").format("YYYY-MM-DD") }),
+    queryKey: ['doctor-appointments', state?.list[0]?.date, typeFilter],
+    queryFn: () => AppointmentService.getDoctorAppointments(
+      doctorId, 
+      { date: dayjs(state?.list[0]?.date,"DD/MM/YYYY").format("YYYY-MM-DD"), type: typeFilter }
+    ),
     keepPreviousData: true,
   });
   const mutationCreateMedicalResult = useMutation({
@@ -361,6 +365,20 @@ const DoctorAppointmentDate = () => {
         Lịch khám ngày{" "}
         {state?.list[0] ? state?.list[0]?.date : "Chưa chọn ngày"}
       </Title>
+      <Select
+        placeholder="Lọc theo loại lịch khám"
+        allowClear
+        style={{ width: 220, marginBottom: 12 }}
+        onChange={(value) => {
+          setTypeFilter(value);
+        }}
+        options={[
+          { label: "Tất cả", value: null },
+          { label: "Khám trực tiếp", value: "in-person" },
+          { label: "Tư vấn", value: "telehealth" }      
+        ]}
+      />
+
     
       <TableStyle
         rowSelection={rowSelection}

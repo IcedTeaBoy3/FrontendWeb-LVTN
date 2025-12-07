@@ -19,6 +19,7 @@ import { convertPaymentType } from '@/utils/paymentType_utils';
 import { convertGender } from '@/utils/gender_utils';
 import { convertMethodPayment } from '@/utils/method_utils';
 import { convertRole } from '@/utils/role_utils';
+import { convertAppointmentType } from '@/utils/type_appointment_utils';
 import {
     ArrowLeftOutlined,
     CheckOutlined,
@@ -153,7 +154,7 @@ const DetailAppointmentPage = () => {
                 cancelText="Hủy"
                 okButtonProps={{ 
                     type: "primary", 
-                    danger: true, // 🔥 nhấn mạnh hành động có ảnh hưởng
+                    danger: true, 
                 }}
                 centered
                 style={{ borderRadius: 12 }}
@@ -193,7 +194,7 @@ const DetailAppointmentPage = () => {
                         <StyledCard
                             title="Thông tin lịch khám"
                             extra={
-                                <Tag color={getStatusColor(appointmentData.status)}>
+                                <Tag color={getStatusColor(appointmentData.status)} style={{ fontSize: 14 }}>
                                 {convertStatusAppointment(appointmentData.status)}
                                 </Tag>
                             }
@@ -224,6 +225,13 @@ const DetailAppointmentPage = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Mã lịch khám">
                             {appointmentData.appointmentCode || "Chưa cập nhật"}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Loại lịch hẹn">
+                                <Tag color="blue" style={{ fontSize: 14 }}>
+                                    {appointmentData.type
+                                        ? convertAppointmentType(appointmentData.type)
+                                        : "Chưa xác định"}
+                                </Tag>
                             </Descriptions.Item>
                             <Descriptions.Item label="Ngày khám">
                             {appointmentData.schedule?.workday
@@ -257,17 +265,21 @@ const DetailAppointmentPage = () => {
                                     ? dayjs(appointmentData.createdAt).format("DD/MM/YYYY HH:mm")
                                     : "Chưa cập nhật"}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Người huỷ lịch khám">
-                                {appointmentData.cancelledBy ? convertRole(appointmentData.cancelledBy) : <Text type="secondary">Chưa huỷ</Text>}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Lý do huỷ lịch khám">
-                                {appointmentData.cancelReason || <Text type="secondary">Không có</Text>}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Ngày huỷ lịch khám">
-                                {appointmentData.cancelledAt
-                                    ? dayjs(appointmentData.cancelledAt).format("DD/MM/YYYY HH:mm")
-                                    : <Text type="secondary">Chưa huỷ</Text>}
-                            </Descriptions.Item>
+                            { appointmentData.status === "cancelled" && (
+                                <>
+                                    <Descriptions.Item label="Người huỷ lịch khám">
+                                    {appointmentData.cancelledBy ? convertRole(appointmentData.cancelledBy) : <Text type="secondary">Chưa huỷ</Text>}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Lý do huỷ lịch khám">
+                                        {appointmentData.cancelReason || <Text type="secondary">Không có</Text>}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="Ngày huỷ lịch khám">
+                                        {appointmentData.cancelledAt
+                                            ? dayjs(appointmentData.cancelledAt).format("DD/MM/YYYY HH:mm")
+                                            : <Text type="secondary">Chưa huỷ</Text>}
+                                    </Descriptions.Item>
+                                </>
+                            )}
 
                         </Descriptions>
                         <Title level={5} style={{ margin: "16px 0 8px 0" }}>
@@ -338,7 +350,7 @@ const DetailAppointmentPage = () => {
                             <StyledCard
                                 title="Thông tin thanh toán"
                                 extra={
-                                    <Tag color={getStatusPaymentColor(appointmentData?.payment?.status)}>
+                                    <Tag color={getStatusPaymentColor(appointmentData?.payment?.status)} style={{ fontSize: 14 }}>
                                         {convertStatusPayment(appointmentData?.payment?.status)}
                                     </Tag>
                                 }
