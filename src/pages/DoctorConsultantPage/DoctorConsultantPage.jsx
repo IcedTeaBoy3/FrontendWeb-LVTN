@@ -13,6 +13,8 @@ const DoctorConsultantPage = () => {
     const client = useRef(AgoraRTC.createClient({ mode: "rtc", codec: "vp8" }));
     const [localTracks, setLocalTracks] = useState([]);
     const [isMicOn, setIsMicOn] = useState(true);
+    const [isCameraOn, setIsCameraOn] = useState(true);
+
     const [joined, setJoined] = useState(false);
 
     const localVideoRef = useRef(null);
@@ -41,6 +43,17 @@ const DoctorConsultantPage = () => {
 
         Message.info(newState ? "Đã bật mic" : "Đã tắt mic");
     };
+    const toggleCamera = async () => {
+        const cameraTrack = localTracks[1]; // track video
+        if (!cameraTrack) return;
+
+        const newState = !isCameraOn;
+        await cameraTrack.setEnabled(newState);
+        setIsCameraOn(newState);
+
+        Message.info(newState ? "Đã bật camera" : "Đã tắt camera");
+    };
+
 
     // 🔥 JOIN ROOM
     const startCall = async () => {
@@ -117,7 +130,7 @@ const DoctorConsultantPage = () => {
     };
 
     return (
-        <Card style={{ width: "100%", padding: 20 }}>
+        <>
             <Title level={3}>Tư vấn trực tuyến qua Video</Title>
             <Text type="secondary">Mã cuộc hẹn: {appointmentCode}</Text>
 
@@ -125,13 +138,17 @@ const DoctorConsultantPage = () => {
             <Row gutter={20} style={{ marginTop: 20 }}>
                 {/* LOCAL */}
                 <Col span={12}>
-                    <Card title="Bác sĩ (Bạn)" bodyStyle={{ padding: 0 }}>
+                    <Card
+                        title="Bác sĩ (Bạn)"
+                       
+                        style={{ borderRadius: 10 }}
+                    >
                         <div
                             ref={localVideoRef}
                             style={{
                                 width: "100%",
                                 height: 400,
-                                background: "#000",
+                                background: "#111",
                                 borderRadius: 10,
                                 overflow: "hidden",
                                 position: "relative",
@@ -142,13 +159,17 @@ const DoctorConsultantPage = () => {
 
                 {/* REMOTE */}
                 <Col span={12}>
-                    <Card title="Bệnh nhân" bodyStyle={{ padding: 0 }}>
+                    <Card
+                        title="Bệnh nhân"
+                        styles={{ bodyStyle: { padding: 0 } }}
+                        style={{ borderRadius: 10 }}
+                    >
                         <div
                             ref={remoteVideoRef}
                             style={{
                                 width: "100%",
                                 height: 400,
-                                background: "#000",
+                                background: "#111",
                                 borderRadius: 10,
                                 overflow: "hidden",
                                 position: "relative",
@@ -158,41 +179,60 @@ const DoctorConsultantPage = () => {
                 </Col>
             </Row>
 
-            {/* CONTROL BUTTONS */}
-            <Space style={{ marginTop: 20 }}>
+            {/* CONTROL BAR */}
+            <div
+                style={{
+                    marginTop: 25,
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 15,
+                }}
+            >
                 {!joined ? (
                     <Button
                         type="primary"
                         size="large"
                         icon={<VideoCameraOutlined />}
+                        style={{ borderRadius: 30, paddingInline: 25 }}
                         onClick={startCall}
                     >
                         Bắt đầu tư vấn
                     </Button>
                 ) : (
                     <>
+                        {/* Toggle Mic */}
                         <Button
-                            type={isMicOn ? "default" : "primary"}
-                            danger={!isMicOn}
+                            shape="circle"
                             size="large"
-                            icon={isMicOn ? <AudioMutedOutlined /> : <AudioOutlined />}
+                            danger={!isMicOn}
+                            type={isMicOn ? "default" : "primary"}
+                            icon={isMicOn ? <AudioOutlined /> : <AudioMutedOutlined />}
                             onClick={toggleMic}
-                        >
-                            {isMicOn ? "Tắt Mic" : "Mở Mic"}
-                        </Button>
+                        />
 
+                        {/* Toggle Camera */}
                         <Button
+                            shape="circle"
+                            size="large"
+                            danger={!isCameraOn}
+                            type={isCameraOn ? "default" : "primary"}
+                            icon={<VideoCameraOutlined />}
+                            onClick={toggleCamera}
+                        />
+
+                        {/* Leave Call */}
+                        <Button
+                            type="primary"
                             danger
+                            shape="circle"
                             size="large"
                             icon={<PhoneOutlined />}
                             onClick={leaveCall}
-                        >
-                            Thoát
-                        </Button>
+                        />
                     </>
                 )}
-            </Space>
-        </Card>
+            </div>
+        </>
     );
 };
 

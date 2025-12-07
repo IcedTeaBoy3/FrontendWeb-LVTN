@@ -254,12 +254,14 @@ const DoctorAppointmentDate = () => {
         if(record.status == "confirmed"){
 
           itemActions.push({ type: "divider" });
-          itemActions.push({ key: "complete", label: "Hoàn thành", icon: <CheckCircleFilled style={{ fontSize: 16,color:'green' }} /> });
-          itemActions.push({ type: "divider" });
           itemActions.push({ key: "cancel", label: "Huỷ lịch khám", icon: <ExclamationCircleOutlined style={{ fontSize: 16,color:'red' }} /> });
-          itemActions.push({ type: "divider" });
-          if(record.type == "telehealth"){
-            itemActions.push({ key: "startCall", label: "Bắt đầu cuộc gọi", icon: <VideoCameraOutlined style={{ fontSize: 16 }} /> });
+          if(record.paymentStatus === "paid"){
+            itemActions.push({ type: "divider" });
+            itemActions.push({ key: "complete", label: "Hoàn thành", icon: <CheckCircleFilled style={{ fontSize: 16,color:'green' }} /> });
+            if(record.type === "telehealth"){
+              itemActions.push({ type: "divider" });
+              itemActions.push({ key: "startCall", label: "Bắt đầu cuộc gọi", icon: <VideoCameraOutlined style={{ fontSize: 16 }} /> });
+            }
           }
         }
         
