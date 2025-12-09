@@ -1,4 +1,4 @@
-import { Typography, Calendar,List, Divider, Form, Select, DatePicker, Button, Input, Space,Dropdown  } from "antd";
+import { Typography, Calendar,List, Divider, Form, Select, DatePicker, Button, Input, Space, Dropdown,TimePicker } from "antd";
 import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSelector } from "react-redux";
@@ -15,10 +15,11 @@ import * as Message from "@/components/Message/Message";
 import Highlighter from 'react-highlight-words';
 import { CalendarCell, ShiftTag, ShiftTime, EmptyText, StyledCalendar } from './style';
 import { ThemeProvider } from "styled-components";
+import CreateScheduleForm from "@/components/CreateScheduleForm/CreateScheduleForm";
 import { theme } from '@/styles/theme';
-import { getColorForShiftName } from '@/utils/shiftName_utils';
-
+import { getColorForShiftName, convertShiftNameToLabel } from '@/utils/shiftName_utils';
 import dayjs from "dayjs";
+import UpdateScheduleForm from "../../components/UpdateScheduleForm/UpdateScheduleForm";
 dayjs.locale("vi");
 const { Text, Title } = Typography;
 const DoctorSchedulePage = () => {
@@ -308,7 +309,7 @@ const DoctorSchedulePage = () => {
               bg={getColorForShiftName(shift.name).bg}
               color={getColorForShiftName(shift.name).color}
             >
-              {shift.name}
+              {convertShiftNameToLabel(shift.name)}
             </ShiftTag>
             <ShiftTime>
               {dayjs(shift.startTime).format("HH:mm")} -{" "}
@@ -341,9 +342,11 @@ const DoctorSchedulePage = () => {
     formCreate
     .validateFields()
     .then((values) => {
-      const { workday, slotDuration } = values;
+      const { workday, shiftName, slotDuration } = values;;
+
       mutationCreateSchedule.mutate({
         workday,
+        shiftNames: shiftName,
         doctorId: account.doctor.doctorId,
         slotDuration
       });
@@ -363,19 +366,31 @@ const DoctorSchedulePage = () => {
   const handleCancelDelete = () => {
     setIsModalOpenDelete(false);
   };
-  const handleOnUpdateSchedule = (values) => {
-    const { workday, slotDuration, status } = values;
-    mutationUpdateSchedule.mutate({ 
-      id: rowSelected, 
-      data: { workday, doctorId: account?.doctor?.doctorId, slotDuration, status } 
-    });
+  const handleOnUpdateSchedule = () => {
+    formUpdate
+    .validateFields()
+    .then((values) => {
+      const { workday, shiftName, slotDuration } = values;
+      mutationUpdateSchedule.mutate({ 
+        id: rowSelected, 
+        data: { 
+          workday, 
+          shiftNames:shiftName,
+          doctorId: account?.doctor?.doctorId, 
+          slotDuration, 
+        } 
+      });
+    })
   };
   const handleEditSchedule = (scheduleId) => {
     const schedule = schedulesData.find(sch => sch._id === scheduleId);
     if(!schedule) return;
+    const shiftName = schedule?.shifts?.map((shift) => shift.name);
+    
     formUpdate.setFieldsValue({
       workday: dayjs(schedule.workday),
       slotDuration: schedule.slotDuration,
+      shiftName: shiftName
     });
     setIsDrawerOpen(true);
   };
@@ -423,7 +438,7 @@ const DoctorSchedulePage = () => {
                           <List.Item.Meta
                             title={
                               <div style={{backgroundColor: getColorForShiftName(shift.name).bg, color: getColorForShiftName(shift.name).color, display: 'inline-block', padding: '2px 6px', borderRadius: '6px', fontWeight: '500'}}>
-                                {shift.name}
+                                {convertShiftNameToLabel(shift.name)}
                               </div>
                             }
                             description={ 
@@ -512,66 +527,11 @@ const DoctorSchedulePage = () => {
         forceRender
       >
         <LoadingComponent isLoading={isPendingUpdate}>
-          <Form
-            name="formUpdate"
-            labelCol={{ span: 6 }}
-            wrapperCol={{ span: 18 }}
-            onFinish={handleOnUpdateSchedule}
-            autoComplete="off"
+          <UpdateScheduleForm
             form={formUpdate}
-          >
-            <Form.Item
-              label="Ngày làm việc"
-              name="workday"
-              rules={[
-                {
-                  required: true,
-                  message: "Vui lòng chọn ngày làm việc!",
-                },
-              ]}
-            >
-              <DatePicker
-                style={{ width: "100%" }}
-                format="DD/MM/YYYY"
-                disabledDate={(current) => current && (current < dayjs().add(1,'day').startOf('day') || current.day() === 0)}
-              />
-            </Form.Item>
-            <Form.Item
-              label="Thời gian khám"
-              name="slotDuration"
-            >
-              <Select
-                placeholder="Chọn thời gian khám"
-                options={[
-                  { label: '15 phút', value: 15 },
-                  { label: '20 phút', value: 20 },
-                  { label: '30 phút', value: 30 },
-                  { label: '45 phút', value: 45 },
-                  { label: '60 phút', value: 60 },
-                ]}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label={null}
-              wrapperCol={{ offset: 18, span: 6 }}
-            >
-              <Space>
-                <ButtonComponent
-                  type="default"
-                  onClick={() => setIsDrawerOpen(false)}
-                >
-                  Huỷ
-                </ButtonComponent>
-                <ButtonComponent
-                  type="primary"
-                  htmlType="submit"
-                >
-                  Lưu
-                </ButtonComponent>
-              </Space>
-            </Form.Item>
-          </Form>
+            setIsDrawerOpen={setIsDrawerOpen}
+            onSubmit={handleOnUpdateSchedule}
+          ></UpdateScheduleForm>
         </LoadingComponent>
       </DrawerComponent>
       <LoadingComponent isLoading={isPendingCreate}>
@@ -585,62 +545,7 @@ const DoctorSchedulePage = () => {
           okText="Thêm"
           style={{ borderRadius: 0 }}
         >
-          <Form
-            name="formCreate"
-            labelCol={{ span: 6 }}
-            wrapperCol={{ span: 18 }}
-            style={{ maxWidth: 600, padding: "20px" }}
-            initialValues={{
-                slotDuration: 30,
-                workday: null,
-            }}
-            autoComplete="off"
-            form={formCreate}
-          >
-            <Form.Item
-                label="Ngày làm việc"
-                name="workday"
-                rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng chọn ngày làm việc!",
-                    },
-                    {
-                      validator: (_, value) => {
-                        if (value && value.day() === 0) {
-                          return Promise.reject("Phòng khám không làm việc vào ngày Chủ nhật!");
-                        }
-                        return Promise.resolve();
-                      }
-                    }
-                ]}
-            >
-                  
-              <DatePicker
-                style={{ width: "100%" }}
-                format="DD/MM/YYYY"
-                disabledDate={(current) =>
-                  current && current < dayjs().add(1, "day").startOf("day")
-                }
-              />
-                
-            </Form.Item>
-              <Form.Item
-                label="Thời gian khám"
-                name="slotDuration"
-              >
-                <Select
-                  placeholder="Chọn thời gian khám"
-                  options={[
-                    { label: '15 phút', value: 15 },
-                    { label: '20 phút', value: 20 },
-                    { label: '30 phút', value: 30 },
-                    { label: '45 phút', value: 45 },
-                    { label: '60 phút', value: 60 },
-                  ]}
-                />
-              </Form.Item>
-            </Form>
+          <CreateScheduleForm form={formCreate} />
         </ModalComponent>
       </LoadingComponent >
       

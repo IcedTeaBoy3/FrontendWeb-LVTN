@@ -13,6 +13,8 @@ import { ShiftService } from '@/services/ShiftService';
 import { ScheduleService } from '@/services/ScheduleService';
 import { SlotService } from '@/services/SlotService';
 import * as Message from "@/components/Message/Message";
+import { getColorForShiftName, convertShiftNameToLabel } from '@/utils/shiftName_utils';
+
 import dayjs from 'dayjs';
 const {Text} =Typography;
 
@@ -221,7 +223,7 @@ const DetailSchedulePage = () => {
   const dataTable = shiftData.map((item, index) => ({
     key: item.shiftId,
     index: index + 1,
-    name: item.name,
+    name: convertShiftNameToLabel(item.name),
     startTime: dayjs(item.startTime).format("HH:mm"),
     endTime: dayjs(item.endTime).format("HH:mm"),
     slotCount: item.slotCount
@@ -333,34 +335,34 @@ const DetailSchedulePage = () => {
   };
   const handleOnchange = (value) => {
     if(isDrawerOpen) {
-      if(value === 'Ca sáng') {
+      if(value === 'morning') {
         formUpdate.setFieldsValue({
           startTime: dayjs('08:00', 'HH:mm'),
           endTime: dayjs('12:00', 'HH:mm'),
         });
-      } else if(value === 'Ca chiều') {
+      } else if(value === 'afternoon') {
         formUpdate.setFieldsValue({
           startTime: dayjs('13:00', 'HH:mm'),
           endTime: dayjs('17:00', 'HH:mm'),
         });
-      } else if(value === 'Ca tối') {
+      } else if(value === 'evening') {
         formUpdate.setFieldsValue({
           startTime: dayjs('18:00', 'HH:mm'),
           endTime: dayjs('22:00', 'HH:mm'),
         });
       }
     } else {
-      if(value === 'Ca sáng') {
+      if(value === 'morning') {
         formCreate.setFieldsValue({
           startTime: dayjs('08:00', 'HH:mm'),
           endTime: dayjs('12:00', 'HH:mm'),
         });
-      } else if(value === 'Ca chiều') {
+      } else if(value === 'afternoon') {
         formCreate.setFieldsValue({
           startTime: dayjs('13:00', 'HH:mm'),
           endTime: dayjs('17:00', 'HH:mm'),
         });
-      } else if(value === 'Ca tối') {
+      } else if(value === 'evening') {
         formCreate.setFieldsValue({
           startTime: dayjs('18:00', 'HH:mm'),
           endTime: dayjs('22:00', 'HH:mm'),
@@ -463,9 +465,9 @@ const DetailSchedulePage = () => {
                       style={{ width: "100%" }}
                       onChange={handleOnchange}
                       options={[
-                        { value: 'Ca sáng', label: 'Ca sáng' },
-                        { value: 'Ca chiều', label: 'Ca chiều' },
-                        { value: 'Ca tối', label: 'Ca tối' },
+                        { value: 'morning', label: 'Ca sáng' },
+                        { value: 'afternoon', label: 'Ca chiều' },
+                        { value: 'evening', label: 'Ca tối' },
                       ]}
                     />
                   </Form.Item>
@@ -576,7 +578,7 @@ const DetailSchedulePage = () => {
                   <AppstoreOutlined style={{ color: "#1890ff", marginRight: 8 }} />
                   Ca làm việc:{" "}
                 </Text>
-                <Text>{shiftSelected?.name || "—"}</Text>
+                <Text>{convertShiftNameToLabel(shiftSelected?.name) || "—"}</Text>
               </Col>
 
               <Col span={24}>
@@ -704,9 +706,9 @@ const DetailSchedulePage = () => {
                     style={{ width: "100%" }}
                     onChange={handleOnchange}
                     options={[
-                      { value: 'Ca sáng', label: 'Ca sáng' },
-                      { value: 'Ca chiều', label: 'Ca chiều' },
-                      { value: 'Ca tối', label: 'Ca tối' },
+                      { value: 'morning', label: 'Ca sáng' },
+                      { value: 'afternoon', label: 'Ca chiều' },
+                      { value: 'evening', label: 'Ca tối' },
                     ]}
                   />
                 </Form.Item>

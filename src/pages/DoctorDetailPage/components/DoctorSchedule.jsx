@@ -7,6 +7,8 @@ import ButtonComponent from '@/components/ButtonComponent/ButtonComponent';
 import ModalComponent from '@/components/ModalComponent/ModalComponent';
 import LoadingComponent from '@/components/LoadingComponent/LoadingComponent';
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
+import CreateScheduleForm from '@/components/CreateScheduleForm/CreateScheduleForm';
+import UpdateScheduleForm from '@/components/UpdateScheduleForm/UpdateScheduleForm';
 import * as Message from '@/components/Message/Message';
 import { EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined,PlusOutlined,ExclamationCircleOutlined,SearchOutlined  } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -190,7 +192,7 @@ const DoctorSchedule = ({id}) => {
     const isPendingDelete = mutationDeleteSchedule.isPending;
     const isPendingUpdate = mutationUpdateSchedule.isPending;
     const dataTable = dataSchedules?.data.map((item,index) => ({
-        key: item._id,
+        key: item._id || item.id,
         index: index+1,
         workDay: new Date(item.workday).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
         slotDuration: item.slotDuration,
@@ -250,7 +252,7 @@ const DoctorSchedule = ({id}) => {
 
                 const onMenuClick = ({ key, domEvent }) => {
                     setRowSelected(record.key);
-                    domEvent.stopPropagation(); // tránh chọn row khi bấm menu
+                    domEvent.stopPropagation(); 
                     if (key === "detail") return handleViewSchedule(record.key);
                     if (key === "edit") return handleEditSchedule(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
@@ -284,9 +286,12 @@ const DoctorSchedule = ({id}) => {
         formCreate
             .validateFields()
             .then((values) => {
+                const {workday, shiftName, slotDuration} = values;
                 const data = {
                     doctorId: id,
-                    ...values
+                    workday,
+                    shiftNames: shiftName,
+                    slotDuration
                 };
                 mutationCreateSchedule.mutate(data);
             });
@@ -302,21 +307,34 @@ const DoctorSchedule = ({id}) => {
     };
     const handleEditSchedule = (scheduleId) => {
         const schedule = dataSchedules?.data.find(item => item._id === scheduleId);
+
         if(schedule){
+            const shiftName = schedule?.shifts.map((shift) => shift.name);
             formUpdate.setFieldsValue({
                 workday: dayjs(schedule.workday),
                 slotDuration: schedule.slotDuration,
+                shiftName: shiftName,
             });
             setIsDrawerOpen(true);
         }
     };
-    const handleOnUpdateSchedule = (values) => {
+    const handleOnUpdateSchedule = () => {
         if(rowSelected){
-            const data = {
-                ...values,
-                doctorId:id,
-            };
-            mutationUpdateSchedule.mutate({ scheduleId: rowSelected, data });
+            console.log("rowSelected",rowSelected);
+            formUpdate
+            .validateFields()
+            .then((values) => {
+                const { workday, shiftName, slotDuration } = values;
+                mutationUpdateSchedule.mutate({ 
+                    scheduleId: rowSelected,
+                    data: { 
+                        workday, 
+                        shiftNames:shiftName,
+                        doctorId: id, 
+                        slotDuration, 
+                    } 
+                });
+            })
         }
     };
     const handleShowConfirmDelete = () => {
@@ -374,65 +392,9 @@ const DoctorSchedule = ({id}) => {
                     okText="Thêm"
                     style={{ borderRadius: 0 }}
                 >
-                    <Form
-                        name="formCreate"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
-                        initialValues={{
-                            slotDuration: 30,
-                            workday: null,
-                        }}
-                        autoComplete="off"
+                    <CreateScheduleForm
                         form={formCreate}
-                    >
-                        
-                        <Form.Item
-                            label="Ngày làm việc"
-                            name="workday"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn ngày làm việc!",
-                                },
-                                {
-                                    validator: (_, value) => {
-                                        if (value && value.day() === 0) {
-                                            return Promise.reject("Phòng khám không làm việc vào ngày Chủ nhật!");
-                                        }
-                                        return Promise.resolve();
-                                    }
-                                }
-                            ]}
-                        >
-                                
-                            <DatePicker
-                                style={{ width: "100%" }}
-                                format="DD/MM/YYYY"
-                                disabledDate={(current) =>
-                                    current && current < dayjs().add(1, "day").startOf("day")
-                                }
-                            />
-                            
-                        </Form.Item>
-                        <Form.Item
-                            label="Thời gian khám"
-                            name="slotDuration"
-                        >
-                            <Select
-                                placeholder="Chọn thời gian khám"
-                                options={[
-                                    { label: '15 phút', value: 15 },
-                                    { label: '20 phút', value: 20 },
-                                    { label: '30 phút', value: 30 },
-                                    { label: '45 phút', value: 45 },
-                                    { label: '60 phút', value: 60 },
-                                ]}
-                            />
-
-                        </Form.Item>
-
-                    </Form>
+                    />
                 </ModalComponent>
             </LoadingComponent >
             <ModalComponent
@@ -477,7 +439,7 @@ const DoctorSchedule = ({id}) => {
                 forceRender
             >
                 <LoadingComponent isLoading={isPendingUpdate}>
-                    <Form
+                    {/* <Form
                         name="formUpdate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
@@ -540,7 +502,12 @@ const DoctorSchedule = ({id}) => {
                                 </ButtonComponent>
                             </Space>
                         </Form.Item>
-                    </Form>
+                    </Form> */}
+                    <UpdateScheduleForm
+                        form={formUpdate}
+                        onSubmit={handleOnUpdateSchedule}
+                        setIsDrawerOpen={setIsDrawerOpen}
+                    />
                 </LoadingComponent>
             </DrawerComponent>
         </>

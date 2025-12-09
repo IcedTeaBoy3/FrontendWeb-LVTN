@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect  } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { ScheduleService } from '@/services/ScheduleService'
 import { DoctorService } from '@/services/DoctorService'
-import { Space, Input, DatePicker, Button, Form, Radio, Typography, Select, Divider, Dropdown} from "antd";
+import { Space, Input, DatePicker, Button, Form, Typography, Select, Dropdown, Tag} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -12,6 +12,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
+import { convertShiftNameToLabel } from '@/utils/shiftName_utils';
 import dayjs from 'dayjs';
 
 import {
@@ -36,6 +37,24 @@ const SchedulePage = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
+    const [slotGroupCreate, setSlotGroupCreate] = useState({
+        morning: [],
+        afternoon: [],
+        evening: [],
+    });
+    const [slotGroupUpdate, setSlotGroupUpdate] = useState({
+        morning: [],
+        afternoon: [],
+        evening: [],
+    });
+    const [selectedSlotsCreate, setSelectedSlotsCreate] = useState([]);
+    const [selectedSlotsUpdate, setSelectedSlotsUpdate] = useState([]);
+
+    const SHIFT_TIME = {
+        morning: [dayjs("08:00", "HH:mm"), dayjs("12:00", "HH:mm")],
+        afternoon: [dayjs("13:00", "HH:mm"), dayjs("17:00", "HH:mm")],
+        evening: [dayjs("18:00", "HH:mm"), dayjs("22:00", "HH:mm")],
+    };
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -133,7 +152,7 @@ const SchedulePage = () => {
             ) : (
             text
             ),
-        });
+    });
 
     // sửa lại để xóa cũng confirm luôn
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -246,7 +265,6 @@ const SchedulePage = () => {
         index: index + 1,
         doctor: item.doctor?.person?.fullName,
         workday: dayjs(item.workday).format("DD/MM/YYYY"),
-        // shiftId: item.shift?.name,
         shiftCount: item.shiftCount,
         slotCount: item.slotCount,
         slotDuration: item.slotDuration,
@@ -341,9 +359,10 @@ const SchedulePage = () => {
         formCreate
             .validateFields()
             .then((values) => {
-                const { workday, doctorId, slotDuration } = values;
+                const { workday, shiftName, doctorId, slotDuration } = values;
                 mutationCreateSchedule.mutate({
                     workday,
+                    shiftNames: shiftName,
                     doctorId,
                     slotDuration
                 });
@@ -352,10 +371,12 @@ const SchedulePage = () => {
     const handleEditSchedule = (key) => {
         const schedule = scheduleData.find(item => item.scheduleId === key);
         if (!schedule) return;
+        const shiftName = schedule?.shifts?.map((shift) => shift.name);
         formUpdate.setFieldsValue({
             workday: schedule.workday ? dayjs(schedule.workday) : null,
             doctorId: schedule.doctor?.doctorId || schedule?.doctor?.id,
             slotDuration: schedule.slotDuration,
+            shiftName: shiftName,
             status: schedule.status
         });
         setIsDrawerOpen(true);
@@ -378,8 +399,11 @@ const SchedulePage = () => {
         formCreate.resetFields();
     };
     const handleOnUpdateSchedule = (values) => {
-        const { workday, doctorId, slotDuration, status } = values;
-        mutationUpdateSchedule.mutate({ id: rowSelected, data: { workday, doctorId,slotDuration, status } });
+        const { workday, shiftName, doctorId, slotDuration, status } = values;
+        mutationUpdateSchedule.mutate({ 
+            id: rowSelected, 
+            data: { workday, doctorId,shiftNames: shiftName,slotDuration, status } 
+        });
     };
     const handleOkDeleteMany = () => {
         mutationDeleteManySchedules.mutate(selectedRowKeys);
@@ -387,6 +411,65 @@ const SchedulePage = () => {
     const handleCancelDeleteMany = () => {
         setIsModalOpenDeleteMany(false);
     };
+    const handleShiftChangeCreate = (selectedShifts) => {
+        const newGroup = { morning: [], afternoon: [], evening: [] };
+        let all = [];
+
+        selectedShifts.forEach((shift) => {
+            const range = SHIFT_TIME[shift];
+            const slots = generateSlots(range);
+            newGroup[shift] = slots;
+            all = [...all, ...slots.map(s => s.value)];
+        });
+
+        setSlotGroupCreate(newGroup);
+        setSelectedSlotsCreate(all);
+        formCreate.setFieldsValue({ slot: all });
+    };
+    const handleShiftChangeUpdate = (selectedShifts) => {
+        const newGroup = { morning: [], afternoon: [], evening: [] };
+        let all = [];
+
+        selectedShifts.forEach((shift) => {
+            const range = SHIFT_TIME[shift];
+            const slots = generateSlots(range);
+            newGroup[shift] = slots;
+            all = [...all, ...slots.map(s => s.value)];
+        });
+
+        setSlotGroupUpdate(newGroup);
+        setSelectedSlotsUpdate(all);
+        formUpdate.setFieldsValue({ slot: all });
+    };
+    const generateSlots = (range) => {
+        const duration = formCreate.getFieldValue("slotDuration") || 30;
+        const start = range[0];
+        const end = range[1];
+        const created = [];
+        let cursor = start;
+        while (
+            cursor.add(duration, "minute").isBefore(end) ||
+            cursor.add(duration, "minute").isSame(end)
+        ) {
+            const s = cursor;
+            const e = cursor.add(duration, "minute");
+
+            created.push({
+                label: `${s.format("HH:mm")} - ${e.format("HH:mm")}`,
+                value: `${s.toISOString()}|${e.toISOString()}`,
+            });
+            cursor = e;
+        }
+
+        return created;
+    };
+    useEffect(() => {
+        const initShifts = ["morning", "afternoon", "evening"];
+        handleShiftChangeCreate(initShifts);
+        formCreate.setFieldsValue({ shiftName: initShifts });
+    }, []);
+
+
     const menuProps = {
         items: [
             {
@@ -417,21 +500,15 @@ const SchedulePage = () => {
         <>
             <Title level={4}>Danh sách lịch làm việc</Title>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-               
-
-                    <ButtonComponent
-                        type="primary"
-                        onClick={() => setIsModalOpenCreate(true)}
-                        icon={<PlusOutlined />}
-                    >
-                        Thêm mới
-                    </ButtonComponent>
-                    
-                
-
+                <ButtonComponent
+                    type="primary"
+                    onClick={() => setIsModalOpenCreate(true)}
+                    icon={<PlusOutlined />}
+                >
+                    Thêm mới
+                </ButtonComponent>
                 <ButtonComponent    
                     type="default"
-                
                 >
                     Xuất file
                     <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
@@ -459,7 +536,7 @@ const SchedulePage = () => {
                     open={isModalOpenCreate}
                     onOk={handleCreateSchedule}
                     onCancel={handleCloseCreateSchedule}
-                    width={600}
+                    width={700}
                     cancelText="Huỷ"
                     okText="Thêm"
                     style={{ borderRadius: 0 }}
@@ -468,11 +545,12 @@ const SchedulePage = () => {
                         name="formCreate"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ maxWidth: 600, padding: "20px" }}
+                        labelAlign='left'
                         initialValues={{
                             slotDuration: 30,
                             workday: null,
                         }}
+                        
                         autoComplete="off"
                         form={formCreate}
                     >
@@ -544,6 +622,64 @@ const SchedulePage = () => {
                                 ]}
                             />
 
+                        </Form.Item>
+                        {/* Ca làm việc */}
+                        <Form.Item
+                            label="Ca làm việc"
+                            name="shiftName"
+                            rules={[{ required: true, message: "Vui lòng chọn ca!" }]}
+                        >
+                            <Select
+                                mode="multiple"
+                                placeholder="Chọn ca"
+                                onChange={handleShiftChangeCreate}
+                                options={[
+                                    { label: "Ca sáng (08:00 – 12:00)", value: "morning" },
+                                    { label: "Ca chiều (13:00 – 17:00)", value: "afternoon" },
+                                    { label: "Ca tối (18:00 – 22:00)", value: "evening" },
+                                ]}
+                            />
+                        </Form.Item>
+                        
+                        {/* SLOT THEO TỪNG CA */}
+                        <Form.Item
+                            label="Khung giờ"
+                            name="slot"
+                        >
+                            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                            {Object.entries(slotGroupCreate).map(([shift, slotList]) =>
+                                slotList.length > 0 ? (
+                                <div key={shift}>
+                                    <strong>
+                                        {convertShiftNameToLabel(shift)}
+                                    </strong>
+                    
+                                    <div
+                                        style={{
+                                            marginTop: 10,
+                                            display: "flex",
+                                            gap: 10,
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                    {slotList.map((slot) => (
+                                        <Tag
+                                            key={slot.value}
+                                            color="blue"
+                                            style={{
+                                                padding: "6px 10px",
+                                                fontSize: 14,
+                                                borderRadius: 6,
+                                            }}
+                                        >
+                                        {slot.label}
+                                        </Tag>
+                                    ))}
+                                    </div>
+                                </div>
+                                ) : null
+                            )}
+                            </div>
                         </Form.Item>
 
                     </Form>
@@ -685,6 +821,64 @@ const SchedulePage = () => {
                                 ]}
                             />
 
+                        </Form.Item>
+                        {/* Ca làm việc */}
+                        <Form.Item
+                            label="Ca làm việc"
+                            name="shiftName"
+                            rules={[{ required: true, message: "Vui lòng chọn ca!" }]}
+                        >
+                            <Select
+                                mode="multiple"
+                                placeholder="Chọn ca"
+                                onChange={handleShiftChangeUpdate}
+                                options={[
+                                    { label: "Ca sáng (08:00 – 12:00)", value: "morning" },
+                                    { label: "Ca chiều (13:00 – 17:00)", value: "afternoon" },
+                                    { label: "Ca tối (18:00 – 22:00)", value: "evening" },
+                                ]}
+                            />
+                        </Form.Item>
+                        
+                        {/* SLOT THEO TỪNG CA */}
+                        <Form.Item
+                            label="Khung giờ"
+                            name="slot"
+                        >
+                            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                            {Object.entries(slotGroupUpdate).map(([shift, slotList]) =>
+                                slotList.length > 0 ? (
+                                <div key={shift}>
+                                    <strong>
+                                        {convertShiftNameToLabel(shift)}
+                                    </strong>
+                    
+                                    <div
+                                        style={{
+                                            marginTop: 10,
+                                            display: "flex",
+                                            gap: 10,
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                    {slotList.map((slot) => (
+                                        <Tag
+                                            key={slot.value}
+                                            color="blue"
+                                            style={{
+                                                padding: "6px 10px",
+                                                fontSize: 14,
+                                                borderRadius: 6,
+                                            }}
+                                        >
+                                        {slot.label}
+                                        </Tag>
+                                    ))}
+                                    </div>
+                                </div>
+                                ) : null
+                            )}
+                            </div>
                         </Form.Item>
 
                         <Form.Item
