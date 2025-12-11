@@ -3,6 +3,8 @@ import { Form, Select, DatePicker, Tag } from "antd";
 import dayjs from "dayjs";
 
 export default function CreateScheduleForm({ form }) {
+  const [selectedSlots, setSelectedSlots] = useState([]);
+  
   const [slotGroup, setSlotGroup] = useState({
     morning: [],
     afternoon: [],
@@ -43,29 +45,44 @@ export default function CreateScheduleForm({ form }) {
     return created;
   };
 
-  // 👉 Khi chọn ca → generate slot từng ca
   const handleShiftChange = (selectedShifts) => {
     const newGroup = { morning: [], afternoon: [], evening: [] };
-    let allSelected = [];
+    let allSlots = [];
 
     selectedShifts.forEach((shift) => {
-      const range = SHIFT_TIME[shift];
-      const slots = generateSlots(range);
-
+      const slots = generateSlots(SHIFT_TIME[shift]);
       newGroup[shift] = slots;
 
-      allSelected = [...allSelected, ...slots.map((s) => s.value)];
+      // Thu tất cả slot của các ca đã chọn
+      allSlots = [...allSlots, ...slots.map((s) => s.value)];
     });
 
     setSlotGroup(newGroup);
 
-    form.setFieldsValue({ slot: allSelected });
+    // Auto chọn tất cả slot
+    setSelectedSlots(allSlots);
+    form.setFieldsValue({ slot: allSlots });
   };
+  const toggleSlot = (value) => {
+    let newSelected;
+
+    if (selectedSlots.includes(value)) {
+      newSelected = selectedSlots.filter((v) => v !== value);
+    } else {
+      newSelected = [...selectedSlots, value];
+    }
+
+    setSelectedSlots(newSelected);
+    form.setFieldsValue({ slot: newSelected });
+  };
+
 
   useEffect(() => {
     const initShifts = ["morning", "afternoon", "evening"];
-    handleShiftChange(initShifts);
     form.setFieldsValue({ shiftName: initShifts });
+    handleShiftChange(initShifts);
+
+    // không set slot ở đây
   }, []);
 
   return (
@@ -116,7 +133,7 @@ export default function CreateScheduleForm({ form }) {
         <Form.Item
           label="Ca làm việc"
           name="shiftName"
-          rules={[{ required: true, message: "Vui lòng chọn ca!" }]}
+          rules={[{ required: true, message: "Vui lòng chọn ca làm việc!" }]}
         >
           <Select
             mode="multiple"
@@ -156,17 +173,19 @@ export default function CreateScheduleForm({ form }) {
                   }}
                   >
                   {slotList.map((slot) => (
-                    <Tag
+                    <Tag.CheckableTag
                       key={slot.value}
-                      color="blue"
+                      checked={selectedSlots.includes(slot.value)}
+                      onChange={() => toggleSlot(slot.value)}
                       style={{
-                        padding: "6px 10px",
+                        padding: "6px 12px",
                         fontSize: 14,
                         borderRadius: 6,
+                        cursor: "pointer",
                       }}
                     >
                       {slot.label}
-                    </Tag>
+                    </Tag.CheckableTag>
                   ))}
                   </div>
               </div>

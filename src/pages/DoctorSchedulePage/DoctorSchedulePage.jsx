@@ -30,6 +30,7 @@ const DoctorSchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [rowSelected, setRowSelected] = useState(null);
   const [selectedCellData, setSelectedCellData] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -342,11 +343,11 @@ const DoctorSchedulePage = () => {
     formCreate
     .validateFields()
     .then((values) => {
-      const { workday, shiftName, slotDuration } = values;;
-
+      const { workday, shiftName, slotDuration, slot } = values;;
       mutationCreateSchedule.mutate({
         workday,
         shiftNames: shiftName,
+        slot,
         doctorId: account.doctor.doctorId,
         slotDuration
       });
@@ -385,13 +386,7 @@ const DoctorSchedulePage = () => {
   const handleEditSchedule = (scheduleId) => {
     const schedule = schedulesData.find(sch => sch._id === scheduleId);
     if(!schedule) return;
-    const shiftName = schedule?.shifts?.map((shift) => shift.name);
-    
-    formUpdate.setFieldsValue({
-      workday: dayjs(schedule.workday),
-      slotDuration: schedule.slotDuration,
-      shiftName: shiftName
-    });
+    setSelectedSchedule(schedule);
     setIsDrawerOpen(true);
   };
   return (
@@ -529,9 +524,10 @@ const DoctorSchedulePage = () => {
         <LoadingComponent isLoading={isPendingUpdate}>
           <UpdateScheduleForm
             form={formUpdate}
+            initialData={selectedSchedule}
             setIsDrawerOpen={setIsDrawerOpen}
             onSubmit={handleOnUpdateSchedule}
-          ></UpdateScheduleForm>
+          />
         </LoadingComponent>
       </DrawerComponent>
       <LoadingComponent isLoading={isPendingCreate}>

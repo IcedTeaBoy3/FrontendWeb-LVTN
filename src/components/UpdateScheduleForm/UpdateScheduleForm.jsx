@@ -1,14 +1,23 @@
 import { useEffect, useState } from "react";
 import { Form, Select, DatePicker, Tag, Space } from "antd";
+const { CheckableTag } = Tag;
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import dayjs from "dayjs";
 
-export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) {
+export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen, initialData }) {
   const [slotGroup, setSlotGroup] = useState({
     morning: [],
     afternoon: [],
     evening: [],
   });
+ 
+
+  const [selectedSlots, setSelectedSlots] = useState([]);
+  const handleSelectSlot = (slotValue, checked) => {
+    setSelectedSlots((prev) =>
+      checked ? [...prev, slotValue] : prev.filter((v) => v !== slotValue)
+    );
+  };
 
   const SHIFT_TIME = {
     morning: [dayjs("08:00", "HH:mm"), dayjs("12:00", "HH:mm")],
@@ -16,9 +25,10 @@ export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) 
     evening: [dayjs("18:00", "HH:mm"), dayjs("22:00", "HH:mm")],
   };
 
-  // 👉 Tạo slot theo range giờ
+  // 👉 Generate slot cho ca
   const generateSlots = (range) => {
     const duration = form.getFieldValue("slotDuration") || 30;
+    
     const start = range[0];
     const end = range[1];
 
@@ -43,25 +53,58 @@ export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) 
     return created;
   };
 
-  // 👉 Khi đổi ca → Generate lại slot
   const handleShiftChange = (selectedShifts) => {
     const newGroup = { morning: [], afternoon: [], evening: [] };
+    let autoSelect = [];
 
     selectedShifts.forEach((shift) => {
       const range = SHIFT_TIME[shift];
-      newGroup[shift] = generateSlots(range);
+      const slots = generateSlots(range);
+      newGroup[shift] = slots;
+
+      // 👉 gom tất cả slot vào selected
+      autoSelect = [...autoSelect, ...slots.map(s => s.value)];
     });
 
     setSlotGroup(newGroup);
+
+    // 👉 Nếu đang tạo mới (không có initialData)
+    if (!initialData) {
+      setSelectedSlots(autoSelect);   // check ALL slot
+    } else {
+      // 👉 Nếu đang update → chỉ giữ slot hợp lệ
+      setSelectedSlots(prev => prev.filter(v => autoSelect.includes(v)));
+    }
   };
 
-  // 👉 Generate slot khi mở form
-  useEffect(() => {
-    const shiftNames = form.getFieldValue("shiftName") || [];
-    if (!shiftNames.length) return;
 
-    handleShiftChange(shiftNames);
-  }, [form]);
+  useEffect(() => {
+    if (!initialData) return;
+
+    form.setFieldsValue({
+      workday: dayjs(initialData.workday),
+      slotDuration: initialData.slotDuration,
+      shiftName: initialData.shifts?.map(s => s.name) || [],
+    });
+
+    const restoredGroup = { morning: [], afternoon: [], evening: [] };
+    const restoredSelected = [];
+
+    initialData.shifts.forEach((shift) => {
+      restoredGroup[shift.name] = shift.slots.map((s) => {
+        const v = `${s.startTime}|${s.endTime}`;
+        restoredSelected.push(v);
+        return {
+          label: `${dayjs(s.startTime).format("HH:mm")} - ${dayjs(s.endTime).format("HH:mm")}`,
+          value: v,
+        };
+      });
+    });
+
+    setSlotGroup(restoredGroup);
+    setSelectedSlots(restoredSelected);
+  }, [initialData]);
+
 
   return (
     <Form form={form} layout="vertical">
@@ -84,7 +127,7 @@ export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) 
         <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
       </Form.Item>
 
-      {/* Thời lượng khám */}
+      {/* Thời lượng */}
       <Form.Item label="Thời gian khám" name="slotDuration">
         <Select
           onChange={() => {
@@ -101,7 +144,7 @@ export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) 
         />
       </Form.Item>
 
-      {/* Ca làm việc */}
+      {/* Ca */}
       <Form.Item
         label="Ca làm việc"
         name="shiftName"
@@ -119,7 +162,7 @@ export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) 
         />
       </Form.Item>
 
-      {/* SLOT – CHỈ HIỂN THỊ */}
+      {/* Slot hiển thị */}
       <Form.Item label="Khung giờ" name="slot">
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {Object.entries(slotGroup).map(([shift, slotList]) =>
@@ -142,9 +185,10 @@ export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) 
                   }}
                 >
                   {slotList.map((slot) => (
-                    <Tag
+                    <CheckableTag
                       key={slot.value}
-                      color="blue"
+                      checked={selectedSlots.includes(slot.value)}
+                      // onChange={(checked) => handleSelectSlot(slot.value, checked)}
                       style={{
                         padding: "6px 10px",
                         fontSize: 14,
@@ -152,7 +196,7 @@ export default function UpdateScheduleForm({ form, onSubmit, setIsDrawerOpen }) 
                       }}
                     >
                       {slot.label}
-                    </Tag>
+                    </CheckableTag>
                   ))}
                 </div>
               </div>

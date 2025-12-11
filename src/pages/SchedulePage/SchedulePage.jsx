@@ -368,19 +368,7 @@ const SchedulePage = () => {
                 });
             })
     };
-    const handleEditSchedule = (key) => {
-        const schedule = scheduleData.find(item => item.scheduleId === key);
-        if (!schedule) return;
-        const shiftName = schedule?.shifts?.map((shift) => shift.name);
-        formUpdate.setFieldsValue({
-            workday: schedule.workday ? dayjs(schedule.workday) : null,
-            doctorId: schedule.doctor?.doctorId || schedule?.doctor?.id,
-            slotDuration: schedule.slotDuration,
-            shiftName: shiftName,
-            status: schedule.status
-        });
-        setIsDrawerOpen(true);
-    };
+    
     const handleViewSchedule = (key) => {
         navigate(`/admin/schedules/${key}`);
     };
@@ -411,42 +399,43 @@ const SchedulePage = () => {
     const handleCancelDeleteMany = () => {
         setIsModalOpenDeleteMany(false);
     };
-    const handleShiftChangeCreate = (selectedShifts) => {
-        const newGroup = { morning: [], afternoon: [], evening: [] };
-        let all = [];
+    const handleEditSchedule = (key) => {
+        const schedule = scheduleData.find(item => item.scheduleId === key);
+        if (!schedule) return;
+        const shiftName = schedule?.shifts.map((shift) => shift.name);
+        formUpdate.setFieldsValue({
+            workday: dayjs(schedule.workday),
+            slotDuration: schedule.slotDuration,
+            doctorId: schedule.doctor?.doctorId,
+            shiftName: shiftName,
 
-        selectedShifts.forEach((shift) => {
-            const range = SHIFT_TIME[shift];
-            const slots = generateSlots(range);
-            newGroup[shift] = slots;
-            all = [...all, ...slots.map(s => s.value)];
         });
-
-        setSlotGroupCreate(newGroup);
-        setSelectedSlotsCreate(all);
-        formCreate.setFieldsValue({ slot: all });
+        handleShiftChangeUpdate(shiftName);
+        setIsDrawerOpen(true);
     };
+    
     const handleShiftChangeUpdate = (selectedShifts) => {
         const newGroup = { morning: [], afternoon: [], evening: [] };
         let all = [];
+        const duration = formUpdate.getFieldValue("slotDuration") || 30;
 
         selectedShifts.forEach((shift) => {
             const range = SHIFT_TIME[shift];
-            const slots = generateSlots(range);
+            const slots = generateSlotsWithDuration(range, duration);
             newGroup[shift] = slots;
             all = [...all, ...slots.map(s => s.value)];
         });
 
         setSlotGroupUpdate(newGroup);
-        setSelectedSlotsUpdate(all);
+        // setSelectedSlotsUpdate(all);
         formUpdate.setFieldsValue({ slot: all });
     };
-    const generateSlots = (range) => {
-        const duration = formCreate.getFieldValue("slotDuration") || 30;
+    const generateSlotsWithDuration = (range, duration) => {
         const start = range[0];
         const end = range[1];
         const created = [];
         let cursor = start;
+
         while (
             cursor.add(duration, "minute").isBefore(end) ||
             cursor.add(duration, "minute").isSame(end)
@@ -462,6 +451,22 @@ const SchedulePage = () => {
         }
 
         return created;
+    };
+    const handleShiftChangeCreate = (selectedShifts) => {
+        const newGroup = { morning: [], afternoon: [], evening: [] };
+        let all = [];
+        const duration = formCreate.getFieldValue("slotDuration") || 30;
+
+        selectedShifts.forEach((shift) => {
+            const range = SHIFT_TIME[shift];
+            const slots = generateSlotsWithDuration(range, duration);
+            newGroup[shift] = slots;
+            all = [...all, ...slots.map(s => s.value)];
+        });
+
+        setSlotGroupCreate(newGroup);
+        // setSelectedSlotsCreate(all);
+        formCreate.setFieldsValue({ slot: all });
     };
     useEffect(() => {
         const initShifts = ["morning", "afternoon", "evening"];
@@ -609,10 +614,14 @@ const SchedulePage = () => {
                         </Form.Item>
                         <Form.Item
                             label="Thời gian khám"
-                            name="slotDuration"
+                            name="slotDuration"  
                         >
                             <Select
                                 placeholder="Chọn thời gian khám"
+                                onChange={() => {
+                                    const s = formCreate.getFieldValue("shiftName") || [];
+                                    handleShiftChangeCreate(s);
+                                }}
                                 options={[
                                     { label: '15 phút', value: 15 },
                                     { label: '20 phút', value: 20 },
@@ -809,9 +818,14 @@ const SchedulePage = () => {
                         <Form.Item
                             label="Thời gian khám"
                             name="slotDuration"
+                            
                         >
                             <Select
                                 placeholder="Chọn thời gian khám"
+                                onChange={() => {
+                                    const s = formUpdate.getFieldValue("shiftName") || [];
+                                    handleShiftChangeUpdate(s);
+                                }}
                                 options={[
                                     { label: '15 phút', value: 15 },
                                     { label: '20 phút', value: 20 },

@@ -21,11 +21,12 @@ const DoctorSchedule = ({id}) => {
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [formUpdate] = Form.useForm();
-    const now = new Date(); // Tạo đối tượng Date hiện tại
+    const now = new Date(); 
     const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
     const [selectedYear, setSelectedYear] = useState(now.getFullYear());
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [formCreate] = Form.useForm();
+    const [selectedSchedule, setSelectedSchedule] = useState(null);
     const navigate = useNavigate();
     // Tìm kiếm
     const [searchText, setSearchText] = useState("");
@@ -286,10 +287,11 @@ const DoctorSchedule = ({id}) => {
         formCreate
             .validateFields()
             .then((values) => {
-                const {workday, shiftName, slotDuration} = values;
+                const {workday, shiftName, slotDuration, slot} = values;
                 const data = {
                     doctorId: id,
                     workday,
+                    slot,
                     shiftNames: shiftName,
                     slotDuration
                 };
@@ -309,18 +311,12 @@ const DoctorSchedule = ({id}) => {
         const schedule = dataSchedules?.data.find(item => item._id === scheduleId);
 
         if(schedule){
-            const shiftName = schedule?.shifts.map((shift) => shift.name);
-            formUpdate.setFieldsValue({
-                workday: dayjs(schedule.workday),
-                slotDuration: schedule.slotDuration,
-                shiftName: shiftName,
-            });
+            setSelectedSchedule(schedule);
             setIsDrawerOpen(true);
         }
     };
     const handleOnUpdateSchedule = () => {
         if(rowSelected){
-            console.log("rowSelected",rowSelected);
             formUpdate
             .validateFields()
             .then((values) => {
@@ -439,72 +435,9 @@ const DoctorSchedule = ({id}) => {
                 forceRender
             >
                 <LoadingComponent isLoading={isPendingUpdate}>
-                    {/* <Form
-                        name="formUpdate"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 18 }}
-                        labelAlign="left"
-                        onFinish={handleOnUpdateSchedule}
-                        autoComplete="off"
-                        form={formUpdate}
-                    >
-                        <Form.Item
-                            label="Ngày làm việc"
-                            name="workday"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Vui lòng chọn ngày làm việc!",
-                                },
-                                
-                            ]}
-                        >
-                            <DatePicker
-                                style={{ width: "100%" }}
-                                format="DD/MM/YYYY"
-                                disabledDate={(current) => current && (current < dayjs().add(1,'day').startOf('day') || current.day() === 0)}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Thời gian khám"
-                            name="slotDuration"
-                        >
-                            <Select
-                                placeholder="Chọn thời gian khám"
-                                options={[
-                                    { label: '15 phút', value: 15 },
-                                    { label: '20 phút', value: 20 },
-                                    { label: '30 phút', value: 30 },
-                                    { label: '45 phút', value: 45 },
-                                    { label: '60 phút', value: 60 },
-                                ]}
-                            />
-
-                        </Form.Item>
-
-                        <Form.Item
-                            label={null}
-                            wrapperCol={{ offset: 18, span: 6 }}
-                        >
-                            <Space>
-                                <ButtonComponent
-                                    type="default"
-                                    onClick={() => setIsDrawerOpen(false)}
-                                >
-                                    Huỷ
-                                </ButtonComponent>
-                                <ButtonComponent
-                                    type="primary"
-                                    ghost
-                                    htmlType="submit"
-                                >
-                                    Cập nhật
-                                </ButtonComponent>
-                            </Space>
-                        </Form.Item>
-                    </Form> */}
                     <UpdateScheduleForm
                         form={formUpdate}
+                        initialData={selectedSchedule}
                         onSubmit={handleOnUpdateSchedule}
                         setIsDrawerOpen={setIsDrawerOpen}
                     />
