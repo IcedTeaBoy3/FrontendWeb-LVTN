@@ -56,7 +56,7 @@ const ChatWindow = ({ selectedConversation, messages = [], onSend }) => {
       {/* Header – Thanh thông tin bệnh nhân */}
       <div
         style={{
-          padding: "16px 24px",
+          padding: "15px 24px",
           background: theme.primaryDark,
           color: "white",
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
@@ -84,12 +84,11 @@ const ChatWindow = ({ selectedConversation, messages = [], onSend }) => {
       <div
         ref={listRef}
         style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "20px 24px",
-            // backgroundImage: 'url("/chat-background.png")',
-            backgroundSize: "500px",
-            backgroundPosition: "center",
+          flex: 1,
+          overflowY: "auto",
+          padding: "20px 24px",
+          backgroundSize: "500px",
+          backgroundPosition: "center",
         }}
       >
         {messages.map((msg) => {
@@ -106,19 +105,19 @@ const ChatWindow = ({ selectedConversation, messages = [], onSend }) => {
             >
               <div
                 style={{
-                    maxWidth: "70%",
-                    padding: "10px 16px",
-                    borderRadius: 18,
-                    background: isDoctor ? theme.primary : "white",
-                    color: isDoctor ? "white" : "black",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                    border: isDoctor ? "none" : "1px solid #e8e8e8",
-                    position: "relative",
+                  maxWidth: "70%",
+                  padding: "10px 16px",
+                  borderRadius: 18,
+                  background: isDoctor ? theme.primary : "white",  
+                  color: isDoctor ? "white" : "black",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  border: isDoctor ? "none" : "1px solid #e8e8e8",
+                  position: "relative",
                 }}
               >
-                <Text style={{ fontSize: 15, lineHeight: 1.5 }}>
+                <span style={{ fontSize: 15, lineHeight: 1.5,}}>
                   {msg.content}
-                </Text>
+                </span>
                 <div
                   style={{
                     fontSize: 11,
