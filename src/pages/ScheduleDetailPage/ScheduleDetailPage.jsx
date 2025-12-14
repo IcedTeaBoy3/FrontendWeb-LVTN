@@ -22,10 +22,12 @@ const DetailSchedulePage = () => {
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
   const [isModalOpenDetail, setIsModalOpenDetail] = useState(false);
+  const [isModalOpenDeleteSlot, setIsModalOpenDeleteSlot] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [rowSelected, setRowSelected] = useState(null);
   const [shiftSelected, setShiftSelected] = useState(null);
+  const [slotSelected, setSlotSelected] = useState(null);
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const navigate = useNavigate();
@@ -60,31 +62,31 @@ const DetailSchedulePage = () => {
                 placeholder={`Tìm theo ${dataIndex}`}
                 value={selectedKeys[0]}
                 onChange={(e) =>
-                    setSelectedKeys(e.target.value ? [e.target.value] : [])
+                  setSelectedKeys(e.target.value ? [e.target.value] : [])
                 }
                 onPressEnter={() =>
-                    handleSearch(selectedKeys, confirm, dataIndex)
+                  handleSearch(selectedKeys, confirm, dataIndex)
                 }
                 style={{ marginBottom: 8, display: "block" }}
             />
             <Space>
                 <ButtonComponent
-                    type="primary"
-                    onClick={() =>
-                        handleSearch(selectedKeys, confirm, dataIndex)
-                    }
-                    icon={<SearchOutlined />}
-                    size="small"
-                    style={{ width: 90 }}
+                  type="primary"
+                  onClick={() =>
+                    handleSearch(selectedKeys, confirm, dataIndex)
+                  }
+                  icon={<SearchOutlined />}
+                  size="small"
+                  style={{ width: 90 }}
                 >
-                    Tìm
+                  Tìm
                 </ButtonComponent>
                 <Button
-                    onClick={() => handleReset(clearFilters, confirm)}
-                    size="small"
-                    style={{ width: 90 }}
+                  onClick={() => handleReset(clearFilters, confirm)}
+                  size="small"
+                  style={{ width: 90 }}
                 >
-                    Xóa
+                  Xóa
                 </Button>
             </Space>
         </div>
@@ -174,11 +176,11 @@ const DetailSchedulePage = () => {
         queryGetAllShiftBySchedule.refetch();
         setRowSelected(null);
       }else{
-        Message.error(data?.message || "Error delete shift");
+        Message.error(data?.message || "Lỗi xoá ca làm việc");
       }
     },
     onError: (error) => {
-      Message.error(error?.response?.data?.message || "Error delete shift");
+      Message.error(error?.response?.data?.message || "Lỗi xoá ca làm việc");
     }
   });
   const queryGetAllShiftBySchedule = useQuery({
@@ -195,6 +197,24 @@ const DetailSchedulePage = () => {
     queryKey: ["getSchedule", id],
     queryFn: () => ScheduleService.getSchedule(id),
     enable: !!id,
+  });
+  const mutationDeleteSlot = useMutation({
+    mutationKey: ['deleteSlot'],
+    mutationFn: SlotService.deleteSlot,
+    onSuccess: (data) => {
+      if(data?.status === "success") {
+        Message.success(data?.message);
+        setIsModalOpenDeleteSlot(false);
+        queryGetAllSlotByShift.refetch();
+        queryGetAllShiftBySchedule.refetch();
+        setSlotSelected(null);
+      }else{
+        Message.error(data?.message || "Lỗi xoá khung giờ");
+      }
+    },
+    onError: (error) => {
+      Message.error(error?.response?.data?.message || "Lỗi xoá khung giờ");
+    }
   });
   const handleCreateShift = () => {
     formCreate
@@ -369,6 +389,12 @@ const DetailSchedulePage = () => {
         });
       }
     }
+  };
+  const handleOkDeleteSlot = () => {
+    mutationDeleteSlot.mutate(slotSelected);
+  }
+  const handleCancelDeleteSlot = () => {
+    setIsModalOpenDeleteSlot(false);
   }
 
   return (
@@ -555,6 +581,34 @@ const DetailSchedulePage = () => {
           </div>
         </LoadingComponent>
       </ModalComponent>
+      <ModalComponent
+        title={
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+            <span>Xoá khung giờ</span>
+          </span>
+        }
+        open={isModalOpenDeleteSlot}
+        onOk={handleOkDeleteSlot}
+        onCancel={handleCancelDeleteSlot}
+        okText="Xóa"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true }}
+        centered
+        style={{ borderRadius: 8 }}
+      >
+        <LoadingComponent isLoading={mutationDeleteSlot.isPending}>
+          <div style={{ textAlign: "center", padding: "8px 0" }}>
+            <Text>
+              Bạn có chắc chắn muốn{" "}
+              <Text strong type="danger">
+                xoá
+              </Text>{" "}
+              khung giờ này không?
+            </Text>
+          </div>
+        </LoadingComponent>
+      </ModalComponent>
       <DrawerComponent
         title="Chi tiết ca làm việc"
         placement="right"
@@ -650,7 +704,27 @@ const DetailSchedulePage = () => {
                 filterSearch: true,
                 filterMultiple: false,
                 width: 150,
-              }
+              },
+              {
+                title: "Hành động",
+                key: "action",
+                render: (_, record) => {
+                  
+                  return (
+                    <Space size="middle">
+                      <ButtonComponent
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        danger
+                        onClick={() => {
+                          setIsModalOpenDeleteSlot(true);
+                        }}
+                      >Xoá</ButtonComponent>
+                    </Space>
+                  );
+                },
+              },
+             
             ]}
             loading={isLoadingSlots}
             dataSource={slotsData.map((item, index) => ({
@@ -663,130 +737,135 @@ const DetailSchedulePage = () => {
             pagination={{
               pageSize: 5,
             }}
+            onRow={(record) => ({
+              onClick: () => {
+                setSlotSelected(record.key);
+              },
+            })}
           />
         </LoadingComponent>
 
       </DrawerComponent>
       <DrawerComponent
-          title={
-            <>
-              <EditOutlined style={{marginRight:'8px'}}/>
-              Cập nhật ca làm việc
-            </>
-          }
-          placement="right"
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          width={window.innerWidth < 768 ? "100%" : 700}
-          forceRender
+        title={
+          <>
+            <EditOutlined style={{marginRight:'8px'}}/>
+            Cập nhật ca làm việc
+          </>
+        }
+        placement="right"
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        width={window.innerWidth < 768 ? "100%" : 700}
+        forceRender
       >
-          <LoadingComponent isLoading={isPendingUpdate}>
-            <Form
-              name="formUpdate"
-              labelCol={{ span: 6 }}
-              labelAlign="left"
-              wrapperCol={{ span: 18 }}
-              style={{ maxWidth: 600 }}
-              onFinish={handleOnUpdateShift}
-              autoComplete="off"
-              form={formUpdate}
-            >
+        <LoadingComponent isLoading={isPendingUpdate}>
+          <Form
+            name="formUpdate"
+            labelCol={{ span: 6 }}
+            labelAlign="left"
+            wrapperCol={{ span: 18 }}
+            style={{ maxWidth: 600 }}
+            onFinish={handleOnUpdateShift}
+            autoComplete="off"
+            form={formUpdate}
+          >
+            <Form.Item
+                label="Ca làm việc"
+                name="name"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn ca làm việc!",
+                  },
+                ]}
+              >
+                <Select
+                  placeholder="Chọn ca làm việc"
+                  style={{ width: "100%" }}
+                  onChange={handleOnchange}
+                  options={[
+                    { value: 'morning', label: 'Ca sáng' },
+                    { value: 'afternoon', label: 'Ca chiều' },
+                    { value: 'evening', label: 'Ca tối' },
+                  ]}
+                />
+              </Form.Item>
               <Form.Item
-                  label="Ca làm việc"
-                  name="name"
+                  label="Thời gian bắt đầu"
+                  name="startTime"
                   rules={[
                       {
                         required: true,
-                        message: "Vui lòng chọn ca làm việc!",
+                        message: "Vui lòng chọn thời gian bắt đầu!",
                       },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const startTime = getFieldValue('startTime');
+                          const endTime = getFieldValue('endTime');
+                          if (startTime && endTime && startTime.isAfter(endTime)) {
+                            return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
+                          }
+                          return Promise.resolve();
+                        }
+                      })
                   ]}
-                >
-                  <Select
-                    placeholder="Chọn ca làm việc"
-                    style={{ width: "100%" }}
-                    onChange={handleOnchange}
-                    options={[
-                      { value: 'morning', label: 'Ca sáng' },
-                      { value: 'afternoon', label: 'Ca chiều' },
-                      { value: 'evening', label: 'Ca tối' },
-                    ]}
-                  />
-                </Form.Item>
-                <Form.Item
-                    label="Thời gian bắt đầu"
-                    name="startTime"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Vui lòng chọn thời gian bắt đầu!",
-                        },
-                        ({ getFieldValue }) => ({
-                            validator(_, value) {
-                                const startTime = getFieldValue('startTime');
-                                const endTime = getFieldValue('endTime');
-                                if (startTime && endTime && startTime.isAfter(endTime)) {
-                                    return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
-                                }
-                                return Promise.resolve();
-                            }
-                        })
-                    ]}
-                >
-                    <TimePicker
-                        format="HH:mm"
-                        style={{ width: "100%" }}
-                        placeholder="Chọn giờ bắt đầu"
-                    />
-                </Form.Item>
+              >
+                <TimePicker
+                  format="HH:mm"
+                  style={{ width: "100%" }}
+                  placeholder="Chọn giờ bắt đầu"
+                />
+              </Form.Item>
 
-                <Form.Item
-                    label="Thời gian kết thúc"
-                    name="endTime"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Vui lòng chọn thời gian kết thúc!",
-                        },
-                        ({ getFieldValue }) => ({
-                            validator(_, value) {
-                                const startTime = getFieldValue('startTime');
-                                const endTime = getFieldValue('endTime');
-                                if (startTime && endTime && startTime.isAfter(endTime)) {
-                                    return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
-                                }
-                                return Promise.resolve();
-                            }
-                        })
-                    ]}
-                >
-                  <TimePicker
-                    format="HH:mm"
-                    style={{ width: "100%" }}
-                    placeholder="Chọn giờ kết thúc"
-                  />
-                </Form.Item>
-                <Form.Item
-                  label={null}
-                  wrapperCol={{ offset: 18, span: 6 }}
-                >
-                  <Space>
-                    <ButtonComponent
-                      type="default"
-                      onClick={() => setIsDrawerOpen(false)}
-                    >
-                      Huỷ
-                    </ButtonComponent>
-                    <ButtonComponent
-                      type="primary"
-                      ghost
-                      htmlType="submit"
-                    >
-                      Cập nhật
-                    </ButtonComponent>
-                  </Space>
-                </Form.Item>
-            </Form>
-          </LoadingComponent>
+              <Form.Item
+                  label="Thời gian kết thúc"
+                  name="endTime"
+                  rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn thời gian kết thúc!",
+                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const startTime = getFieldValue('startTime');
+                          const endTime = getFieldValue('endTime');
+                          if (startTime && endTime && startTime.isAfter(endTime)) {
+                            return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
+                          }
+                          return Promise.resolve();
+                        }
+                      })
+                  ]}
+              >
+                <TimePicker
+                  format="HH:mm"
+                  style={{ width: "100%" }}
+                  placeholder="Chọn giờ kết thúc"
+                />
+              </Form.Item>
+              <Form.Item
+                label={null}
+                wrapperCol={{ offset: 18, span: 6 }}
+              >
+                <Space>
+                  <ButtonComponent
+                    type="default"
+                    onClick={() => setIsDrawerOpen(false)}
+                  >
+                    Huỷ
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="primary"
+                    ghost
+                    htmlType="submit"
+                  >
+                    Cập nhật
+                  </ButtonComponent>
+                </Space>
+              </Form.Item>
+          </Form>
+        </LoadingComponent>
       </DrawerComponent>
       <TableStyle
         rowSelection={rowSelection}

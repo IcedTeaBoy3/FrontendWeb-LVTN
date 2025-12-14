@@ -7,11 +7,10 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import ModalDetailPatient from "@/components/ModalDetailPatient/ModalDetailPatient";
-import { EyeOutlined, EditOutlined, MoreOutlined,SearchOutlined, CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
-import { Dropdown, Typography, Timeline, Tag, Input, Space, Button, Card } from "antd";
+import { EyeOutlined, MoreOutlined,SearchOutlined, CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { Dropdown, Typography, Timeline, Tag, Input, Space, Button, Card, Empty } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
-import * as Message from "@/components/Message/Message";
 
 import { convertGender } from "@/utils/gender_utils";
 import { convertStatusAppointment, getStatusColor} from "@/utils/status_appointment_utils";
@@ -47,39 +46,39 @@ const DoctorPatientPage = () => {
           clearFilters,
       }) => (
           <div style={{ padding: 8 }}>
-              <Input
-                  ref={searchInput}
-                  placeholder={`Tìm theo ${dataIndex}`}
-                  value={selectedKeys[0]}
-                  onChange={(e) =>
-                      setSelectedKeys(e.target.value ? [e.target.value] : [])
-                  }
-                  onPressEnter={() =>
-                      handleSearch(selectedKeys, confirm, dataIndex)
-                  }
-                  style={{ marginBottom: 8, display: "block" }}
-              />
-              <Space>
-                  <ButtonComponent
-                      type="primary"
-                      onClick={() =>
-                          handleSearch(selectedKeys, confirm, dataIndex)
-                      }
-                      icon={<SearchOutlined />}
-                      size="small"
-                      style={{ width: 90 }}
-                  >
-                      Tìm
-                  </ButtonComponent>
-                  <Button
-                      onClick={() => handleReset(clearFilters, confirm)}
-                      size="small"
-                      style={{ width: 90 }}
-                  >
-                      Xóa
-                  </Button>
-              </Space>
-          </div>
+            <Input
+              ref={searchInput}
+              placeholder={`Tìm theo ${dataIndex}`}
+              value={selectedKeys[0]}
+              onChange={(e) =>
+                setSelectedKeys(e.target.value ? [e.target.value] : [])
+              }
+              onPressEnter={() =>
+                handleSearch(selectedKeys, confirm, dataIndex)
+              }
+              style={{ marginBottom: 8, display: "block" }}
+            />
+            <Space>
+              <ButtonComponent
+                type="primary"
+                onClick={() =>
+                    handleSearch(selectedKeys, confirm, dataIndex)
+                }
+                icon={<SearchOutlined />}
+                size="small"
+                style={{ width: 90 }}
+              >
+                Tìm
+              </ButtonComponent>
+              <Button
+                onClick={() => handleReset(clearFilters, confirm)}
+                size="small"
+                style={{ width: 90 }}
+              >
+                Xóa
+              </Button>
+            </Space>
+        </div>
       ),
       filterIcon: (filtered) => (
           <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
@@ -267,48 +266,62 @@ const DoctorPatientPage = () => {
         width={600}
         open={isOpenDrawer}
         onClose={() => setIsOpenDrawer(false)}
+        
       >
         <LoadingComponent isLoading={isLoadingDoctorPatientHistory}>
-          <Timeline 
-            mode="left"
-            items={historyRecords.map((record) => ({
-              label: (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                  <div style={{ color: "#1677ff", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
-                    <CalendarOutlined /> {dayjs(record.appointmentDate).format("DD/MM/YYYY")}
+          {historyRecords && historyRecords.length === 0 ? (
+            <div
+              style={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Empty description="Chưa có lịch sử khám bệnh" />
+            </div>
+          ) : (
+            <Timeline 
+              mode="left"
+              items={historyRecords.map((record) => ({
+                label: (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                    <div style={{ color: "#1677ff", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                      <CalendarOutlined /> {dayjs(record.appointmentDate).format("DD/MM/YYYY")}
+                    </div>
+                    <div style={{ color: "green",fontWeight:"bold", display: "flex", alignItems: "center", gap: 4 }}>
+                      <ClockCircleOutlined /> {dayjs(record.slot.startTime).format("HH:mm")} - {dayjs(record.slot.endTime).format("HH:mm")}
+                    </div>
                   </div>
-                  <div style={{ color: "green",fontWeight:"bold", display: "flex", alignItems: "center", gap: 4 }}>
-                    <ClockCircleOutlined /> {dayjs(record.slot.startTime).format("HH:mm")} - {dayjs(record.slot.endTime).format("HH:mm")}
-                  </div>
-                </div>
-              ),
-              children: (
-                <Card 
-                  actions={[
-                    <ButtonComponent
-                      type="primary"
-                      ghost
-                      onClick={() => {
-                        if(!record.medicalResult){
-                          Message.warning("Chưa có kết quả khám cho cuộc hẹn này!");
-                        }
-                        navigate(`/doctor/patients/${record.medicalResult._id}`);
-                      }}
-                    >Xem chi tiết</ButtonComponent>
-                  ]}
-                >
-                  <Paragraph ellipsis><Text strong>Dịch vụ khám: </Text>{record.doctorService?.service?.name || "Chưa cập nhật"}</Paragraph>
-                  <Paragraph ellipsis><Text strong>Triệu chứng: </Text>{record.symptoms || "Chưa cập nhật"}</Paragraph>
-                  <Paragraph ellipsis><Text strong>Chuẩn đoán: </Text>{record.medicalResult?.diagnosis || "Chưa cập nhật"}</Paragraph>
-                  <Paragraph ellipsis><Text strong>Ghi chú: </Text>{record.medicalResult?.note || "—"}</Paragraph>
-                 
-                  <Tag color={getStatusColor(record.status)}>
-                    {convertStatusAppointment(record.status)}
-                  </Tag>
-                </Card>
-              ),
+                ),
+                children: (
+                  <Card 
+                    actions={[
+                      <ButtonComponent
+                        type="primary"
+                        ghost
+                        onClick={() => {
+                          // if(!record.medicalResult){
+                          //   Message.warning("Chưa có kết quả khám cho cuộc hẹn này!");
+                          // }
+                          navigate(`/doctor/patients/${record.medicalResult._id}`);
+                        }}
+                      >Xem chi tiết</ButtonComponent>
+                    ]}
+                  >
+                    <Paragraph ellipsis><Text strong>Dịch vụ khám: </Text>{record.doctorService?.service?.name || "Chưa cập nhật"}</Paragraph>
+                    <Paragraph ellipsis><Text strong>Triệu chứng: </Text>{record.symptoms || "Chưa cập nhật"}</Paragraph>
+                    <Paragraph ellipsis><Text strong>Chuẩn đoán: </Text>{record.medicalResult?.diagnosis || "Chưa cập nhật"}</Paragraph>
+                    <Paragraph ellipsis><Text strong>Ghi chú: </Text>{record.medicalResult?.note || "—"}</Paragraph>
+                  
+                    <Tag color={getStatusColor(record.status)}>
+                      {convertStatusAppointment(record.status)}
+                    </Tag>
+                  </Card>
+                ),
             }))}
           />
+          )}
           
 
         </LoadingComponent>

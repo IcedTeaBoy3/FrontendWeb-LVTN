@@ -8,4 +8,8 @@ export const SlotService = {
         const response = await axiosInstance.get(`/slot/get-all-slots-by-shift/${shiftId}`);
         return response.data;
     },
+    deleteSlot: async (id) => {
+        const response = await axiosInstance.delete(`/slot/delete-slot/${id}`);
+        return response.data;
+    }
 }

@@ -10,7 +10,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import * as Message from "@/components/Message/Message";
 import dayjs from 'dayjs';
-import { Divider, Typography, Dropdown, Form, Select, TimePicker, Input, Button,Space,Card, Row ,Col,Tag, DatePicker   } from 'antd';
+import { Divider, Typography, Dropdown, Form, Select, TimePicker, Input, Button, Space, Card, Row , Col,Tag, DatePicker   } from 'antd';
 import { ArrowLeftOutlined, ClockCircleOutlined, CalendarOutlined, AppstoreOutlined ,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined, SearchOutlined,ExclamationCircleOutlined    } from '@ant-design/icons';
 import { useState, useRef } from 'react';
 import { getColorForShiftName, convertShiftNameToLabel } from '@/utils/shiftName_utils';
@@ -23,8 +23,10 @@ const DetailDoctorSchedulePage = () => {
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
   const [isModalOpenDetail, setIsModalOpenDetail] = useState(false);
+  const [isModalOpenDeleteSlot, setIsModalOpenDeleteSlot] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [shiftSelected, setShiftSelected] = useState(null);
+  const [slotSelected, setSlotSelected] = useState(null);
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const navigate = useNavigate();
@@ -53,38 +55,38 @@ const DetailDoctorSchedulePage = () => {
         clearFilters,
     }) => (
         <div style={{ padding: 8 }}>
-            <Input
-                ref={searchInput}
-                placeholder={`Tìm theo ${dataIndex}`}
-                value={selectedKeys[0]}
-                onChange={(e) =>
-                  setSelectedKeys(e.target.value ? [e.target.value] : [])
-                }
-                onPressEnter={() =>
-                  handleSearch(selectedKeys, confirm, dataIndex)
-                }
-                style={{ marginBottom: 8, display: "block" }}
-            />
-            <Space>
-              <ButtonComponent
-                  type="primary"
-                  onClick={() =>
-                    handleSearch(selectedKeys, confirm, dataIndex)
-                  }
-                  icon={<SearchOutlined />}
-                  size="small"
-                  style={{ width: 90 }}
-              >
-                  Tìm
-              </ButtonComponent>
-              <Button
-                  onClick={() => handleReset(clearFilters, confirm)}
-                  size="small"
-                  style={{ width: 90 }}
-              >
-                  Xóa
-              </Button>
-            </Space>
+          <Input
+            ref={searchInput}
+            placeholder={`Tìm theo ${dataIndex}`}
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() =>
+              handleSearch(selectedKeys, confirm, dataIndex)
+            }
+            style={{ marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <ButtonComponent
+              type="primary"
+              onClick={() =>
+                handleSearch(selectedKeys, confirm, dataIndex)
+              }
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Tìm
+            </ButtonComponent>
+            <Button
+              onClick={() => handleReset(clearFilters, confirm)}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Xóa
+            </Button>
+          </Space>
         </div>
     ),
     filterIcon: (filtered) => (
@@ -169,6 +171,24 @@ const DetailDoctorSchedulePage = () => {
     queryKey: ["getAllSlotByShift", rowSelected],
     queryFn: () => SlotService.getAllSlotsByShift(rowSelected),
     enabled: !!rowSelected,
+  });
+  const mutationDeleteSlot = useMutation({
+    mutationKey: ['deleteSlot'],
+    mutationFn: SlotService.deleteSlot,
+    onSuccess: (data) => {
+      if(data?.status === "success") {
+        Message.success(data?.message);
+        setIsModalOpenDeleteSlot(false);
+        queryGetAllSlotByShift.refetch();
+        queryGetAllShiftsBySchedule.refetch();
+        setSlotSelected(null);
+      }else{
+        Message.error(data?.message || "Lỗi xoá khung giờ");
+      }
+    },
+    onError: (error) => {
+      Message.error(error?.response?.data?.message || "Lỗi xoá khung giờ");
+    }
   });
   const mutationDeleteShift = useMutation({
     mutationKey: ['deleteShift'],
@@ -365,6 +385,12 @@ const DetailDoctorSchedulePage = () => {
       }
     }
   };
+  const handleOkDeleteSlot = () => {
+    mutationDeleteSlot.mutate(slotSelected);
+  }
+  const handleCancelDeleteSlot = () => {
+    setIsModalOpenDeleteSlot(false);
+  }
   return (
     <>
       <ButtonComponent
@@ -407,10 +433,10 @@ const DetailDoctorSchedulePage = () => {
               label="Ca làm việc"
               name="name"
               rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn ca làm việc!",
-                  },
+                {
+                  required: true,
+                  message: "Vui lòng chọn ca làm việc!",
+                },
               ]}
             >
               <Select
@@ -429,47 +455,47 @@ const DetailDoctorSchedulePage = () => {
                 name="startTime"
                 rules={[
                     {
-                        required: true,
-                        message: "Vui lòng chọn thời gian bắt đầu!",
+                      required: true,
+                      message: "Vui lòng chọn thời gian bắt đầu!",
                     },
                     ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            const startTime = getFieldValue('startTime');
-                            const endTime = getFieldValue('endTime');
-                            if (startTime && endTime && startTime.isAfter(endTime)) {
-                                return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
-                            }
-                            return Promise.resolve();
+                      validator(_, value) {
+                        const startTime = getFieldValue('startTime');
+                        const endTime = getFieldValue('endTime');
+                        if (startTime && endTime && startTime.isAfter(endTime)) {
+                          return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
                         }
+                        return Promise.resolve();
+                      }
                     })
                 ]}
             >
-                <TimePicker
-                    format="HH:mm"
-                    style={{ width: "100%" }}
-                    placeholder="Chọn giờ bắt đầu"
-                />
+              <TimePicker
+                format="HH:mm"
+                style={{ width: "100%" }}
+                placeholder="Chọn giờ bắt đầu"
+              />
             </Form.Item>
 
             <Form.Item
-                label="Thời gian kết thúc"
-                name="endTime"
-                rules={[
-                    {
-                        required: true,
-                        message: "Vui lòng chọn thời gian kết thúc!",
-                    },
-                    ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            const startTime = getFieldValue('startTime');
-                            const endTime = getFieldValue('endTime');
-                            if (startTime && endTime && startTime.isAfter(endTime)) {
-                                return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
-                            }
-                            return Promise.resolve();
-                        }
-                    })
-                ]}
+              label="Thời gian kết thúc"
+              name="endTime"
+              rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn thời gian kết thúc!",
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      const startTime = getFieldValue('startTime');
+                      const endTime = getFieldValue('endTime');
+                      if (startTime && endTime && startTime.isAfter(endTime)) {
+                         return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
+                      }
+                      return Promise.resolve();
+                    }
+                  })
+              ]}
             >
               <TimePicker
                 format="HH:mm"
@@ -603,7 +629,26 @@ const DetailDoctorSchedulePage = () => {
                 filterSearch: true,
                 filterMultiple: false,
                 width: 150,
-              }
+              },
+              {
+                title: "Hành động",
+                key: "action",
+                render: (_, record) => {
+                  
+                  return (
+                    <Space size="middle">
+                      <ButtonComponent
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        danger
+                        onClick={() => {
+                          setIsModalOpenDeleteSlot(true);
+                        }}
+                      >Xoá</ButtonComponent>
+                    </Space>
+                  );
+                },
+              },
             ]}
             loading={isLoadingSlots}
             dataSource={slotsData.map((item, index) => ({
@@ -616,6 +661,11 @@ const DetailDoctorSchedulePage = () => {
             pagination={{
               pageSize: 5,
             }}
+            onRow={(record) => ({
+              onClick: () => {
+                setSlotSelected(record.key);
+              },
+            })}
           />
         </LoadingComponent>
 
@@ -739,6 +789,34 @@ const DetailDoctorSchedulePage = () => {
           </Form>
         </LoadingComponent>
       </DrawerComponent>
+      <ModalComponent
+        title={
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
+            <span>Xoá khung giờ</span>
+          </span>
+        }
+        open={isModalOpenDeleteSlot}
+        onOk={handleOkDeleteSlot}
+        onCancel={handleCancelDeleteSlot}
+        okText="Xóa"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true }}
+        centered
+        style={{ borderRadius: 8 }}
+      >
+        <LoadingComponent isLoading={mutationDeleteSlot.isPending}>
+          <div style={{ textAlign: "center", padding: "8px 0" }}>
+            <Text>
+              Bạn có chắc chắn muốn{" "}
+              <Text strong type="danger">
+                xoá
+              </Text>{" "}
+              khung giờ này không?
+            </Text>
+          </div>
+        </LoadingComponent>
+      </ModalComponent>
       <TableStyle
         rowSelection={rowSelection}
         emptyText="Không có lịch làm việc nào"
