@@ -11,7 +11,7 @@ import { EyeOutlined, MoreOutlined,SearchOutlined, CalendarOutlined, ClockCircle
 import { Dropdown, Typography, Timeline, Tag, Input, Space, Button, Card, Empty } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
-
+import * as Message from "@/components/Message/Message";
 import { convertGender } from "@/utils/gender_utils";
 import { convertStatusAppointment, getStatusColor} from "@/utils/status_appointment_utils";
 import dayjs from "dayjs";
@@ -301,9 +301,9 @@ const DoctorPatientPage = () => {
                         type="primary"
                         ghost
                         onClick={() => {
-                          // if(!record.medicalResult){
-                          //   Message.warning("Chưa có kết quả khám cho cuộc hẹn này!");
-                          // }
+                          if(!record.medicalResult){
+                            Message.warning("Chưa có kết quả khám cho cuộc hẹn này!");
+                          }
                           navigate(`/doctor/patients/${record.medicalResult._id}`);
                         }}
                       >Xem chi tiết</ButtonComponent>

@@ -2,6 +2,7 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import ModalDetailPatient from '@/components/ModalDetailPatient/ModalDetailPatient';
 import AttachmentsSection from '@/components/AttachmentsSection/AttachmentsSection';
 import {convertStatusPayment, getStatusPaymentColor} from '@/utils/status_payment_utils';
+import { convertShiftNameToLabel } from '@/utils/shiftName_utils';
 import { convertPaymentType } from '@/utils/paymentType_utils';
 import { convertMethodPayment } from '@/utils/method_utils';
 import { Descriptions, Image, Space, Tag,Button, Typography } from 'antd';
@@ -61,7 +62,7 @@ const DrawerDetailAppointment = ({visible, appointmentDetail, onClose, onComplet
                     {schedule?.workday ? dayjs(schedule.workday).format("DD/MM/YYYY") : "—"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Giờ khám">
-                        {slot ? `${dayjs(slot.startTime).format("HH:mm")} - ${dayjs(slot.endTime).format("HH:mm")} (${slot?.shift?.name})` : "—"}
+                        {slot ? `${dayjs(slot.startTime).format("HH:mm")} - ${dayjs(slot.endTime).format("HH:mm")} (${convertShiftNameToLabel(slot?.shift?.name)})` : "—"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Triệu chứng" span={2}>
                         {symptoms || <Text type="secondary">Không có</Text>}
