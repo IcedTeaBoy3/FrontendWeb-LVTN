@@ -26,7 +26,6 @@ const DoctorAppointmentPage = () => {
     queryKey: ['doctor-appointments', doctorId],
     queryFn: () => AppointmentService.getDoctorAppointments(doctorId, { page: 1, limit: 10 }),
     keepPreviousData: true,
-    
     enabled: !!doctorId,
   });
   const { data: doctorAppointmentsData, isLoading: isLoadingDoctorAppointments } = queryGetDoctorAppointments;
@@ -35,7 +34,7 @@ const DoctorAppointmentPage = () => {
     return {
       id: appointment.appointmentId,
       appointmentNumber: appointment.appointmentNumber,
-      date: dayjs(appointment.schedule?.workday).format('DD/MM/YYYY'),
+      date: dayjs(appointment?.schedule?.workday).format('DD/MM/YYYY'),
       time: dayjs(appointment.slot?.startTime).format('HH:mm') + ' - ' + dayjs(appointment?.slot?.endTime).format('HH:mm'),
       patientName: appointment.patientProfile?.person?.fullName || '--',
       status: appointment.status,
