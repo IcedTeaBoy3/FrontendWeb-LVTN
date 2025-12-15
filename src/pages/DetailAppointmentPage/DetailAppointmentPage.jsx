@@ -20,6 +20,7 @@ import { convertGender } from '@/utils/gender_utils';
 import { convertMethodPayment } from '@/utils/method_utils';
 import { convertRole } from '@/utils/role_utils';
 import { convertAppointmentType } from '@/utils/type_appointment_utils';
+import { convertShiftNameToLabel } from '@/utils/shiftName_utils.js';
 import {
     ArrowLeftOutlined,
     CheckOutlined,
@@ -241,7 +242,7 @@ const DetailAppointmentPage = () => {
                             <Descriptions.Item label="Giờ khám">
                                 <Text style={{color:'green',fontSize:16}}>
                                 {appointmentData.slot
-                                ? `${DatetimeUtils.formatTime(appointmentData.slot)} (${appointmentData.slot?.shift?.name})`
+                                ? `${DatetimeUtils.formatTime(appointmentData.slot)} (${convertShiftNameToLabel(appointmentData.slot?.shift?.name)})`
                                 : "Chưa cập nhật"}
                                 </Text>
                             </Descriptions.Item>
