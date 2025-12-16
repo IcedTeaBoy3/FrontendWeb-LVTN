@@ -1,7 +1,14 @@
 import axiosInstance from '@/config/axiosInstance';
 export const DoctorService = {
-    getAllDoctors: async () => {
-        const response = await axiosInstance.get('/doctor/get-all-doctors');
+    getAllDoctors: async ({ page, limit }) => {
+        const response = await axiosInstance.get('/doctor/get-all-doctors',
+            {
+                params: {
+                    page,
+                    limit
+                }
+            }
+        );
         return response.data;
     },
     getDoctor: async (id) => {

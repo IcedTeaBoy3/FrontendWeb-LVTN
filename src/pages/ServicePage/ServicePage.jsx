@@ -11,6 +11,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
+import { convertServiceTypeToLabel } from '@/utils/servicetype_utils';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -228,6 +229,7 @@ const ServicePage = () => {
         specialty: item.specialty?.name || <Text type="secondary">Chưa cập nhật</Text>,
         description: item.description,
         price: item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
+        type: item.type,
         status: item.status,
     }));
     const columns = [
@@ -309,6 +311,21 @@ const ServicePage = () => {
             render: (text) => (
                 <Text>{text}</Text>
             ),
+        },
+        {
+            title: "Loại dịch vụ",
+            dataIndex: "type",
+            key: "type",
+            filters: [
+                { text: "Khám bệnh", value: "booking" },
+                { text: "Tư vấn", value: "consultation" },
+                { text: "Khác", value: "other" },
+            ],
+            onFilter: (value, record) => record.type.startsWith(value),
+            filterMultiple: false,
+            render: (text) => (
+                <Tag color="purple">{convertServiceTypeToLabel(text)}</Tag>
+            )
         },
 
         {
@@ -395,6 +412,7 @@ const ServicePage = () => {
                 price: service.price,
                 specialty: service.specialty?.specialtyId,
                 status: service.status,
+                type: service.type,
             });
             setIsDrawerOpen(true);
         }
@@ -499,6 +517,9 @@ const ServicePage = () => {
                         wrapperCol={{ span: 18 }}
                         labelAlign="left"
                         autoComplete="off"
+                        initialValues={{
+                            type: "booking"
+                        }}
                         form={formCreate}
                     >
                         <Form.Item
@@ -546,6 +567,21 @@ const ServicePage = () => {
                             ]}
                         >
                             <InputNumber placeholder='Nhập giá dịch vụ' style={{ width: "100%" }} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Loại dịch vụ"
+                            name="type"
+                            rules={[
+                                { required: true, message: "Vui lòng chọn loại dịch vụ" },
+                               
+                               
+                            ]}
+                        >
+                            <Radio.Group>
+                                <Radio value="booking">Khám bệnh</Radio>
+                                <Radio value="consultation">Tư vấn</Radio>
+                                <Radio value="other">Khác</Radio>
+                            </Radio.Group>
                         </Form.Item>
 
                     </Form>
@@ -636,6 +672,21 @@ const ServicePage = () => {
                                 <Radio value="inactive">Không hoạt động</Radio>
                             </Radio.Group>
 
+                        </Form.Item>
+                        <Form.Item
+                            label="Loại dịch vụ"
+                            name="type"
+                            rules={[
+                                { required: true, message: "Vui lòng chọn loại dịch vụ" },
+                               
+                               
+                            ]}
+                        >
+                            <Radio.Group>
+                                <Radio value="booking">Khám bệnh</Radio>
+                                <Radio value="consultation">Tư vấn</Radio>
+                                <Radio value="other">Khác</Radio>
+                            </Radio.Group>
                         </Form.Item>
 
                         <Form.Item
