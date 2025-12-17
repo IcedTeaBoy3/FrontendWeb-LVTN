@@ -482,7 +482,7 @@ const AppointmentPage = () => {
                             }}
                             options={[
                                 { label: "Tất cả", value: null },
-                                { label: "Khám trực tiếp", value: "in-person" },
+                                { label: "Khám bệnh", value: "in-person" },
                                 { label: "Tư vấn", value: "telehealth" }      
                             ]}
                         />

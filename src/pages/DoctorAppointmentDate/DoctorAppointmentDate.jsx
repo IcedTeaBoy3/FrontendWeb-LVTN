@@ -1,13 +1,25 @@
 
 import { useLocation, useNavigate } from "react-router-dom"
-import { Space, Input, Form, Typography, Dropdown, Upload, Tag, Button, DatePicker, Select } from "antd";
+import { Space, Input, Form, Typography, Dropdown, Upload, Tag, Button, DatePicker, Select, Badge } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import * as Message from "@/components/Message/Message";
-import { SearchOutlined, EyeOutlined, MoreOutlined, ExclamationCircleOutlined ,UploadOutlined, CheckCircleFilled, VideoCameraOutlined  } from "@ant-design/icons";
-import { useState, useRef} from "react";
+import { 
+  SearchOutlined, 
+  EyeOutlined,
+  MoreOutlined, 
+  ExclamationCircleOutlined,
+  UploadOutlined, 
+  CheckCircleFilled, 
+  VideoCameraOutlined,
+  ReloadOutlined,
+  PlusOutlined,
+  ExportOutlined
+} from "@ant-design/icons";
+import { useState, useRef, useEffect, useMemo} from "react";
+import useDebounce from "@/hooks/useDebounce";
 import { useSelector } from "react-redux";
 import { useQuery,useMutation } from '@tanstack/react-query';
 import { AppointmentService } from '@/services/AppointmentService';
@@ -19,7 +31,7 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import {formatDate, formatTime} from "@/utils/datetime_utils";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
-// Thiết lập ngôn ngữ cho dayjs
+
 dayjs.locale("vi");
 const { Text, Title } = Typography;
 const DoctorAppointmentDate = () => {
@@ -35,6 +47,7 @@ const DoctorAppointmentDate = () => {
   const [isOpenModalCancel, setIsOpenModalCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [typeFilter, setTypeFilter] = useState(null);
+  const [globalSearch, setGlobalSearch] = useState("");
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -360,34 +373,103 @@ const DoctorAppointmentDate = () => {
   const handleCancelConfirm = () => {
     setIsOpenModalCancel(false);
   };
+  const debouncedGlobalSearch = useDebounce(globalSearch, 500);
+  const filteredData = useMemo(() => {
+    if (!debouncedGlobalSearch) return dataTable;
+    return dataTable.filter((item) => {
+      const searchLower = debouncedGlobalSearch.toLowerCase();
+      return (
+        item.appointmentCode.toLowerCase().includes(searchLower) ||
+        item.patientName.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [dataTable, debouncedGlobalSearch]);
+  useEffect(() => {
+    if(!debouncedGlobalSearch){
+      setSearchText("");
+      setSearchedColumn("");
+    }
+  }, [debouncedGlobalSearch]);
+  
 
   return (
     <>
-      <Title level={4}>
-        Lịch khám ngày{" "}
-        {state?.list[0] ? state?.list[0]?.date : "Chưa chọn ngày"}
-      </Title>
-      <Select
-        placeholder="Lọc theo loại lịch khám"
-        allowClear
-        style={{ width: 220, marginBottom: 12 }}
-        onChange={(value) => {
-          setTypeFilter(value);
-        }}
-        options={[
-          { label: "Tất cả", value: null },
-          { label: "Khám trực tiếp", value: "in-person" },
-          { label: "Tư vấn", value: "telehealth" }      
-        ]}
-      />
+      <Space align="center" style={{ marginBottom: 24 }}>
+        <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
 
+          <Title level={4}>
+            Lịch khám ngày{" "}
+            {state?.list[0] ? state?.list[0]?.date : "Chưa chọn ngày"}
+          </Title>
+        </Badge>
+          
+      </Space>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+        <Space>
+          <Space.Compact>
+            <Input
+              placeholder="Tìm kiếm theo mã lịch khám, bệnh nhân hoặc ngày khám"
+              allowClear
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              style={{ width: 400 }}
+              size="middle"
+              enterButton
+            /> 
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+          </Space.Compact>
+          <Space>
+            <Select
+              placeholder="Lọc theo loại lịch khám"
+              allowClear
+              style={{ width: 220 }}
+              onChange={(value) => {
+                setTypeFilter(value);
+              }}
+              options={[
+                { label: "Tất cả", value: null },
+                { label: "Khám bệnh", value: "in-person" },
+                { label: "Tư vấn", value: "telehealth" }      
+              ]}
+            />
+
+            <Button 
+              type="primary" 
+              ghost 
+              onClick={() => queryGetAllAppointments.refetch()}  
+              icon={<ReloadOutlined />}
+            >
+              Tải lại
+            </Button>
+          </Space>
+            
+        </Space>
+        <Space>
+          <ButtonComponent
+            type="primary"
+            onClick={() => setIsModalOpenCreate(true)}
+            icon={<PlusOutlined />}
+          >
+            Thêm mới
+          </ButtonComponent>
+          <ButtonComponent    
+            type="default"
+          
+          >
+            Xuất file
+            <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+          </ButtonComponent>
+        </Space>
+      </div>
+      
+      
     
       <TableStyle
         rowSelection={rowSelection}
         emptyText="Không có lịch khám nào"
         columns={columns}
         loading={isLoadingDoctorAppointments}
-        dataSource={dataTable}
+        dataSource={filteredData}
         pagination={pagination}
         onChange={(page, pageSize) => {
           setPagination((prev) => ({
