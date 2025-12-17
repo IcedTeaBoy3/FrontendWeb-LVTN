@@ -445,13 +445,6 @@ const DoctorAppointmentDate = () => {
             
         </Space>
         <Space>
-          <ButtonComponent
-            type="primary"
-            onClick={() => setIsModalOpenCreate(true)}
-            icon={<PlusOutlined />}
-          >
-            Thêm mới
-          </ButtonComponent>
           <ButtonComponent    
             type="default"
           
