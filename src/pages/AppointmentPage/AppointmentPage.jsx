@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AppointmentService } from '@/services/AppointmentService';
 import { PaymentService } from '@/services/PaymentService';
-import { Space, Input, Button, Typography, Dropdown, Tag, DatePicker,Select } from "antd";
+import { Space, Input, Button, Typography, Dropdown, Tag, DatePicker,Select,Badge } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -14,6 +14,7 @@ import * as Message from "@/components/Message/Message";
 import * as DatetimeUtils from '@/utils/datetime_utils';
 import { getStatusColor,convertStatusAppointment } from '@/utils/status_appointment_utils';
 import { convertStatusPayment, getStatusPaymentColor } from '@/utils/status_payment_utils';
+import useDebounce from '@/hooks/useDebounce';
 import {
     DeleteOutlined,
     SearchOutlined,
@@ -21,7 +22,9 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     ExportOutlined,
-    CheckCircleFilled
+    CheckCircleFilled,
+    ReloadOutlined,
+    PlusOutlined 
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 const { Text,Title } = Typography;
@@ -34,6 +37,7 @@ const AppointmentPage = () => {
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [isModalConfirmPaymentOpen, setIsModalConfirmPaymentOpen] = useState(false);
     const [typeFilter, setTypeFilter] = useState(null);
+    const [globalSearch, setGlobalSearch] = useState("");
     const navigate = useNavigate();
 
     const rowSelection = {
@@ -82,18 +86,18 @@ const AppointmentPage = () => {
 
             <Space>
                 <ButtonComponent
-                type="primary"
-                onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-                icon={<SearchOutlined />}
-                size="small"
-                style={{ width: 90 }}
+                    type="primary"
+                    onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    icon={<SearchOutlined />}
+                    size="small"
+                    style={{ width: 90 }}
                 >
                 Tìm
                 </ButtonComponent>
                 <Button
-                onClick={() => handleReset(clearFilters, confirm)}
-                size="small"
-                style={{ width: 90 }}
+                    onClick={() => handleReset(clearFilters, confirm)}
+                    size="small"
+                    style={{ width: 90 }}
                 >
                 Xóa
                 </Button>
@@ -424,35 +428,108 @@ const AppointmentPage = () => {
             setSelectedRowKeys(dataTable.map(item => item.key));
         }
     };
+    const debouncedGlobalSearch = useDebounce(globalSearch, 500);
+
+    // Lọc dữ liệu theo tìm kiếm toàn cục
+    const filteredData = useMemo(() => {
+        if (!debouncedGlobalSearch) return dataTable;
+        return dataTable.filter((item) => {
+            const searchLower = debouncedGlobalSearch.toLowerCase();
+            return (
+                item.appointmentCode?.toLowerCase().includes(searchLower) ||
+                item.doctorName?.toLowerCase().includes(searchLower) ||
+                item.patientName?.toLowerCase().includes(searchLower)
+            );
+        });
+    }, [dataTable, debouncedGlobalSearch]);
+    useEffect(() => {
+        if (!debouncedGlobalSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+        }
+    }, [debouncedGlobalSearch]);
     return (
         <>
-            <Title level={4}>Danh sách lịch khám</Title>
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
+
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách lịch khám</Title>
+                </Badge>
+               
+            </Space>
+            <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+                <Space>
+                    <Space.Compact>
+                        <Input
+                            placeholder="Tìm kiếm theo mã lịch khám, bác sĩ, bệnh nhân"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400 }}
+                            size="middle"
+                            enterButton
+                        /> 
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Space>
+
+                        <Select
+                            placeholder="Lọc theo loại lịch khám"
+                            allowClear
+                            style={{ width: 200}}
+                            onChange={(value) => {
+                                setTypeFilter(value);
+                            }}
+                            options={[
+                                { label: "Tất cả", value: null },
+                                { label: "Khám trực tiếp", value: "in-person" },
+                                { label: "Tư vấn", value: "telehealth" }      
+                            ]}
+                        />
+                        <Button 
+                            type="primary" 
+                            ghost 
+                            onClick={() => queryGetAllAppointments.refetch()}  
+                            icon={<ReloadOutlined />}
+                        >
+                            Tải lại
+                        </Button>
+                    </Space>
+                    
+                </Space>
+                <Space>
+
+
+                    <ButtonComponent
+                        type="primary"
+                        onClick={() => setIsModalOpenCreate(true)}
+                        icon={<PlusOutlined />}
+                    >
+                        Thêm mới
+                    </ButtonComponent>
+                    <ButtonComponent    
+                        type="default"
+                    
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>
+            </div>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 setSelectedRowKeys={handleSelectedAll}
                 menuProps={menuProps}
                 handleSelectedAll={handleSelectedAll}
             />
-            <Select
-                placeholder="Lọc theo loại lịch khám"
-                allowClear
-                style={{ width: 220, marginBottom: 12 }}
-                onChange={(value) => {
-                   setTypeFilter(value);
-                }}
-                options={[
-                    { label: "Tất cả", value: null },
-                    { label: "Khám trực tiếp", value: "in-person" },
-                    { label: "Tư vấn", value: "telehealth" }      
-                ]}
-            />
+            
             
             <TableStyle
                 rowSelection={rowSelection}
                 emptyText="Không có dữ liệu lịch khám"
                 columns={columns}
                 loading={isLoadingAppointments}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 onChange={(page, pageSize) => {
                     setPagination((prev) => ({

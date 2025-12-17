@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef,useMemo,useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
 import { ServiceService } from '@/services/ServiceService'
-import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Dropdown, Tag, InputNumber,  Descriptions } from "antd";
+import { Space, Input, Radio, Button, Form, Popover, Typography, Select, Dropdown, Tag, InputNumber, Descriptions, Badge} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -10,6 +10,7 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
+import useDebounce from '@/hooks/useDebounce';
 import * as Message from "@/components/Message/Message";
 import { convertServiceTypeToLabel,getColorByServiceType } from '@/utils/servicetype_utils';
 import {
@@ -20,7 +21,8 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     PlusOutlined,
-    ExportOutlined
+    ExportOutlined,
+    ReloadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -35,6 +37,7 @@ const ServicePage = () => {
     const [serviceDetail, setServiceDetail] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
+    const [globalSearch, setGlobalSearch] = useState("");
 
     const rowSelection = {
         selectedRowKeys,
@@ -472,26 +475,73 @@ const ServicePage = () => {
             setSelectedRowKeys(dataTable.map(item => item.key));
         }
     };
+    const debouncedSearch = useDebounce(globalSearch, 500);
+    const filteredData = useMemo(() => {
+        if (!debouncedSearch) return dataTable;
+
+        const keyword = debouncedSearch.toLowerCase();
+
+        return dataTable.filter((item) =>
+            item.name?.toLowerCase().includes(keyword) ||
+            item.description?.toLowerCase().includes(keyword)
+        );
+    }, [dataTable, debouncedSearch]);
+    useEffect(() => {
+        if (!debouncedSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+        }
+    }, [debouncedSearch]);
     return (
-        <>
-            <Title level={4}>Danh sách dịch vụ</Title>
+        <>  
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
+
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách dịch vụ</Title>
+                </Badge>
+               
+            </Space>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+                <Space>
+                    <Space.Compact>
+                        <Input
+                            placeholder="Tìm kiếm chuyên khoa theo tên hoặc mô tả"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400 }}
+                            size="middle"
+                            enterButton
+                        /> 
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Button 
+                        type="primary" 
+                        ghost 
+                        onClick={() => queryGetAllServices.refetch()}  
+                        icon={<ReloadOutlined />}
+                    >
+                        Tải lại
+                    </Button>
+                </Space>
+                <Space>
 
 
-                <ButtonComponent
-                    type="primary"
-                    onClick={() => setIsModalOpenCreate(true)}
-                    icon={<PlusOutlined />}
-                >
-                    Thêm mới
-                </ButtonComponent>
-                <ButtonComponent    
-                    type="default"
-                
-                >
-                    Xuất file
-                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
-                </ButtonComponent>
+                    <ButtonComponent
+                        type="primary"
+                        onClick={() => setIsModalOpenCreate(true)}
+                        icon={<PlusOutlined />}
+                    >
+                        Thêm mới
+                    </ButtonComponent>
+                    <ButtonComponent    
+                        type="default"
+                    
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>
             </div>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
@@ -815,7 +865,7 @@ const ServicePage = () => {
                 emptyText="Không có dữ liệu dịch vụ"
                 columns={columns}
                 loading={isLoadingServices}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 onChange={(page, pageSize) => {
                     setPagination((prev) => ({

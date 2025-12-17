@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect  } from 'react'
+import { useState, useRef, useEffect, useMemo, use} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { ScheduleService } from '@/services/ScheduleService'
 import { DoctorService } from '@/services/DoctorService'
-import { Space, Input, DatePicker, Button, Form, Typography, Select, Dropdown, Tag} from "antd";
+import { Space, Input, DatePicker, Button, Form, Typography, Select, Dropdown, Tag, Badge} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -12,6 +12,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
+import useDebounce from "@/hooks/useDebounce"
 import { convertShiftNameToLabel } from '@/utils/shiftName_utils';
 import dayjs from 'dayjs';
 
@@ -23,7 +24,8 @@ import {
     EyeOutlined,
     ExclamationCircleOutlined,
     PlusOutlined,
-    ExportOutlined
+    ExportOutlined,
+    ReloadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 const SchedulePage = () => {
@@ -35,6 +37,7 @@ const SchedulePage = () => {
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [globalSearch, setGlobalSearch] = useState("");
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
     const [slotGroupCreate, setSlotGroupCreate] = useState({
@@ -500,35 +503,88 @@ const SchedulePage = () => {
             setSelectedRowKeys(dataTable.map(item => item.key));
         }
     };
+    const debouncedGlobalSearch = useDebounce(globalSearch, 400);
+    const filteredData = useMemo(() => {
+
+        if (!debouncedGlobalSearch) return dataTable;
+        const keyWord = debouncedGlobalSearch.toLowerCase();
+        return dataTable.filter(item => {
+            return item.doctor?.toLowerCase().includes(keyWord) ||
+                item.workday?.toLowerCase().includes(keyWord);
+        });
+    }, [debouncedGlobalSearch, dataTable]);
+    
+    useEffect(() => {
+        if (!debouncedGlobalSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+        }
+    }, [debouncedGlobalSearch]);
 
     return (
         <>
-            <Title level={4}>Danh sách lịch làm việc</Title>
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={999} color="#1890ff">
+
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách lịch làm việc</Title>
+                </Badge>
+                
+            </Space>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-                <ButtonComponent
-                    type="primary"
-                    onClick={() => setIsModalOpenCreate(true)}
-                    icon={<PlusOutlined />}
-                >
-                    Thêm mới
-                </ButtonComponent>
-                <ButtonComponent    
-                    type="default"
-                >
-                    Xuất file
-                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
-                </ButtonComponent>
+                <Space>
+                    <Space.Compact>
+                        <Input
+                            placeholder="Tìm kiếm theo tên bác sĩ, ngày làm việc"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400 }}
+                            size="middle"
+                            enterButton
+                        /> 
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Space>
+                        <DatePicker
+                            picker="month"
+                            onChange={(date) => setSelectedDate(date)}
+                            placeholder="Chọn tháng"
+                            value={selectedDate}
+                            format="MM/YYYY"
+                            allowClear
+                            size="middle"
+                           
+                        />
+                        <Button 
+                            type="primary" 
+                            ghost 
+                            onClick={() => queryGetAllSchedules.refetch()}  
+                            icon={<ReloadOutlined />}
+                        >
+                            Tải lại
+                        </Button>
+                    </Space>
+                </Space>
+                <Space>
+
+
+                    <ButtonComponent
+                        type="primary"
+                        onClick={() => setIsModalOpenCreate(true)}
+                        icon={<PlusOutlined />}
+                    >
+                        Thêm mới
+                    </ButtonComponent>
+                    <ButtonComponent    
+                        type="default"
+                    
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>
             </div>
-            <DatePicker
-                picker="month"
-                onChange={(date) => setSelectedDate(date)}
-                placeholder="Chọn tháng"
-                value={selectedDate}
-                format="MM/YYYY"
-                allowClear
-                size="middle"
-                style={{ marginBottom: 20 }}
-            />
+            
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
                 handleSelectedAll={handleSelectedAll}
@@ -921,7 +977,7 @@ const SchedulePage = () => {
                 rowSelection={rowSelection}
                 columns={columns}
                 loading={isLoadingSchedules}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 onChange={(page) => setPagination(page)}
             />

@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
+import useDebounce from '@/hooks/useDebounce';
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { AccountService } from '@/services/AccountService'
-import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown,Tag, Select, Row, Avatar, Col, Descriptions } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Dropdown,Tag, Select, Avatar, Descriptions, Badge } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -20,7 +21,8 @@ import {
     ExclamationCircleOutlined,
     ExportOutlined,
     BlockOutlined,
-    PlusOutlined
+    PlusOutlined,
+    ReloadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -34,6 +36,7 @@ const AccountPage = () => {
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
     const [account, setAccount] = useState(null);
     const [formUpdate] = Form.useForm();
+    const [globalSearch, setGlobalSearch] = useState("");
 
     const rowSelection = {
         selectedRowKeys,
@@ -246,8 +249,8 @@ const AccountPage = () => {
         key: item.accountId,
         index: index + 1,
         email: item.email,
-        userName: item.userName || 'Chưa cập nhật',
-        phone: item.phone || 'Chưa cập nhật',
+        userName: item.userName || "Chưa cập nhật",
+        phone: item.phone || "Chưa cập nhật",
         role: item.role,
         isBlocked: item.isBlocked,
         isVerified: item.isVerified,
@@ -452,25 +455,69 @@ const AccountPage = () => {
             setSelectedRowKeys(dataTable.map(item => item.key));
         }
     };
+    const debouncedGlobalSearch = useDebounce(globalSearch, 400);
+    const filteredData = useMemo(() => {
+        if (!debouncedGlobalSearch) {
+            return dataTable;
+        }
+        return dataTable.filter((item) =>
+            item.email?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
+            item?.userName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
+            item?.phone?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase())
+        );
+    }, [debouncedGlobalSearch, dataTable]);
+    useEffect(() => {
+        if(!debouncedGlobalSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+        }
+    }, [debouncedGlobalSearch]);
     return (
         <>
-            <Title level={4}>Danh sách tài khoản</Title>
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={99} color="#1890ff">
+
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách tài khoản</Title>
+                </Badge>
+               
+            </Space>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-                <ButtonComponent
-                    type="primary"
-                    disabled={true}
-                    icon={<PlusOutlined />}
-                    style={{ marginRight: 8 }}
-                >
-                    Thêm mới
-                </ButtonComponent>
-                <ButtonComponent    
-                    type="default"
-                
-                >
-                    Xuất file
-                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
-                </ButtonComponent>
+                <Space>
+                    <Space.Compact>
+                        <Input
+                            placeholder="Tìm kiếm theo email, tên tài khoản, số điện thoại"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400 }}
+                            size="middle"
+                            enterButton
+                        /> 
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Space>
+
+                        
+                        <Button 
+                            type="primary" 
+                            ghost 
+                            onClick={() => queryGetAllAccounts.refetch()}  
+                            icon={<ReloadOutlined />}
+                        >
+                            Tải lại
+                        </Button>
+                    </Space>
+                    
+                </Space>
+                <Space>
+                    <ButtonComponent    
+                        type="default"
+                        disabled={true}
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>
             </div>
             
             <BulkActionBar
@@ -482,7 +529,7 @@ const AccountPage = () => {
                 rowSelection={rowSelection}
                 columns={columns}
                 loading={isLoadingAccounts}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 emptyText="Không có dữ liệu tài khoản"
                 onChange={(page, pageSize) => {

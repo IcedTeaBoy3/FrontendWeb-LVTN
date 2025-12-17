@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
-import { Space, Input, Button, Form, Radio, Typography, Popover, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col, Descriptions  } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Dropdown, Upload, Tag, Image, Avatar, Row, Col, Descriptions, Badge  } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -9,6 +9,7 @@ import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
+import useDebounce from '@/hooks/useDebounce';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
 import {
@@ -21,6 +22,7 @@ import {
     PlusOutlined,
     UploadOutlined,
     ExportOutlined,
+    ReloadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -35,7 +37,7 @@ const SpecialtyPage = () => {
     const [specialtyDetail, setSpecialtyDetail] = useState(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
-
+    const [globalSearch, setGlobalSearch] = useState("");
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -207,7 +209,7 @@ const SpecialtyPage = () => {
     const handleReset = (clearFilters, confirm) => {
         clearFilters();
         setSearchText("");
-        confirm(); // refresh bảng sau khi clear
+        confirm(); 
     };
     const columns = [
         {
@@ -431,26 +433,73 @@ const SpecialtyPage = () => {
             setSelectedRowKeys(dataTable.map(item => item.key));
         }
     };
+    const debouncedSearch = useDebounce(globalSearch, 500);
+    const filteredData = useMemo(() => {
+        if (!debouncedSearch) return dataTable;
+
+        const keyword = debouncedSearch.toLowerCase();
+
+        return dataTable.filter((item) =>
+            item.name?.toLowerCase().includes(keyword) ||
+            item.description?.toLowerCase().includes(keyword)
+        );
+    }, [dataTable, debouncedSearch]);
+    useEffect(() => {
+        if (!debouncedSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+        }
+    }, [debouncedSearch]);
     return (
         <>
-            <Title level={4}>Danh sách chuyên khoa</Title>
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
+
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách chuyên khoa</Title>
+                </Badge>
+               
+            </Space>
+            
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+                <Space>
 
-
-                <ButtonComponent
-                    type="primary"
-                    onClick={() => setIsModalOpenCreate(true)}
-                    icon={<PlusOutlined />}
-                >
-                    Thêm mới
-                </ButtonComponent>
-                <ButtonComponent    
-                    type="default"
-                
-                >
-                    Xuất file
-                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
-                </ButtonComponent>
+                    <Space.Compact style={{ width: 400 }}>
+                        <Input
+                            placeholder="Tìm kiếm chuyên khoa theo tên hoặc mô tả"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400}}
+                            size="middle"
+                           
+                        />  
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Button 
+                        type="primary" 
+                        ghost 
+                        icon={<ReloadOutlined />} 
+                        onClick={() => {
+                            queryGetAllSpecialties.refetch();
+                        }}
+                    >Tải lại</Button>
+                </Space>
+                <Space>
+                    <ButtonComponent
+                        type="primary"
+                        onClick={() => setIsModalOpenCreate(true)}
+                        icon={<PlusOutlined />}
+                    >
+                        Thêm mới
+                    </ButtonComponent>
+                    <ButtonComponent    
+                        type="default"
+                    
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>      
             </div>
            
             
@@ -761,7 +810,7 @@ const SpecialtyPage = () => {
                 rowSelection={rowSelection}
                 columns={columns}
                 loading={isLoadingSpecialties}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 onChange={(page, pageSize) => {
                     setPagination((prev) => ({

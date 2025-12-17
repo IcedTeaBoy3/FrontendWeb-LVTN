@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { DoctorReviewService } from "@/services/DoctorReviewService";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import useDebounce from "@/hooks/useDebounce";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
@@ -14,25 +15,25 @@ import {
     ExportOutlined, 
     SearchOutlined, 
     DeleteOutlined, 
-    ExclamationCircleOutlined   
+    ExclamationCircleOutlined,
+    ReloadOutlined  
 } from "@ant-design/icons";
-import { Dropdown, Typography, Tag, Form, Popover, Rate, Descriptions, Input, Space, Button } from "antd";
+import { Dropdown, Typography, Tag, Form, Popover, Rate, Descriptions, Input, Space, Button, Badge ,Select  } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import BulkActionBar from "@/components/BulkActionBar/BulkActionBar";
 import dayjs from "dayjs";
 const { Title, Text } = Typography;
 const DoctorReviewPage = () => {
-    const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const [isModalOpenDeleteMany, setIsModalOpenDeleteMany] = useState(false);
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
     const [doctorReviewDetail, setDoctorReviewDetail] = useState(null);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
-    const [formCreate] = Form.useForm();
-    const [formUpdate] = Form.useForm();
+    const [globalSearch, setGlobalSearch] = useState("");
+
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys) => {
@@ -384,23 +385,69 @@ const DoctorReviewPage = () => {
     const handleCancelDeleteMany = () => {
         setIsModalOpenDeleteMany(false);
     };
+    const debouncedGlobalSearch = useDebounce(globalSearch, 500);
+    const filteredData = useMemo(() => {
+        if (!debouncedGlobalSearch) return dataTable;
+        return dataTable.filter((item) => {
+            return (
+                item.appointmentCode?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
+                item.patientName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
+                item.doctorName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase())
+            );
+        });
+    }, [dataTable, debouncedGlobalSearch]);
+    useEffect(() => {
+        if(!debouncedGlobalSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+        }
+    }, [debouncedGlobalSearch]);
     return (
         <>
-            <Title level={4}>Danh sách đánh giá bác sĩ</Title>
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={99} color="#1890ff">
+
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách đánh giá bác sĩ</Title>
+                </Badge>
+               
+            </Space>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-                <ButtonComponent
-                    type="primary"
-                    onClick={() => setIsModalOpenCreate(true)}
-                    icon={<PlusOutlined />}
-                >
-                    Thêm mới
-                </ButtonComponent>
-                <ButtonComponent    
-                    type="default"
-                >
-                    Xuất file
-                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
-                </ButtonComponent>
+                <Space>
+                    <Space.Compact>
+                        <Input
+                            placeholder="Tìm kiếm theo mã lịch khám, bác sĩ, bệnh nhân"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400 }}
+                            size="middle"
+                            enterButton
+                        /> 
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Space>
+
+                        
+                        <Button 
+                            type="primary" 
+                            ghost 
+                            onClick={() => queryGetAllDoctorReviews.refetch()}  
+                            icon={<ReloadOutlined />}
+                        >
+                            Tải lại
+                        </Button>
+                    </Space>
+                    
+                </Space>
+                <Space>
+                    <ButtonComponent    
+                        type="default"
+                        disabled={true}
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>
             </div>
             
             <BulkActionBar
@@ -412,7 +459,7 @@ const DoctorReviewPage = () => {
                 rowSelection={rowSelection}
                 columns={columns}
                 loading={isLoading}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 onChange={(page, pageSize) => {
                     setPagination((prev) => ({

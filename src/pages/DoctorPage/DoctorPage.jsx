@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo, use } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom';
 import { DoctorService } from '@/services/DoctorService';
 import { DegreeService } from '@/services/DegreeService';
 import AddressService from '@/services/AddressService';
-import { Space, Input, Form, Select, Radio, Typography, Divider, Dropdown, DatePicker, Upload, Tag, Popover } from "antd";
+import { Space, Input, Form, Select, Radio, Typography, Divider, Dropdown, DatePicker, Upload, Tag, Popover, Badge, Button} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -16,6 +16,7 @@ import AddressFields from '@/components/AddressFields/AddressFields';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
+import useDebounce from '@/hooks/useDebounce';
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -27,6 +28,7 @@ import {
     ExportOutlined,
     PlusOutlined,
     UploadOutlined,
+    ReloadOutlined 
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
@@ -46,6 +48,7 @@ const DoctorPage = () => {
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
     const [formCreateDegree] = Form.useForm();
+    const [globalSearch, setGlobalSearch] = useState("");
     const navigate = useNavigate();
     const rowSelection = {
         selectedRowKeys,
@@ -582,25 +585,76 @@ const DoctorPage = () => {
             setSelectedRowKeys(dataTable.map(item => item.key));
         }
     };
+    const debouncedGlobalSearch = useDebounce(globalSearch, 500);
+    // Lọc dữ liệu theo tìm kiếm toàn cục
+    const filteredData = useMemo(() => {
+        const searchValue = debouncedGlobalSearch.toLowerCase();
+        return dataTable.filter((item) => {
+            return (
+                item.fullName?.toString().toLowerCase().includes(searchValue) ||
+                item.email?.toString().toLowerCase().includes(searchValue) ||
+                item.phone?.toString().toLowerCase().includes(searchValue)
+            );
+        });
+    });
+    useEffect(() => {
+        if (!debouncedGlobalSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+            
+        }
+    }), [debouncedGlobalSearch];
+
     return (
         <>
-            <Title level={4}>Danh sách bác sĩ</Title>
-            <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
 
-                <ButtonComponent
-                    type="primary"
-                    onClick={() => setIsModalOpenCreate(true)}
-                    icon={<PlusOutlined />}
-                >
-                    Thêm mới
-                </ButtonComponent>
-                <ButtonComponent    
-                    type="default"
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách bác sĩ</Title>
+                </Badge>
                 
-                >
-                    Xuất file
-                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
-                </ButtonComponent>
+            </Space>
+            <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+                <Space>
+                    <Space.Compact>
+                        <Input
+                            placeholder="Tìm kiếm theo họ tên, email, số điện thoại"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400 }}
+                            size="middle"
+                            enterButton
+                        /> 
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Button 
+                        type="primary" 
+                        ghost 
+                        onClick={() => queryGetAllDoctors.refetch()}  
+                        icon={<ReloadOutlined />}
+                    >
+                        Tải lại
+                    </Button>
+                </Space>
+                <Space>
+
+
+                    <ButtonComponent
+                        type="primary"
+                        onClick={() => setIsModalOpenCreate(true)}
+                        icon={<PlusOutlined />}
+                    >
+                        Thêm mới
+                    </ButtonComponent>
+                    <ButtonComponent    
+                        type="default"
+                    
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>
             </div>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
@@ -1117,7 +1171,7 @@ const DoctorPage = () => {
                 emptyText="Không có dữ liệu bác sĩ"
                 columns={columns}
                 loading={isLoadingDoctors}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 onChange={(page, pageSize) => {
                     setPagination((prev) => ({

@@ -389,15 +389,33 @@ const DoctorSchedulePage = () => {
     setSelectedSchedule(schedule);
     setIsDrawerOpen(true);
   };
+  const handleCreateTomorrowSchedule = () => {
+    const tomorrow = dayjs().add(1, 'day').startOf('day');
+    mutationCreateSchedule.mutate({
+      workday: tomorrow,
+      shiftNames: ['morning', 'afternoon', 'evening'],
+      doctorId: account.doctor.doctorId,
+      slotDuration: 30
+    });
+  }
+
   return (
     <>
       <Title level={4}>Quản lý lịch làm việc</Title>
       <Divider style={{ margin: '12px 0' }} />
-      <ButtonComponent 
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => setIsModalOpenCreate(true)}
-      >Thêm lịch làm việc</ButtonComponent>
+      <Space>
+
+        <ButtonComponent 
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setIsModalOpenCreate(true)}
+        >Thêm lịch làm việc</ButtonComponent>
+        <ButtonComponent 
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleCreateTomorrowSchedule}
+        >Thêm lịch ngày mai</ButtonComponent>
+      </Space>
       <TabsComponent 
         activeKey={tabKey}
         type='card'
