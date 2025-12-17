@@ -11,7 +11,7 @@ import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
-import { convertServiceTypeToLabel } from '@/utils/servicetype_utils';
+import { convertServiceTypeToLabel,getColorByServiceType } from '@/utils/servicetype_utils';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -324,7 +324,7 @@ const ServicePage = () => {
             onFilter: (value, record) => record.type.startsWith(value),
             filterMultiple: false,
             render: (text) => (
-                <Tag color="purple">{convertServiceTypeToLabel(text)}</Tag>
+                <Tag color={getColorByServiceType(text)}>{convertServiceTypeToLabel(text)}</Tag>
             )
         },
 

@@ -13,3 +13,17 @@ export const convertServiceTypeToLabel = (type) => {
             return "Khác";
     }
 }
+export const getColorByServiceType = (type) => {
+    switch (type) {
+        case "booking":
+            return "geekblue";
+        case "consultation":
+            return "green";
+        case "health-check":
+            return "orange";
+        case "other":
+            return "gray";
+        default:
+            return "gray";
+    }
+}
