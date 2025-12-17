@@ -388,7 +388,7 @@ const DoctorReviewPage = () => {
     const debouncedGlobalSearch = useDebounce(globalSearch, 500);
     const filteredData = useMemo(() => {
         if (!debouncedGlobalSearch) return dataTable;
-        return dataTable.filter((item) => {
+        return dataTable?.filter((item) => {
             return (
                 item.appointmentCode?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
                 item.patientName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||

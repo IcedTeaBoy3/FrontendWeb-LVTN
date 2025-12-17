@@ -433,7 +433,7 @@ const AppointmentPage = () => {
     // Lọc dữ liệu theo tìm kiếm toàn cục
     const filteredData = useMemo(() => {
         if (!debouncedGlobalSearch) return dataTable;
-        return dataTable.filter((item) => {
+        return dataTable?.filter((item) => {
             const searchLower = debouncedGlobalSearch.toLowerCase();
             return (
                 item.appointmentCode?.toLowerCase().includes(searchLower) ||

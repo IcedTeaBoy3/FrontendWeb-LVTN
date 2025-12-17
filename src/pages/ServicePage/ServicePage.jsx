@@ -481,7 +481,7 @@ const ServicePage = () => {
 
         const keyword = debouncedSearch.toLowerCase();
 
-        return dataTable.filter((item) =>
+        return dataTable?.filter((item) =>
             item.name?.toLowerCase().includes(keyword) ||
             item.description?.toLowerCase().includes(keyword)
         );

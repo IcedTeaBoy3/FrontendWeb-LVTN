@@ -460,7 +460,7 @@ const AccountPage = () => {
         if (!debouncedGlobalSearch) {
             return dataTable;
         }
-        return dataTable.filter((item) =>
+        return dataTable?.filter((item) =>
             item.email?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
             item?.userName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
             item?.phone?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase())

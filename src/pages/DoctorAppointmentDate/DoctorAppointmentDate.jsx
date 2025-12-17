@@ -376,11 +376,11 @@ const DoctorAppointmentDate = () => {
   const debouncedGlobalSearch = useDebounce(globalSearch, 500);
   const filteredData = useMemo(() => {
     if (!debouncedGlobalSearch) return dataTable;
-    return dataTable.filter((item) => {
+    return dataTable?.filter((item) => {
       const searchLower = debouncedGlobalSearch.toLowerCase();
       return (
-        item.appointmentCode.toLowerCase().includes(searchLower) ||
-        item.patientName.toLowerCase().includes(searchLower)
+        item.appointmentCode?.toLowerCase().includes(searchLower) ||
+        item.patientName?.toLowerCase().includes(searchLower)
       );
     });
   }, [dataTable, debouncedGlobalSearch]);

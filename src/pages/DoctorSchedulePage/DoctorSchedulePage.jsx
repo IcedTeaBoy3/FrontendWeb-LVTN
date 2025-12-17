@@ -296,7 +296,7 @@ const DoctorSchedulePage = () => {
     },
   ];
   const dateCellRender = (value) => {
-    const listData = calendarData.filter(
+    const listData = calendarData?.filter(
       (item) => item.date === value.format("DD/MM/YYYY")
     );
     // Giới hạn hiển thị 3 ca đầu tiên

@@ -508,7 +508,7 @@ const SchedulePage = () => {
 
         if (!debouncedGlobalSearch) return dataTable;
         const keyWord = debouncedGlobalSearch.toLowerCase();
-        return dataTable.filter(item => {
+        return dataTable?.filter(item => {
             return item.doctor?.toLowerCase().includes(keyWord) ||
                 item.workday?.toLowerCase().includes(keyWord);
         });

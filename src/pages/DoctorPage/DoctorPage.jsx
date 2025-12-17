@@ -589,7 +589,7 @@ const DoctorPage = () => {
     // Lọc dữ liệu theo tìm kiếm toàn cục
     const filteredData = useMemo(() => {
         const searchValue = debouncedGlobalSearch.toLowerCase();
-        return dataTable.filter((item) => {
+        return dataTable?.filter((item) => {
             return (
                 item.fullName?.toString().toLowerCase().includes(searchValue) ||
                 item.email?.toString().toLowerCase().includes(searchValue) ||
