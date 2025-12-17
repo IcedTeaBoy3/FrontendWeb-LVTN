@@ -178,18 +178,17 @@ const DoctorPage = () => {
     const uniqueSpecialties = [
         ...new Set(
             data?.flatMap((doctor) =>
-            doctor?.doctorSpecialties.map((ds) => ds?.specialty.name)
+            doctor?.doctorSpecialties.map((ds) => ds?.specialty?.name)
             )
         ),
     ];
     const uniqueWorkplaces = [
         ...new Set(
             data?.flatMap((doctor) =>
-                doctor?.doctorWorkplaces.map((ws) => ws?.workplace.name)
+                doctor?.doctorWorkplaces.map((ws) => ws?.workplace?.name)
             )
         ),
     ];
-    // const workplaces = data?.
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({
             setSelectedKeys,
@@ -301,7 +300,7 @@ const DoctorPage = () => {
             key: "specialty",
             render: (dS) => {
                 return dS ? (
-                    <Tag color="blue">{dS?.specialty.name}</Tag>
+                    <Tag color="blue">{dS?.specialty?.name}</Tag>
                 ) : (
                     <Text type="secondary">Chưa cập nhật</Text>
                 );
@@ -317,12 +316,12 @@ const DoctorPage = () => {
             render: (dW) => {
                 return dW ? (
                     <Popover
-                        content={<div style={{ maxWidth: 300 }}>{dW?.workplace.name}</div>}
+                        content={<div style={{ maxWidth: 300 }}>{dW?.workplace?.name}</div>}
                         title="Nội dung đầy đủ"
                         trigger="hover"
                     >
                         <Text ellipsis style={{ maxWidth: 200, display: "inline-block" }}>
-                            {dW?.workplace.name.length > 60 ? dW?.workplace.name.substring(0, 50) + "..." : dW?.workplace.name}
+                            {dW?.workplace?.name.length > 60 ? dW?.workplace?.name.substring(0, 50) + "..." : dW?.workplace?.name}
                         </Text>
                     </Popover>
                 ) : (

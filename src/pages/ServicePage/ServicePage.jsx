@@ -770,6 +770,9 @@ const ServicePage = () => {
                     <Descriptions.Item label="Mô tả">
                         {serviceDetail?.description || <Text type="secondary">Chưa cập nhật</Text>}
                     </Descriptions.Item>
+                    <Descriptions.Item label="Mô tả">
+                        {<Tag color={getColorByServiceType(serviceDetail?.type)}>{convertServiceTypeToLabel(serviceDetail?.type)}</Tag> || <Text type="secondary">Chưa cập nhật</Text>}
+                    </Descriptions.Item>
                     <Descriptions.Item label="Trạng thái">
                         {serviceDetail?.status === "active" ? (
                             <Tag color="success">Đang hoạt động</Tag>
