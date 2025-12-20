@@ -14,6 +14,7 @@ import { Divider, Typography, Dropdown, Form, Select, TimePicker, Input, Button,
 import { ArrowLeftOutlined, ClockCircleOutlined, CalendarOutlined, AppstoreOutlined ,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined, SearchOutlined,ExclamationCircleOutlined    } from '@ant-design/icons';
 import { useState, useRef } from 'react';
 import { getColorForShiftName, convertShiftNameToLabel } from '@/utils/shiftName_utils';
+import { validateShiftTime, getDisabledTimeByShift} from '@/utils/shiftTime_utils';
 
 
 const { Text, Title } = Typography;
@@ -391,6 +392,8 @@ const DetailDoctorSchedulePage = () => {
   const handleCancelDeleteSlot = () => {
     setIsModalOpenDeleteSlot(false);
   }
+  
+
   return (
     <>
       <ButtonComponent
@@ -454,26 +457,19 @@ const DetailDoctorSchedulePage = () => {
                 label="Thời gian bắt đầu"
                 name="startTime"
                 rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng chọn thời gian bắt đầu!",
-                    },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        const startTime = getFieldValue('startTime');
-                        const endTime = getFieldValue('endTime');
-                        if (startTime && endTime && startTime.isAfter(endTime)) {
-                          return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
-                        }
-                        return Promise.resolve();
-                      }
-                    })
+                  {
+                    required: true,
+                    message: "Vui lòng chọn thời gian bắt đầu!",
+                  },
+                  validateShiftTime(formCreate)
                 ]}
             >
               <TimePicker
                 format="HH:mm"
+                disabledTime={() => getDisabledTimeByShift(formCreate)}
                 style={{ width: "100%" }}
                 placeholder="Chọn giờ bắt đầu"
+                
               />
             </Form.Item>
 
@@ -481,24 +477,16 @@ const DetailDoctorSchedulePage = () => {
               label="Thời gian kết thúc"
               name="endTime"
               rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn thời gian kết thúc!",
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      const startTime = getFieldValue('startTime');
-                      const endTime = getFieldValue('endTime');
-                      if (startTime && endTime && startTime.isAfter(endTime)) {
-                         return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
-                      }
-                      return Promise.resolve();
-                    }
-                  })
+                {
+                  required: true,
+                  message: "Vui lòng chọn thời gian kết thúc!",
+                },
+                validateShiftTime(formCreate)
               ]}
             >
               <TimePicker
                 format="HH:mm"
+                disabledTime={() => getDisabledTimeByShift(formCreate)}
                 style={{ width: "100%" }}
                 placeholder="Chọn giờ kết thúc"
               />
@@ -693,99 +681,64 @@ const DetailDoctorSchedulePage = () => {
             autoComplete="off"
             form={formUpdate}
           >
+            
             <Form.Item
-                label="Ca làm việc"
-                name="name"
-                rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng chọn ca làm việc!",
-                    },
-                ]}
-              >
-                <Select
-                  placeholder="Chọn ca làm việc"
-                  style={{ width: "100%" }}
-                  onChange={handleOnchange}
-                  options={[
-                    { value: 'morning', label: 'Ca sáng' },
-                    { value: 'afternoon', label: 'Ca chiều' },
-                    { value: 'evening', label: 'Ca tối' },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item
-                  label="Thời gian bắt đầu"
-                  name="startTime"
-                  rules={[
-                      {
-                          required: true,
-                          message: "Vui lòng chọn thời gian bắt đầu!",
-                      },
-                      ({ getFieldValue }) => ({
-                          validator(_, value) {
-                              const startTime = getFieldValue('startTime');
-                              const endTime = getFieldValue('endTime');
-                              if (startTime && endTime && startTime.isAfter(endTime)) {
-                                  return Promise.reject(new Error("Thời gian bắt đầu phải trước thời gian kết thúc!"));
-                              }
-                              return Promise.resolve();
-                          }
-                      })
-                  ]}
-              >
-                  <TimePicker
-                      format="HH:mm"
-                      style={{ width: "100%" }}
-                      placeholder="Chọn giờ bắt đầu"
-                  />
-              </Form.Item>
+              label="Thời gian bắt đầu"
+              name="startTime"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn thời gian bắt đầu!",
+                },
+                validateShiftTime(formUpdate)
+              ]}
+            >
+              <TimePicker
+                format="HH:mm"
+                disabledTime={() => getDisabledTimeByShift(formUpdate)}
+                style={{ width: "100%" }}
+                placeholder="Chọn giờ bắt đầu"
+                
+              />
+            </Form.Item>
 
-              <Form.Item
-                  label="Thời gian kết thúc"
-                  name="endTime"
-                  rules={[
-                      {
-                          required: true,
-                          message: "Vui lòng chọn thời gian kết thúc!",
-                      },
-                      ({ getFieldValue }) => ({
-                          validator(_, value) {
-                              const startTime = getFieldValue('startTime');
-                              const endTime = getFieldValue('endTime');
-                              if (startTime && endTime && startTime.isAfter(endTime)) {
-                                  return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu!"));
-                              }
-                              return Promise.resolve();
-                          }
-                      })
-                  ]}
-              >
-                <TimePicker
-                  format="HH:mm"
-                  style={{ width: "100%" }}
-                  placeholder="Chọn giờ kết thúc"
-                />
-              </Form.Item>
-              <Form.Item
-                label={null}
-                wrapperCol={{ offset: 18, span: 6 }}
-              >
-                <Space>
-                  <ButtonComponent
-                    type="default"
-                    onClick={() => setIsDrawerOpen(false)}
-                  >
-                    Huỷ
-                  </ButtonComponent>
-                  <ButtonComponent
-                    type="primary"
-                    htmlType="submit"
-                  >
-                    Lưu
-                  </ButtonComponent>
-                </Space>
-              </Form.Item>
+            <Form.Item
+              label="Thời gian kết thúc"
+              name="endTime"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn thời gian kết thúc!",
+                },
+                validateShiftTime(formUpdate)
+              ]}
+            >
+              <TimePicker
+                format="HH:mm"
+                disabledTime={() => getDisabledTimeByShift(formUpdate)}
+                style={{ width: "100%" }}
+                placeholder="Chọn giờ kết thúc"
+              />
+            </Form.Item>
+            <Form.Item
+              label={null}
+              wrapperCol={{ offset: 18, span: 6 }}
+            >
+              <Space>
+                <ButtonComponent
+                  type="default"
+                  onClick={() => setIsDrawerOpen(false)}
+                >
+                  Huỷ
+                </ButtonComponent>
+                <ButtonComponent
+                  type="primary"
+                  htmlType="submit"
+                >
+                  Lưu
+                </ButtonComponent>
+              </Space>
+            </Form.Item>
           </Form>
         </LoadingComponent>
       </DrawerComponent>
