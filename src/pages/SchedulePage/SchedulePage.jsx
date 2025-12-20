@@ -5,7 +5,6 @@ import { ScheduleService } from '@/services/ScheduleService'
 import { DoctorService } from '@/services/DoctorService'
 import { Space, Input, DatePicker, Button, Form, Typography, Select, Dropdown, Tag, Badge} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
-import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
@@ -14,8 +13,8 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import useDebounce from "@/hooks/useDebounce"
 import { convertShiftNameToLabel } from '@/utils/shiftName_utils';
+import { normalizeVietnamese, highlightText } from "@/utils/search_utils";
 import dayjs from 'dayjs';
-
 import {
     EditOutlined,
     DeleteOutlined,
@@ -50,9 +49,6 @@ const SchedulePage = () => {
         afternoon: [],
         evening: [],
     });
-    const [selectedSlotsCreate, setSelectedSlotsCreate] = useState([]);
-    const [selectedSlotsUpdate, setSelectedSlotsUpdate] = useState([]);
-
     const SHIFT_TIME = {
         morning: [dayjs("08:00", "HH:mm"), dayjs("12:00", "HH:mm")],
         afternoon: [dayjs("13:00", "HH:mm"), dayjs("17:00", "HH:mm")],
@@ -261,8 +257,8 @@ const SchedulePage = () => {
     const { isPending: isPendingDelete } = mutationDeleteSchedule;
     const { isPending: isPendingUpdate } = mutationUpdateSchedule;
     const { isPending: isPendingDeleteMany } = mutationDeleteManySchedules;
-    const doctorData = doctors?.data?.doctors || [];
-    const scheduleData = schedules?.data?.schedules || [];
+    const doctorData = useMemo(() => doctors?.data?.doctors || [], [doctors]);
+    const scheduleData = useMemo(() => schedules?.data?.schedules || [], [schedules]);
     const dataTable = scheduleData.map((item, index) => ({
         key: item.scheduleId,
         index: index + 1,
@@ -287,12 +283,14 @@ const SchedulePage = () => {
             filterMultiple: false,
             ...getColumnSearchProps("workday", "date"),
             sorter: (a, b) => dayjs(a.workday, "DD/MM/YYYY").unix() - dayjs(b.workday, "DD/MM/YYYY").unix(),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
             title: "Bác sĩ",
             dataIndex: "doctor",
             key: "doctor",
             ...getColumnSearchProps("doctor"),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
             title: "Thời gian khám (phút) / lượt",
@@ -507,10 +505,10 @@ const SchedulePage = () => {
     const filteredData = useMemo(() => {
 
         if (!debouncedGlobalSearch) return dataTable;
-        const keyWord = debouncedGlobalSearch.toLowerCase();
+        const keyWord = normalizeVietnamese(debouncedGlobalSearch);
         return dataTable?.filter(item => {
-            return item.doctor?.toLowerCase().includes(keyWord) ||
-                item.workday?.toLowerCase().includes(keyWord);
+            return normalizeVietnamese(item?.doctor)?.includes(keyWord) ||
+            normalizeVietnamese(item?.workday)?.includes(keyWord);
         });
     }, [debouncedGlobalSearch, dataTable]);
     

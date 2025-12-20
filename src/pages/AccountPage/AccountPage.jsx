@@ -3,7 +3,6 @@ import useDebounce from '@/hooks/useDebounce';
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { AccountService } from '@/services/AccountService'
 import { Space, Input, Button, Form, Radio, Typography, Dropdown,Tag, Select, Avatar, Descriptions, Badge } from "antd";
-import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -12,6 +11,7 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
+import { normalizeVietnamese, highlightText } from "@/utils/search_utils";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -21,7 +21,6 @@ import {
     ExclamationCircleOutlined,
     ExportOutlined,
     BlockOutlined,
-    PlusOutlined,
     ReloadOutlined
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
@@ -249,14 +248,13 @@ const AccountPage = () => {
         key: item.accountId,
         index: index + 1,
         email: item.email,
-        userName: item.userName || "Chưa cập nhật",
-        phone: item.phone || "Chưa cập nhật",
+        userName: item.userName,
+        phone: item.phone,
         role: item.role,
         isBlocked: item.isBlocked,
         isVerified: item.isVerified,
     }));
-    // cột bảng
-     const columns = [
+    const columns = [
         {
             title: "STT",
             dataIndex: "index",
@@ -268,18 +266,27 @@ const AccountPage = () => {
             dataIndex: "email",
             key: "email",
             ...getColumnSearchProps("email"),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
             title: "Tên tài khoản",
             dataIndex: "userName",
             key: "userName",
             ...getColumnSearchProps("userName"),
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return highlightText(text, debouncedGlobalSearch)
+            },
         },
         {
             title: "Số điện thoại",
             dataIndex: "phone",
             key: "phone",
             ...getColumnSearchProps("phone"),
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return highlightText(text, debouncedGlobalSearch)
+            },
         },
         {
             title: "Vai trò",
@@ -460,10 +467,11 @@ const AccountPage = () => {
         if (!debouncedGlobalSearch) {
             return dataTable;
         }
+        const searchLower = normalizeVietnamese(debouncedGlobalSearch);
         return dataTable?.filter((item) =>
-            item.email?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
-            item?.userName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
-            item?.phone?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase())
+            normalizeVietnamese(item.email).includes(searchLower) ||
+            normalizeVietnamese(item?.userName).includes(searchLower) ||
+            normalizeVietnamese(item?.phone).includes(searchLower)
         );
     }, [debouncedGlobalSearch, dataTable]);
     useEffect(() => {

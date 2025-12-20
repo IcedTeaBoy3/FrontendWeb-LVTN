@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { SpecialtyService } from '@/services/SpecialtyService'
-import { Space, Input, Button, Form, Radio, Typography, Popover, Dropdown, Upload, Tag, Image, Avatar, Row, Col, Descriptions, Badge  } from "antd";
-import Highlighter from "react-highlight-words";
+import { Space, Input, Button, Form, Radio, Typography, Popover, Dropdown, Upload, Tag, Image, Descriptions, Badge  } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
@@ -12,6 +11,7 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import useDebounce from '@/hooks/useDebounce';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
+import {normalizeVietnamese, highlightText} from "@/utils/search_utils";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -130,7 +130,7 @@ const SpecialtyPage = () => {
     const { isPending: isPendingUpdate } = mutationUpdateSpecialty;
     const { isPending: isPendingDelete } = mutationDeleteSpecialty;
     const { isPending: isPendingDeleteMany } = mutationDeleteManySpecialties;
-    const data = dataSpecialties?.data?.specialties;
+    const data = useMemo(() => dataSpecialties?.data?.specialties || [], [dataSpecialties]);
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({
             setSelectedKeys,
@@ -223,27 +223,36 @@ const SpecialtyPage = () => {
             dataIndex: "name",
             key: "name",
             ...getColumnSearchProps("name"),
+            render: (text) => highlightText(text, debouncedSearch),
         },
         {
             title: "Mô tả",
             dataIndex: "description",
             key: "description",
-            render: (text) => (
-                text ? (
+            render: (text) => {
+                if (!text) {
+                    return <Text type="secondary">Chưa cập nhật</Text>;
+                }
+
+                const shortText =
+                text.length > 60 ? text.substring(0, 50) + "..." : text;
+
+                return (
                     <Popover
-                        content={<div style={{ maxWidth: 300 }}>{text}</div>}
+                        content={
+                        <div style={{ maxWidth: 300 }}>
+                            {highlightText(text, debouncedSearch)}
+                        </div>
+                        }
                         title="Nội dung đầy đủ"
                         trigger="hover"
                     >
                         <Text ellipsis style={{ maxWidth: 200, display: "inline-block" }}>
-                            {text.length > 60 ? text.substring(0, 50) + "..." : text}
+                        {highlightText(shortText, debouncedSearch)}
                         </Text>
                     </Popover>
-                ) : (
-                    <Text type="secondary">Chưa cập nhật</Text>
-                )
-            )
-
+                );
+            },
         },
         {
             title: "Hình ảnh",
@@ -437,11 +446,11 @@ const SpecialtyPage = () => {
     const filteredData = useMemo(() => {
         if (!debouncedSearch) return dataTable;
 
-        const keyword = debouncedSearch.toLowerCase();
+        const keyword = normalizeVietnamese(debouncedSearch);
 
         return dataTable?.filter((item) =>
-            item.name?.toLowerCase().includes(keyword) ||
-            item.description?.toLowerCase().includes(keyword)
+            normalizeVietnamese(item?.name).includes(keyword) ||
+            normalizeVietnamese(item?.description).includes(keyword)
         );
     }, [dataTable, debouncedSearch]);
     useEffect(() => {

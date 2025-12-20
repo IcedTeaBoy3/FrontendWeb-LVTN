@@ -2,7 +2,6 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { Space, Input, Form, Typography, Dropdown, Upload, Tag, Button, DatePicker, Select, Badge } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
-import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
 import * as Message from "@/components/Message/Message";
@@ -15,7 +14,6 @@ import {
   CheckCircleFilled, 
   VideoCameraOutlined,
   ReloadOutlined,
-  PlusOutlined,
   ExportOutlined
 } from "@ant-design/icons";
 import { useState, useRef, useEffect, useMemo} from "react";
@@ -29,6 +27,7 @@ import { convertStatusPayment, getStatusPaymentColor } from '@/utils/status_paym
 import DrawerDetailAppointment from "./components/DrawerDetailAppointment";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import {formatDate, formatTime} from "@/utils/datetime_utils";
+import {normalizeVietnamese} from "@/utils/search_utils";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 
@@ -318,7 +317,7 @@ const DoctorAppointmentDate = () => {
       stt: index +1,
       appointmentCode: appointment.appointmentCode,
       patientName: appointment.patientProfile?.person?.fullName || '--',
-      date: formatDate(appointment.schedule.workday),
+      date: dayjs(appointment.schedule?.workday).format('DD/MM/YYYY'),
       time: formatTime(appointment?.slot),
       paymentStatus: appointment.payment?.status,
       status: appointment.status,
@@ -377,10 +376,11 @@ const DoctorAppointmentDate = () => {
   const filteredData = useMemo(() => {
     if (!debouncedGlobalSearch) return dataTable;
     return dataTable?.filter((item) => {
-      const searchLower = debouncedGlobalSearch.toLowerCase();
+      const keyword = normalizeVietnamese(debouncedGlobalSearch);
       return (
-        item.appointmentCode?.toLowerCase().includes(searchLower) ||
-        item.patientName?.toLowerCase().includes(searchLower)
+        item.appointmentCode && normalizeVietnamese(item.appointmentCode).includes(keyword) ||
+        item.patientName && normalizeVietnamese(item.patientName).includes(keyword) ||
+        item.date && normalizeVietnamese(item.date).includes(keyword)
       );
     });
   }, [dataTable, debouncedGlobalSearch]);

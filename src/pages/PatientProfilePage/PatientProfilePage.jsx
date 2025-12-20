@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { PatientProfileService } from '@/services/PatientProfileService'
 import AddressService from '@/services/AddressService'
-import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown, Upload, Tag, Image, Avatar, Row, Col,DatePicker,Select, Descriptions  } from "antd";
+import { Space, Input, Button, Form, Radio, Typography, Divider, Dropdown, Tag, DatePicker, Select, Descriptions, Badge } from "antd";
 import Highlighter from "react-highlight-words";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
@@ -14,6 +14,8 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import TabsComponent from '@/components/TabsComponent/TabsComponent';
 import * as Message from "@/components/Message/Message";
 import ethnicGroups from '@/data/ethnicGroups.js'
+import { highlightText,normalizeVietnamese } from '@/utils/search_utils.jsx';
+import useDebounce from '@/hooks/useDebounce';
 import dayjs from 'dayjs';
 import { convertGender } from '@/utils/gender_utils';
 import {
@@ -23,11 +25,9 @@ import {
     MoreOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
-    PlusOutlined,
-    UploadOutlined,
+    ReloadOutlined,
     ExportOutlined,
 } from "@ant-design/icons";
-import { Children } from 'react';
 const { Text, Title } = Typography;
 const PatientProfilePage = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -42,6 +42,8 @@ const PatientProfilePage = () => {
     const [patientProfile, setPatientProfile] = useState(null);
     const [activeTabKey, setActiveTabKey] = useState("1");
     const [formUpdate] = Form.useForm();
+    const [globalSearch, setGlobalSearch] = useState("");
+
     const getNameByCode = (list, code) => list.find(i => i.code === code)?.name || '';
 
     const rowSelection = {
@@ -248,10 +250,10 @@ const PatientProfilePage = () => {
         patientProfileCode: item.patientProfileCode,
         index: index + 1,
         idCard: item.idCard,
-        insuranceCode: item.insuranceCode || <Text type="secondary">Chưa cập nhật</Text>,
-        fullName: item.person.fullName || <Text type="secondary">Chưa cập nhật</Text>,
-        dateOfBirth: item.person.dateOfBirth,
-        gender: item.person.gender,
+        insuranceCode: item?.insuranceCode || "Chưa cập nhật",
+        fullName: item.person?.fullName  || "Chưa cập nhật",
+        dateOfBirth: item.person?.dateOfBirth,
+        gender: item.person?.gender,
     }));
    
     const columns = [
@@ -266,24 +268,34 @@ const PatientProfilePage = () => {
             dataIndex: "patientProfileCode",
             key: "patientProfileCode",
             ...getColumnSearchProps("patientProfileCode"),
+            render: (text) => highlightText(text, debouncedSearch)
         },
         {
             title: "CCCD/CMND",
             dataIndex: "idCard",
             key: "idCard",
             ...getColumnSearchProps("idCard"),
+            render: (text) => highlightText(text, debouncedSearch)
         },
         {
             title: "Mã bảo hiểm",
             dataIndex: "insuranceCode",
             key: "insuranceCode",
             ...getColumnSearchProps("insuranceCode"),
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return highlightText(text, debouncedSearch)
+            }
         },
         {
             title: "Họ và tên",
             dataIndex: "fullName",
             key: "fullName",
             ...getColumnSearchProps("fullName"),
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return highlightText(text, debouncedSearch)
+            }
         },
         {
             title: "Ngày sinh",
@@ -483,28 +495,70 @@ const PatientProfilePage = () => {
             setSelectedRowKeys(dataTable?.map(item => item.key));
         }
     };
+    const debouncedSearch = useDebounce(globalSearch, 500);
+    const filteredData = useMemo(() => {
+        if (!debouncedSearch) return dataTable;
+
+        const keyword = normalizeVietnamese(debouncedSearch);
+
+        return dataTable?.filter((item) =>
+            normalizeVietnamese(item.patientProfileCode).includes(keyword) ||
+            normalizeVietnamese(item.idCard).includes(keyword) ||
+            normalizeVietnamese(item?.insuranceCode).includes(keyword) ||
+            normalizeVietnamese(item?.fullName).includes(keyword)
+        );
+    }, [dataTable, debouncedSearch]);
+    useEffect(() => {
+        if (!debouncedSearch) {
+            setSearchText("");
+            setSearchedColumn("");
+        }
+    }, [debouncedSearch]);
 
     return (
         <>
-            <Title level={4}>Danh sách bệnh nhân</Title>
+            <Space align="center" style={{ marginBottom: 24 }}>
+                <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
+
+                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách bệnh nhân</Title>
+                </Badge>
+               
+            </Space>
             
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
-                <ButtonComponent
-                    type="primary"
-                    // onClick={() => setIsModalOpenCreate(true)}
-                    disabled={true}
-                    icon={<PlusOutlined />}
-                    style={{ marginRight: 8 }}
-                >
-                    Thêm mới
-                </ButtonComponent>
-                <ButtonComponent    
-                    type="default"
-                
-                >
-                    Xuất file
-                    <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
-                </ButtonComponent>
+                <Space>
+
+                    <Space.Compact style={{ width: 400 }}>
+                        <Input
+                            placeholder="Tìm kiếm mã bảo hiểm, CCCD, mã bảo hiểm, họ và tên"
+                            allowClear
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{ width: 400}}
+                            size="middle"
+                           
+                        />  
+                        <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}/>
+                    </Space.Compact>
+                    <Button 
+                        type="primary" 
+                        ghost 
+                        icon={<ReloadOutlined />} 
+                        onClick={() => {
+                            queryGetAllSpecialties.refetch();
+                        }}
+                    >Tải lại</Button>
+                </Space>
+                <Space>
+                    
+                    <ButtonComponent    
+                        type="default"
+                    
+                    >
+                        Xuất file
+                        <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />
+                    </ButtonComponent>
+                </Space>      
             </div>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
@@ -517,7 +571,7 @@ const PatientProfilePage = () => {
                 rowSelection={rowSelection}
                 columns={columns}
                 loading={isLoadingPatientProfiles}
-                dataSource={dataTable}
+                dataSource={filteredData}
                 pagination={pagination}
                 onChange={(page, pageSize) => {
                     setPagination((prev) => ({

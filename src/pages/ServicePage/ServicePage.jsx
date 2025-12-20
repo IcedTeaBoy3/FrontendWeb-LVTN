@@ -13,6 +13,7 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import useDebounce from '@/hooks/useDebounce';
 import * as Message from "@/components/Message/Message";
 import { convertServiceTypeToLabel,getColorByServiceType } from '@/utils/servicetype_utils';
+import { normalizeVietnamese, highlightText } from "@/utils/search_utils";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -222,8 +223,8 @@ const ServicePage = () => {
     const { isPending: isPendingDelete } = mutationDeleteService;
     const { isPending: isPendingUpdate } = mutationUpdateService;
     const { isPending: isPendingDeleteMany } = mutationDeleteManyServices;
-    const serviceData = services?.data?.services || [];
-    const specialtyData = specialties?.data?.specialties || [];
+    const serviceData = useMemo(() => services?.data?.services || [], [services]);
+    const specialtyData = useMemo(() => specialties?.data?.specialties || [], [specialties]);
     // dữ liệu bảng
     const dataTable = serviceData?.map((item, index) => ({
         key: item.serviceId,
@@ -247,6 +248,7 @@ const ServicePage = () => {
             dataIndex: "name",
             key: "name",
             ...getColumnSearchProps("name"),
+            render: (text) => highlightText(text, debouncedSearch),
         },
         {
             title: "Chuyên khoa",
@@ -271,21 +273,27 @@ const ServicePage = () => {
             title: "Mô tả",
             dataIndex: "description",
             key: "description",
-            render: (text) => (
-                text ? (
+            render: (text) => {
+                if (!text) {
+                    return <Text type="secondary">Chưa cập nhật</Text>;
+                }
+                const shortText = text.length > 60 ? text.substring(0, 50) + "..." : text;
+                return (
                     <Popover
-                        content={<div style={{ maxWidth: 300 }}>{text}</div>}
+                        content={
+                        <div style={{ maxWidth: 300 }}>
+                            {highlightText(text, debouncedSearch)}
+                        </div>
+                        }
                         title="Nội dung đầy đủ"
                         trigger="hover"
                     >
                         <Text ellipsis style={{ maxWidth: 200, display: "inline-block" }}>
-                            {text.length > 60 ? text.substring(0, 50) + "..." : text}
+                        {highlightText(shortText, debouncedSearch)}
                         </Text>
                     </Popover>
-                ) : (
-                    <Text type="secondary">Chưa cập nhật</Text>
-                )
-            )
+                );
+            },
 
         },
         {
@@ -479,11 +487,11 @@ const ServicePage = () => {
     const filteredData = useMemo(() => {
         if (!debouncedSearch) return dataTable;
 
-        const keyword = debouncedSearch.toLowerCase();
+        const keyword = normalizeVietnamese(debouncedSearch);
 
         return dataTable?.filter((item) =>
-            item.name?.toLowerCase().includes(keyword) ||
-            item.description?.toLowerCase().includes(keyword)
+            normalizeVietnamese(item?.name).includes(keyword) ||
+            normalizeVietnamese(item?.description).includes(keyword)
         );
     }, [dataTable, debouncedSearch]);
     useEffect(() => {

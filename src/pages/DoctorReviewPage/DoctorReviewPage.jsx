@@ -4,21 +4,20 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import useDebounce from "@/hooks/useDebounce";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
-import DrawerComponent from "@/components/DrawerComponent/DrawerComponent";
 import * as Message from "@/components/Message/Message";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
+import { normalizeVietnamese, highlightText } from "@/utils/search_utils";
 import { 
     EyeOutlined, 
     EditOutlined, 
     MoreOutlined, 
-    PlusOutlined, 
     ExportOutlined, 
     SearchOutlined, 
     DeleteOutlined, 
     ExclamationCircleOutlined,
     ReloadOutlined  
 } from "@ant-design/icons";
-import { Dropdown, Typography, Tag, Form, Popover, Rate, Descriptions, Input, Space, Button, Badge ,Select  } from "antd";
+import { Dropdown, Typography, Tag, Popover, Rate, Descriptions, Input, Space, Button, Badge } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
 import Highlighter from "react-highlight-words";
 import BulkActionBar from "@/components/BulkActionBar/BulkActionBar";
@@ -241,18 +240,21 @@ const DoctorReviewPage = () => {
             dataIndex: "appointmentCode",
             key: "appointmentCode",
             ...getColumnSearchProps("appointmentCode"),
+            render: (text) => highlightText(text, debouncedGlobalSearch)
         },
         {
             title: "Tên bệnh nhân",
             dataIndex: "patientName",
             key: "patientName",
             ...getColumnSearchProps("patientName"),
+            render: (text) => highlightText(text, debouncedGlobalSearch)
         },
         {
             title: "Tên bác sĩ",
             dataIndex: "doctorName",
             key: "doctorName",
             ...getColumnSearchProps("doctorName"),
+            render: (text) => highlightText(text, debouncedGlobalSearch)
         },
         {
             title: "Đánh giá",
@@ -389,10 +391,11 @@ const DoctorReviewPage = () => {
     const filteredData = useMemo(() => {
         if (!debouncedGlobalSearch) return dataTable;
         return dataTable?.filter((item) => {
+            const keyword = normalizeVietnamese(debouncedGlobalSearch);
             return (
-                item.appointmentCode?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
-                item.patientName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase()) ||
-                item.doctorName?.toLowerCase().includes(debouncedGlobalSearch.toLowerCase())
+                normalizeVietnamese(item.appointmentCode)?.includes(normalizeVietnamese(keyword)) ||
+                normalizeVietnamese(item.patientName)?.includes(normalizeVietnamese(keyword)) ||
+                normalizeVietnamese(item.doctorName)?.includes(normalizeVietnamese(keyword))
             );
         });
     }, [dataTable, debouncedGlobalSearch]);

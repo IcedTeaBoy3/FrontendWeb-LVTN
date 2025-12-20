@@ -5,7 +5,6 @@ import { AppointmentService } from '@/services/AppointmentService';
 import { PaymentService } from '@/services/PaymentService';
 import { Space, Input, Button, Typography, Dropdown, Tag, DatePicker,Select,Badge } from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
-import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
@@ -14,6 +13,7 @@ import * as Message from "@/components/Message/Message";
 import * as DatetimeUtils from '@/utils/datetime_utils';
 import { getStatusColor,convertStatusAppointment } from '@/utils/status_appointment_utils';
 import { convertStatusPayment, getStatusPaymentColor } from '@/utils/status_payment_utils';
+import {normalizeVietnamese, highlightText} from "@/utils/search_utils";
 import useDebounce from '@/hooks/useDebounce';
 import {
     DeleteOutlined,
@@ -260,12 +260,14 @@ const AppointmentPage = () => {
             dataIndex: "appointmentCode",
             key: "appointmentCode",
             ...getColumnSearchProps("appointmentCode"),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
             title: "Ngày khám",
             dataIndex: "appointmentDate",
             key: "appointmentDate",
             ...getColumnSearchProps("appointmentDate", "date"),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
            
         
             
@@ -275,18 +277,21 @@ const AppointmentPage = () => {
             dataIndex: "appointmentTime",
             key: "appointmentTime",
             ...getColumnSearchProps("appointmentTime"),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
            title: "Bác sĩ",
            dataIndex: "doctorName",
            key: "doctorName",
            ...getColumnSearchProps("doctorName"),
+           render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
             title: "Bệnh nhân",
             dataIndex: "patientName",
             key: "patientName",
             ...getColumnSearchProps("patientName"),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
             title: "Trạng thái",
@@ -434,11 +439,13 @@ const AppointmentPage = () => {
     const filteredData = useMemo(() => {
         if (!debouncedGlobalSearch) return dataTable;
         return dataTable?.filter((item) => {
-            const searchLower = debouncedGlobalSearch.toLowerCase();
+            const searchLower = normalizeVietnamese(debouncedGlobalSearch);
             return (
-                item.appointmentCode?.toLowerCase().includes(searchLower) ||
-                item.doctorName?.toLowerCase().includes(searchLower) ||
-                item.patientName?.toLowerCase().includes(searchLower)
+                normalizeVietnamese(item.appointmentCode)?.includes(searchLower) ||
+                normalizeVietnamese(item.doctorName)?.includes(searchLower) ||
+                normalizeVietnamese(item.patientName)?.includes(searchLower) || 
+                normalizeVietnamese(item.appointmentDate)?.includes(searchLower) ||
+                normalizeVietnamese(item.appointmentTime)?.includes(searchLower)
             );
         });
     }, [dataTable, debouncedGlobalSearch]);

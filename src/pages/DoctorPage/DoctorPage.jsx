@@ -6,7 +6,6 @@ import { DegreeService } from '@/services/DegreeService';
 import AddressService from '@/services/AddressService';
 import { Space, Input, Form, Select, Radio, Typography, Divider, Dropdown, DatePicker, Upload, Tag, Popover, Badge, Button} from "antd";
 import TableStyle from "@/components/TableStyle/TableStyle";
-import Highlighter from "react-highlight-words";
 import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
@@ -17,6 +16,7 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
 import useDebounce from '@/hooks/useDebounce';
+import { normalizeVietnamese,highlightText } from '@/utils/search_utils';
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -272,6 +272,7 @@ const DoctorPage = () => {
         setSearchText("");
         confirm(); // refresh bảng sau khi clear
     };
+    
     const columns = [
         {
             title: "STT",
@@ -284,18 +285,27 @@ const DoctorPage = () => {
             dataIndex: "fullName",
             key: "fullName",
             ...getColumnSearchProps("fullName"),
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return highlightText(text, debouncedGlobalSearch)
+            },
         },
         {
             title: "Email",
             dataIndex: "email",
             key: "email",
             ...getColumnSearchProps("email"),
+            render: (text) => highlightText(text, debouncedGlobalSearch),
         },
         {
             title: "Số điện thoại",
             dataIndex: "phone",
             key: "phone",
             ...getColumnSearchProps("phone"),
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return highlightText(text, debouncedGlobalSearch)
+            },
         },
         {
             title: "Chuyên khoa",
@@ -588,12 +598,12 @@ const DoctorPage = () => {
     const debouncedGlobalSearch = useDebounce(globalSearch, 500);
     // Lọc dữ liệu theo tìm kiếm toàn cục
     const filteredData = useMemo(() => {
-        const searchValue = debouncedGlobalSearch.toLowerCase();
+        const searchValue = normalizeVietnamese(debouncedGlobalSearch);
         return dataTable?.filter((item) => {
             return (
-                item.fullName?.toString().toLowerCase().includes(searchValue) ||
-                item.email?.toString().toLowerCase().includes(searchValue) ||
-                item.phone?.toString().toLowerCase().includes(searchValue)
+                normalizeVietnamese(item?.fullName).includes(searchValue) ||
+                normalizeVietnamese(item?.email).includes(searchValue) ||
+                normalizeVietnamese(item?.phone).includes(searchValue)
             );
         });
     });
