@@ -26,8 +26,9 @@ import { convertStatusAppointment, getStatusColor } from '@/utils/status_appoint
 import { convertStatusPayment, getStatusPaymentColor } from '@/utils/status_payment_utils';
 import DrawerDetailAppointment from "./components/DrawerDetailAppointment";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
-import {formatDate, formatTime} from "@/utils/datetime_utils";
-import {normalizeVietnamese} from "@/utils/search_utils";
+import { formatDate, formatTime } from "@/utils/datetime_utils";
+import { normalizeVietnamese } from "@/utils/search_utils";
+import HighlightText from "@/components/HighlightText/HighlightText";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 
@@ -204,24 +205,40 @@ const DoctorAppointmentDate = () => {
       dataIndex: "appointmentCode",
       key: "appointmentCode",
       ...getColumnSearchProps("appointmentCode"),
+      render: (text) => {
+        if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+        return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+      }
     },
     {
       title: "Bệnh nhân",
       dataIndex: "patientName",
       key: "patientName",
       ...getColumnSearchProps("patientName"),
+      render: (text) => {
+        if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+        return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+      }
     },
     {
       title: "Ngày khám",
       dataIndex: "date",
       key: "date",
       ...getColumnSearchProps("date", "date"),
+      render: (text) => {
+        if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+        return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+      }
     },
     {
       title: "Thời gian",
       dataIndex: "time",
       key: "time",
       ...getColumnSearchProps("time"),
+      render: (text) => {
+        if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+        return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+      }
     },
     {
       title: "Trạng thái",

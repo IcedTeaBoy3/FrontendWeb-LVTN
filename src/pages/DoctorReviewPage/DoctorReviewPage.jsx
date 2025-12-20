@@ -6,7 +6,8 @@ import ButtonComponent from "@/components/ButtonComponent/ButtonComponent";
 import LoadingComponent from "@/components/LoadingComponent/LoadingComponent";
 import * as Message from "@/components/Message/Message";
 import ModalComponent from "@/components/ModalComponent/ModalComponent";
-import { normalizeVietnamese, highlightText } from "@/utils/search_utils";
+import { normalizeVietnamese} from "@/utils/search_utils";
+import HighlightText from "@/components/HighlightText/HighlightText";
 import { 
     EyeOutlined, 
     EditOutlined, 
@@ -240,21 +241,30 @@ const DoctorReviewPage = () => {
             dataIndex: "appointmentCode",
             key: "appointmentCode",
             ...getColumnSearchProps("appointmentCode"),
-            render: (text) => highlightText(text, debouncedGlobalSearch)
+            render: (text) => {
+                if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
             title: "Tên bệnh nhân",
             dataIndex: "patientName",
             key: "patientName",
             ...getColumnSearchProps("patientName"),
-            render: (text) => highlightText(text, debouncedGlobalSearch)
+            render: (text) => {
+                if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
             title: "Tên bác sĩ",
             dataIndex: "doctorName",
             key: "doctorName",
             ...getColumnSearchProps("doctorName"),
-            render: (text) => highlightText(text, debouncedGlobalSearch)
+            render: (text) => {
+                if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
             title: "Đánh giá",

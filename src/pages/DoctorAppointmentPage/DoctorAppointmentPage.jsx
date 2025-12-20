@@ -41,7 +41,8 @@ const DoctorAppointmentPage = () => {
     }
   });
   const dateCellRender = (value) => {
-    const listData =calenderData.filter(item => item.date === value.format('DD/MM/YYYY'));
+    // lọc dữ liệu theo ngày được truyền vào lấy 5 lịch khám
+    const listData =calenderData.filter(item => item.date === value.format('DD/MM/YYYY'))?.slice(0,5);
     return (
       <CalendarCell>
         {listData.map((item) => (
@@ -63,7 +64,7 @@ const DoctorAppointmentPage = () => {
     setIsModalOpen(true);
     const listData = calenderData.filter((item) =>
       item.date === value.format('DD/MM/YYYY')
-    );
+    ).slice(0,5);
     setSelectedDate({ date: value, list: listData });
   };
 

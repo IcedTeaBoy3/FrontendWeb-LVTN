@@ -11,7 +11,8 @@ import DrawerComponent from '@/components/DrawerComponent/DrawerComponent';
 import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
-import { normalizeVietnamese, highlightText } from "@/utils/search_utils";
+import { normalizeVietnamese } from "@/utils/search_utils";
+import HighlightText from '@/components/HighlightText/HighlightText';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -266,7 +267,7 @@ const AccountPage = () => {
             dataIndex: "email",
             key: "email",
             ...getColumnSearchProps("email"),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
+            render: (text) => <HighlightText text={text} keyword={debouncedGlobalSearch} />,
         },
         {
             title: "Tên tài khoản",
@@ -275,7 +276,7 @@ const AccountPage = () => {
             ...getColumnSearchProps("userName"),
             render: (text) => {
                 if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
-                return highlightText(text, debouncedGlobalSearch)
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
             },
         },
         {
@@ -285,7 +286,7 @@ const AccountPage = () => {
             ...getColumnSearchProps("phone"),
             render: (text) => {
                 if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
-                return highlightText(text, debouncedGlobalSearch)
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
             },
         },
         {

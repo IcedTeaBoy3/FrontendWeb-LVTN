@@ -11,7 +11,8 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import useDebounce from '@/hooks/useDebounce';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
-import {normalizeVietnamese, highlightText} from "@/utils/search_utils";
+import {normalizeVietnamese} from "@/utils/search_utils";
+import HighlightText from '@/components/HighlightText/HighlightText';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -223,7 +224,12 @@ const SpecialtyPage = () => {
             dataIndex: "name",
             key: "name",
             ...getColumnSearchProps("name"),
-            render: (text) => highlightText(text, debouncedSearch),
+            render: (text) => {
+                if (!text) {
+                    return <Text type="secondary">Chưa cập nhật</Text>;
+                }
+                return <HighlightText text={text} keyword={debouncedSearch} />;
+            }
         },
         {
             title: "Mô tả",
@@ -241,14 +247,14 @@ const SpecialtyPage = () => {
                     <Popover
                         content={
                         <div style={{ maxWidth: 300 }}>
-                            {highlightText(text, debouncedSearch)}
+                            <HighlightText text={text} keyword={debouncedSearch} />
                         </div>
                         }
                         title="Nội dung đầy đủ"
                         trigger="hover"
                     >
                         <Text ellipsis style={{ maxWidth: 200, display: "inline-block" }}>
-                        {highlightText(shortText, debouncedSearch)}
+                            <HighlightText text={shortText} keyword={debouncedSearch} />
                         </Text>
                     </Popover>
                 );

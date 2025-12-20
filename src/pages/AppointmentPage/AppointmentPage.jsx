@@ -13,7 +13,8 @@ import * as Message from "@/components/Message/Message";
 import * as DatetimeUtils from '@/utils/datetime_utils';
 import { getStatusColor,convertStatusAppointment } from '@/utils/status_appointment_utils';
 import { convertStatusPayment, getStatusPaymentColor } from '@/utils/status_payment_utils';
-import {normalizeVietnamese, highlightText} from "@/utils/search_utils";
+import {normalizeVietnamese} from "@/utils/search_utils";
+import HighlightText from '@/components/HighlightText/HighlightText';
 import useDebounce from '@/hooks/useDebounce';
 import {
     DeleteOutlined,
@@ -260,38 +261,44 @@ const AppointmentPage = () => {
             dataIndex: "appointmentCode",
             key: "appointmentCode",
             ...getColumnSearchProps("appointmentCode"),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
+            render: (text) => <HighlightText text={text} keyword={debouncedGlobalSearch} />
         },
         {
             title: "Ngày khám",
             dataIndex: "appointmentDate",
             key: "appointmentDate",
             ...getColumnSearchProps("appointmentDate", "date"),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
-           
-        
-            
+            render: (text) => <HighlightText text={text} keyword={debouncedGlobalSearch} />
         },
         {
             title: "Giờ khám",
             dataIndex: "appointmentTime",
             key: "appointmentTime",
             ...getColumnSearchProps("appointmentTime"),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
+            render: (text) => {
+                if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
            title: "Bác sĩ",
            dataIndex: "doctorName",
            key: "doctorName",
            ...getColumnSearchProps("doctorName"),
-           render: (text) => highlightText(text, debouncedGlobalSearch),
+           render: (text) => {
+                if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+           }
         },
         {
             title: "Bệnh nhân",
             dataIndex: "patientName",
             key: "patientName",
             ...getColumnSearchProps("patientName"),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
+            render: (text) => {
+                if(!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
             title: "Trạng thái",

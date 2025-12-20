@@ -14,7 +14,8 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import TabsComponent from '@/components/TabsComponent/TabsComponent';
 import * as Message from "@/components/Message/Message";
 import ethnicGroups from '@/data/ethnicGroups.js'
-import { highlightText,normalizeVietnamese } from '@/utils/search_utils.jsx';
+import { normalizeVietnamese } from '@/utils/search_utils';
+import HighlightText from '@/components/HighlightText/HighlightText';
 import useDebounce from '@/hooks/useDebounce';
 import dayjs from 'dayjs';
 import { convertGender } from '@/utils/gender_utils';
@@ -268,14 +269,17 @@ const PatientProfilePage = () => {
             dataIndex: "patientProfileCode",
             key: "patientProfileCode",
             ...getColumnSearchProps("patientProfileCode"),
-            render: (text) => highlightText(text, debouncedSearch)
+            render: (text) => <HighlightText text={text} keyword={debouncedSearch} />
         },
         {
             title: "CCCD/CMND",
             dataIndex: "idCard",
             key: "idCard",
             ...getColumnSearchProps("idCard"),
-            render: (text) => highlightText(text, debouncedSearch)
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedSearch} />
+            }
         },
         {
             title: "Mã bảo hiểm",
@@ -284,7 +288,7 @@ const PatientProfilePage = () => {
             ...getColumnSearchProps("insuranceCode"),
             render: (text) => {
                 if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
-                return highlightText(text, debouncedSearch)
+                return <HighlightText text={text} keyword={debouncedSearch} />
             }
         },
         {
@@ -294,7 +298,7 @@ const PatientProfilePage = () => {
             ...getColumnSearchProps("fullName"),
             render: (text) => {
                 if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
-                return highlightText(text, debouncedSearch)
+                return <HighlightText text={text} keyword={debouncedSearch} />
             }
         },
         {

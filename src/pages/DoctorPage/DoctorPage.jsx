@@ -16,7 +16,8 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import defaultImage from "@/assets/default_image.png";
 import useDebounce from '@/hooks/useDebounce';
-import { normalizeVietnamese,highlightText } from '@/utils/search_utils';
+import { normalizeVietnamese } from '@/utils/search_utils';
+import HighlightText from '@/components/HighlightText/HighlightText';
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -287,15 +288,18 @@ const DoctorPage = () => {
             ...getColumnSearchProps("fullName"),
             render: (text) => {
                 if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
-                return highlightText(text, debouncedGlobalSearch)
-            },
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
             title: "Email",
             dataIndex: "email",
             key: "email",
             ...getColumnSearchProps("email"),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
+            render: (text) => {
+                if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
             title: "Số điện thoại",
@@ -304,8 +308,8 @@ const DoctorPage = () => {
             ...getColumnSearchProps("phone"),
             render: (text) => {
                 if (!text) return <Text type="secondary">Chưa cập nhật</Text>;
-                return highlightText(text, debouncedGlobalSearch)
-            },
+                return <HighlightText text={text} keyword={debouncedGlobalSearch} />
+            }
         },
         {
             title: "Chuyên khoa",

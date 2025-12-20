@@ -13,7 +13,8 @@ import BulkActionBar from '@/components/BulkActionBar/BulkActionBar';
 import * as Message from "@/components/Message/Message";
 import useDebounce from "@/hooks/useDebounce"
 import { convertShiftNameToLabel } from '@/utils/shiftName_utils';
-import { normalizeVietnamese, highlightText } from "@/utils/search_utils";
+import { normalizeVietnamese } from "@/utils/search_utils";
+import HighlightText from '@/components/HighlightText/HighlightText';
 import dayjs from 'dayjs';
 import {
     EditOutlined,
@@ -283,14 +284,14 @@ const SchedulePage = () => {
             filterMultiple: false,
             ...getColumnSearchProps("workday", "date"),
             sorter: (a, b) => dayjs(a.workday, "DD/MM/YYYY").unix() - dayjs(b.workday, "DD/MM/YYYY").unix(),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
+            render: (text) => <HighlightText text={text} keyword={debouncedGlobalSearch} />
         },
         {
             title: "Bác sĩ",
             dataIndex: "doctor",
             key: "doctor",
             ...getColumnSearchProps("doctor"),
-            render: (text) => highlightText(text, debouncedGlobalSearch),
+            render: (text) => <HighlightText text={text} keyword={debouncedGlobalSearch} />
         },
         {
             title: "Thời gian khám (phút) / lượt",
