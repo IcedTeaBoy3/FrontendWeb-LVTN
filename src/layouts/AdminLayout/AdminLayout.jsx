@@ -145,6 +145,8 @@ const AdminLayout = () => {
         "/admin/services": "Dịch vụ",
         "/admin/personinfo": "Thông tin cá nhân",
         "/admin/statistics": "Thống kê",
+        "/admin/doctors/trash": "Thùng rác bác sĩ",
+        "/admin/appointments/trash": "Thùng rác lịch khám",
     };
 
     const pathSnippets = location.pathname.split("/").filter((i) => i);

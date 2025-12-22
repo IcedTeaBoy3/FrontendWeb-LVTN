@@ -1,9 +1,9 @@
 import axiosInstance from '@/config/axiosInstance';
 
 export const AppointmentService = {
-    getAllAppointments: async ({page, limit, type}) => {
+    getAllAppointments: async ({page, limit, type, isDeleted}) => {
         try {
-            const response = await axiosInstance.get('/appointment/get-all-appointments', { params: { page, limit, type } });
+            const response = await axiosInstance.get('/appointment/get-all-appointments', { params: { page, limit, type, isDeleted } });
             return response.data;
         } catch (error) {
             throw error.response.data;
@@ -50,9 +50,9 @@ export const AppointmentService = {
 
         }
     },
-    getDoctorAppointments: async (doctorId,{page = 1, limit = 100, date, type}) => {
+    getDoctorAppointments: async (doctorId,{page = 1, limit = 100, date, type, isDeleted = false}) => {
         try {
-            const response = await axiosInstance.get(`/appointment/get-doctor-appointments/${doctorId}`, { params: { page, limit, date, type } });
+            const response = await axiosInstance.get(`/appointment/get-doctor-appointments/${doctorId}`, { params: { page, limit, date, type, isDeleted } });
             return response.data;
         } catch (error) {
             throw error.response.data;
@@ -74,4 +74,20 @@ export const AppointmentService = {
             throw error.response.data;
         }
     },
+    softDeleteAppointment: async (appointmentId) => {
+        try {
+            const response = await axiosInstance.put(`/appointment/soft-delete-appointment/${appointmentId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    },
+    restoreAppointment: async (appointmentId) => {
+        try {
+            const response = await axiosInstance.put(`/appointment/restore-appointment/${appointmentId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    }
 };

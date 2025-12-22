@@ -35,6 +35,8 @@ import DoctorStatisticPage from "@/pages/DoctorStatisticPage/DoctorStatisticPage
 import SliderPage from "@/pages/SliderPage/SliderPage";
 import DoctorChatPage from "@/pages/DoctorChatPage/DoctorChatPage";
 import DoctorConsultantPage from "@/pages/DoctorConsultantPage/DoctorConsultantPage";
+import DoctorTrashPage from "@/pages/DoctorTrashPage/DoctorTrashPage";
+import AppointmentTrashPage from "@/pages/AppointmentTrashPage/AppointmentTrashPage";
 
 import AdminLayout from "@/layouts/AdminLayout/AdminLayout";
 import DoctorLayout from "@/layouts/DoctorLayout/DoctorLayout";
@@ -67,11 +69,13 @@ const AppRoutes = () => {
                     <Route path="patients" element={<PatientProfilePage />} />
                     <Route path="schedules" element={<SchedulePage />} />
                     <Route path="doctors/:id" element={<DoctorDetailPage />} />
+                    <Route path="doctors/trash" element={<DoctorTrashPage />} />
                     <Route path="schedules/:id" element={<ScheduleDetailPage />} />
                     <Route path="appointments" element={<AppointmentPage />} />
                     <Route path="appointments/:id" element={<DetailAppointmentPage />} />
                     <Route path="doctorreviews" element={<DoctorReviewPage />} />
                     <Route path="statistics" element={<StatisticPage />} />
+                    <Route path="appointments/trash" element={<AppointmentTrashPage />} />
                     <Route index path="dashboard" element={<Dashboard />} />
                 </Route>
 
@@ -91,7 +95,6 @@ const AppRoutes = () => {
                     <Route path="statistics" element={<DoctorStatisticPage />} />
                     <Route path="chat" element={<DoctorChatPage />} />
                     <Route path="consultant" element={<DoctorConsultantPage />} />
-
                     <Route index path="dashboard" element={<DoctorDashboard />} />
                     
                 </Route>

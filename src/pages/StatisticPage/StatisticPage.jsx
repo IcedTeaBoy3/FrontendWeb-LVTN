@@ -259,10 +259,10 @@ const StatisticPage = () => {
                                     isLoading={isLoadingAppointmentPerDoctor}
                                 />
                                 <br/>
-                                <DoctorPerSpecialty
+                                {/* <DoctorPerSpecialty
                                     data={specialtyPerDoctorData}
                                     isLoading={isLoadingSpecialtyPerDoctor}
-                                />
+                                /> */}
                                 <br/>
                                 <ReviewPerDoctor
                                     data={avgRatingData}

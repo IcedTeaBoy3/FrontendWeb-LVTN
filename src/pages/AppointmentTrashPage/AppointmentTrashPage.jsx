@@ -25,11 +25,11 @@ import {
     ExportOutlined,
     CheckCircleFilled,
     ReloadOutlined,
-    PlusOutlined 
+    ArrowLeftOutlined 
 } from "@ant-design/icons";
 import dayjs from 'dayjs';
 const { Text,Title } = Typography;
-const AppointmentPage = () => {
+const AppointmentTrashPage = () => {
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
@@ -157,13 +157,13 @@ const AppointmentPage = () => {
             page: 1, 
             limit: 1000,
             type: typeFilter, 
-            isDeleted: false
+            isDeleted: true
         }),
         retry: 1,
     });
-    const mutationSoftDeleteAppointment = useMutation({
-        mutationKey: ['softDeleteAppointment'],
-        mutationFn: (appointmentId) => AppointmentService.softDeleteAppointment(appointmentId),
+    const mutationDeleteAppointment = useMutation({
+        mutationKey: ['deleteAppointment'],
+        mutationFn: (appointmentId) => AppointmentService.deleteAppointment(appointmentId),
         onSuccess: (data) => {
             if (data?.status == "success") {
                 Message.success("Xoá lịch khám thành công");
@@ -176,6 +176,23 @@ const AppointmentPage = () => {
         },
         onError: (error) => {
             Message.error(error?.response?.data?.message || "Xoá lịch khám thất bại");
+        }
+    });
+    const mutationRestoreAppointment = useMutation({
+        mutationKey: ['restoreAppointment'],
+        mutationFn: (appointmentId) => AppointmentService.restoreAppointment(appointmentId),
+        onSuccess: (data) => {
+            if (data?.status === "success") {
+                Message.success(data?.message || "Khôi phục lịch khám thành công");
+                queryGetAllAppointments.refetch();
+                setSelectedRowKeys((prev) => prev.filter((key) => key !== rowSelected));
+                setRowSelected(null);
+            }else {
+                Message.error(data?.message || "Khôi phục lịch khám thất bại");
+            }
+        },
+        onError: (error) => {
+            Message.error(error?.response?.data?.message || "Khôi phục lịch khám thất bại");
         }
     });
     const mutationConfirmAppointment = useMutation({
@@ -232,7 +249,7 @@ const AppointmentPage = () => {
     });
     const { data: appointments, isLoading: isLoadingAppointments} = queryGetAllAppointments;
     const { isPending: isPendingConfirm } = mutationConfirmAppointment;
-    const { isPending: isPendingDelete } = mutationSoftDeleteAppointment;
+    const { isPending: isPendingDelete } = mutationDeleteAppointment;
     const { isPending: isPendingDeleteMany } = mutationDeleteManyAppointments;
     const { isPending: isPendingUpdatePayment } = mutationUpdatePaymentStatus;
     const appointmentData = appointments?.data?.appointments || [];
@@ -340,7 +357,12 @@ const AppointmentPage = () => {
                 const itemActions = [
                     { key: "detail", label: "Xem chi tiết", icon: <EyeOutlined style={{ fontSize: 16 }} /> },
                     { type: "divider" },
-                    { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
+                    { key: "delete", label: <Text type="danger">Xoá vĩnh viễn</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} />},
+                    { type: "divider" },
+                    {
+                        key: "restore", label: <Text type="success">Khôi phục</Text>,
+                        icon: <ReloadOutlined style={{ fontSize: 16, color: "green" }} />
+                    },
                    
                     
                 ];
@@ -360,6 +382,7 @@ const AppointmentPage = () => {
                     if (key === "delete") return handleShowConfirmDelete();
                     if (key === "confirm") return setIsModalConfirmOpen(true);
                     if (key === "confirmPayment") return setIsModalConfirmPaymentOpen(true);
+                    if (key === "restore") return mutationRestoreAppointment.mutate(record.key);
                 };
 
                 return (
@@ -388,7 +411,7 @@ const AppointmentPage = () => {
         setIsModalOpenDelete(true);
     };
     const handleOkDelete = () => {
-        mutationSoftDeleteAppointment.mutate(rowSelected);
+        mutationDeleteAppointment.mutate(rowSelected);
     };
     const handleCancelDelete = () => {
         setIsModalOpenDelete(false);
@@ -463,13 +486,23 @@ const AppointmentPage = () => {
             setSearchedColumn("");
         }
     }, [debouncedGlobalSearch]);
+    const handleBack = () => {
+        navigate(-1);
+    };
     return (
         <>
             <Space align="center" style={{ marginBottom: 24 }}>
-                <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
-
-                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách lịch khám</Title>
-                </Badge>
+                <ButtonComponent
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={handleBack}
+                    style={{ fontSize: 20, padding: 0 }}
+                >
+                    <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
+                        <Title level={4} style={{ marginBottom: 0 }}>Thùng rác lịch khám</Title>
+                    </Badge>
+                
+                </ButtonComponent>
                
             </Space>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
@@ -512,17 +545,7 @@ const AppointmentPage = () => {
                     </Space>
                     
                 </Space>
-                <Space>
-
-                    <ButtonComponent    
-                        danger
-                        icon={<DeleteOutlined />} 
-                        onClick={() => navigate('/admin/appointments/trash')} 
-                    
-                    >
-                        Thùng rác
-                    </ButtonComponent>
-                </Space>
+                
             </div>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
@@ -551,7 +574,7 @@ const AppointmentPage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá lịch khám</span>
+                        <span>Xoá lịch khám vĩnh viễn</span>
                     </span>
                 }
                 open={isModalOpenDelete}
@@ -568,7 +591,7 @@ const AppointmentPage = () => {
                         <Text>
                             Bạn có chắc chắn muốn{" "}
                             <Text strong type="danger">
-                                xoá
+                                xoá vĩnh viễn
                             </Text>{" "}
                             lịch khám này không?
                         </Text>
@@ -671,4 +694,4 @@ const AppointmentPage = () => {
     )
 }
 
-export default AppointmentPage
+export default AppointmentTrashPage

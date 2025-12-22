@@ -29,11 +29,12 @@ import {
     ExportOutlined,
     PlusOutlined,
     UploadOutlined,
-    ReloadOutlined 
+    ReloadOutlined,
+    ArrowLeftOutlined 
 } from "@ant-design/icons";
 const { Text, Title } = Typography;
 
-const DoctorPage = () => {
+const DoctorTrashPage = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [rowSelected, setRowSelected] = useState(null);
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
@@ -72,7 +73,7 @@ const DoctorPage = () => {
 
     const queryGetAllDoctors = useQuery({
         queryKey: ['getAllDoctors'],
-        queryFn: () => DoctorService.getAllDoctors({ page: 1, limit: 100 }),
+        queryFn: () => DoctorService.getAllDoctors({ page: 1, limit: 100, isDeleted: true }),
         retry: 1,
     });
     const queryGetAllDegrees = useQuery({
@@ -135,9 +136,9 @@ const DoctorPage = () => {
             Message.error(error?.response?.data?.message || "Cập nhật bác sĩ thất bại. Vui lòng thử lại!");
         },
     });
-    const mutationSoftDeleteDoctor = useMutation({
-        mutationKey: ['softDeleteDoctor'],
-        mutationFn: DoctorService.softDeleteDoctor,
+    const mutationDeleteDoctor = useMutation({
+        mutationKey: ['deleteDoctor'],
+        mutationFn: DoctorService.deleteDoctor,
         onSuccess: (data) => {
             if (data?.status == "success") {
                 Message.success(data?.message);
@@ -151,6 +152,23 @@ const DoctorPage = () => {
         },
         onError: (error) => {
             Message.error(error?.response?.data?.message || "Xoá bác sĩ thất bại. Vui lòng thử lại!");
+        },
+    });
+    const mutationRestoreDoctor = useMutation({
+        mutationKey: ['restoreDoctor'],
+        mutationFn: DoctorService.restoreDoctor,
+        onSuccess: (data) => {
+            if (data?.status == "success") {
+                Message.success(data?.message);
+                setSelectedRowKeys((prev) => prev.filter((key) => key !== rowSelected));
+                setRowSelected(null);
+                queryGetAllDoctors.refetch();
+            } else {
+                Message.error(data?.message);
+            }
+        },
+        onError: (error) => {
+            Message.error(error?.response?.data?.message || "Khôi phục bác sĩ thất bại. Vui lòng thử lại!");
         },
     });
     const mutationDeleteManyDoctors = useMutation({
@@ -173,9 +191,10 @@ const DoctorPage = () => {
     const { data: dataDoctors, isLoading: isLoadingDoctors } = queryGetAllDoctors;
     const { data: dataDegrees, isLoading: isLoadingDegrees } = queryGetAllDegrees;
     const { isPending: isPendingCreateDegree } = mutationCreateDegree;
-    const { isPending: isPendingDelete } = mutationSoftDeleteDoctor;
+    const { isPending: isPendingDelete } = mutationDeleteDoctor;
     const { isPending: isPendingCreate } = mutationCreateDoctor;
     const { isPending: isPendingUpdate } = mutationUpdateDoctor;
+    const { isPending: isPendingRestore } = mutationRestoreDoctor;
     const { isPending: isPendingDeleteMany } = mutationDeleteManyDoctors;
     const data = dataDoctors?.data?.doctors;
     const degrees = dataDegrees?.data?.degrees;
@@ -368,7 +387,13 @@ const DoctorPage = () => {
                     { type: "divider" },
                     { key: "edit", label: "Chỉnh sửa", icon: <EditOutlined style={{ fontSize: 16 }} /> },
                     { type: "divider" },
-                    { key: "delete", label: <Text type="danger">Xoá</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
+                    {
+                        key: "restore", label: <Text type="success">Khôi phục</Text>,
+                        icon: <ReloadOutlined style={{ fontSize: 16, color: "green" }} />
+                    },
+                    { type: "divider" },
+
+                    { key: "delete", label: <Text type="danger">Xoá vĩnh viễn</Text>, icon: <DeleteOutlined style={{ fontSize: 16, color: "red" }} /> },
                 ];
 
                 const onMenuClick = ({ key, domEvent }) => {
@@ -377,6 +402,7 @@ const DoctorPage = () => {
                     if (key === "detail") return handleViewDoctor(record.key);
                     if (key === "edit") return handleEditDoctor(record.key);
                     if (key === "delete") return handleShowConfirmDelete();
+                    if (key === "restore") return mutationRestoreDoctor.mutate(record.key);
                 };
 
                 return (
@@ -520,7 +546,7 @@ const DoctorPage = () => {
         setIsOpenModelCreateDegree(false);
     };
     const handleOkDelete = () => {
-        mutationSoftDeleteDoctor.mutate(rowSelected);
+        mutationDeleteDoctor.mutate(rowSelected);
     };
     const handleCancelDelete = () => {
         setIsModalOpenDelete(false);
@@ -618,15 +644,25 @@ const DoctorPage = () => {
             
         }
     }), [debouncedGlobalSearch];
+    const handleBack = () => {
+        navigate(-1);
+    };
 
     return (
         <>
             <Space align="center" style={{ marginBottom: 24 }}>
-                <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
-
-                    <Title level={4} style={{ marginBottom: 0 }}>Danh sách bác sĩ</Title>
-                </Badge>
+                <ButtonComponent
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={handleBack}
+                    style={{ fontSize: 20, padding: 0 }}
+                >
+                    <Badge count={dataTable?.length} showZero overflowCount={30} color="#1890ff">
+                        <Title level={4} style={{ marginBottom: 0 }}>Thùng rác bác sĩ</Title>
+                    </Badge>
                 
+                </ButtonComponent>
+               
             </Space>
             <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
                 <Space>
@@ -651,26 +687,7 @@ const DoctorPage = () => {
                         Tải lại
                     </Button>
                 </Space>
-                <Space>
-
-
-                    <ButtonComponent
-                        type="primary"
-                        onClick={() => setIsModalOpenCreate(true)}
-                        icon={<PlusOutlined />}
-                    >
-                        Thêm mới
-                    </ButtonComponent>
-                    <ButtonComponent    
-                        danger
-                        ghost
-                        onClick={() => navigate('/admin/doctors/trash')}
-                        icon={<DeleteOutlined />}
-                    >
-                        Thùng rác
-                       
-                    </ButtonComponent>
-                </Space>
+               
             </div>
             <BulkActionBar
                 selectedRowKeys={selectedRowKeys}
@@ -682,7 +699,7 @@ const DoctorPage = () => {
                 title={
                     <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-                        <span>Xoá người dùng</span>
+                        <span>Xoá vĩnh viễn</span>
                     </span>
                 }
                 open={isModalOpenDelete}
@@ -699,7 +716,7 @@ const DoctorPage = () => {
                         <Text>
                             Bạn có chắc chắn muốn{" "}
                             <Text strong type="danger">
-                                xoá
+                                xoá vĩnh viễn
                             </Text>{" "}
                             người dùng này không?
                         </Text>
@@ -1201,4 +1218,4 @@ const DoctorPage = () => {
     )
 }
 
-export default DoctorPage
+export default DoctorTrashPage

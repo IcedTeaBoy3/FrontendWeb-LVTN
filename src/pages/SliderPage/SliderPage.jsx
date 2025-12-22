@@ -468,7 +468,7 @@ const SliderPage = () => {
                 </ButtonComponent>
                 <ButtonComponent    
                     type="default"
-                
+                    disabled={true}
                 >
                     Xuất file
                     <ExportOutlined style={{ fontSize: 16, marginLeft: 8 }} />

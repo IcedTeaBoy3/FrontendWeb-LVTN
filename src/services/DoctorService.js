@@ -1,11 +1,12 @@
 import axiosInstance from '@/config/axiosInstance';
 export const DoctorService = {
-    getAllDoctors: async ({ page, limit }) => {
+    getAllDoctors: async ({ page, limit, isDeleted }) => {
         const response = await axiosInstance.get('/doctor/get-all-doctors',
             {
                 params: {
                     page,
-                    limit
+                    limit,
+                    isDeleted,
                 }
             }
         );
@@ -29,6 +30,14 @@ export const DoctorService = {
     },
     deleteManyDoctors: async (ids) => {
         const response = await axiosInstance.post('/doctor/delete-many-doctors', { ids });
+        return response.data;
+    },
+    softDeleteDoctor: async (id) => {
+        const response = await axiosInstance.put(`/doctor/soft-delete-doctor/${id}`);
+        return response.data;
+    },
+    restoreDoctor: async (id) => {
+        const response = await axiosInstance.put(`/doctor/restore-doctor/${id}`);
         return response.data;
     }
 }
