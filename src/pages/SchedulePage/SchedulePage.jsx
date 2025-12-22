@@ -168,7 +168,7 @@ const SchedulePage = () => {
 
     const queryGetAllDoctors = useQuery({
         queryKey: ['getAllDoctors'],
-        queryFn: DoctorService.getAllDoctors,
+        queryFn: () => DoctorService.getAllDoctors({ page: 1, limit: 100 }),
         retry: 1,
         refetchOnWindowFocus: false,
     });
