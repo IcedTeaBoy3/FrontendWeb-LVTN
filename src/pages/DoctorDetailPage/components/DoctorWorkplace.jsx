@@ -65,7 +65,7 @@ const DoctorWorkplace = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Thêm nơi làm việc thất bại");
+            Message.error(error?.message || "Thêm nơi làm việc thất bại");
         }
     });
     const mutationDeleteDoctorWorkplace = useMutation({
@@ -82,7 +82,7 @@ const DoctorWorkplace = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Xoá nơi làm việc thất bại");
+            Message.error(error?.message || "Xoá nơi làm việc thất bại");
         }
 
     });
@@ -101,7 +101,7 @@ const DoctorWorkplace = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Cập nhật nơi làm việc thất bại");
+            Message.error(error?.message || "Cập nhật nơi làm việc thất bại");
         }
     });
     const { isPending: isPendingCreateDoctorWorkplace } = mutationCreateDoctorWorkplace;

@@ -68,7 +68,7 @@ const DoctorService = ({id}) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Thêm dịch vụ thất bại");
+            Message.error(error?.message || "Thêm dịch vụ thất bại");
         }
     });
     const mutationCreateMultipleDoctorService = useMutation({
@@ -86,7 +86,7 @@ const DoctorService = ({id}) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Thêm dịch vụ thất bại");
+            Message.error(error?.message || "Thêm dịch vụ thất bại");
         }
     });
     const mutationUpdateDoctorService = useMutation({
@@ -104,7 +104,7 @@ const DoctorService = ({id}) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Cập nhật dịch vụ thất bại");
+            Message.error(error?.message || "Cập nhật dịch vụ thất bại");
         }
     });
     const mutationDeleteDoctorService = useMutation({
@@ -121,7 +121,7 @@ const DoctorService = ({id}) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Xoá dịch vụ thất bại");
+            Message.error(error?.message || "Xoá dịch vụ thất bại");
         }
     });
     const mutationDeleteMultipleDoctorService = useMutation({
@@ -138,7 +138,7 @@ const DoctorService = ({id}) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Xoá nhiều dịch vụ thất bại");
+            Message.error(error?.message || "Xoá nhiều dịch vụ thất bại");
         }
     });
     const { data: doctorServices, isLoading: isLoadingServicesByDoctor } = queryGetAllServicesByDoctor;

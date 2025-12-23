@@ -67,7 +67,7 @@ const DoctorInfo = () => {
       }
     },
     onError: (error) => {
-      Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+      Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
     },
   });
   const queryGetAllDegrees = useQuery({

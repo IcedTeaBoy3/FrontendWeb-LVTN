@@ -151,7 +151,7 @@ const DegreePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         },
     });
     const mutationUpdateDegree = useMutation({
@@ -168,7 +168,7 @@ const DegreePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         },
     });
     const mutationDeleteDegree = useMutation({
@@ -186,7 +186,7 @@ const DegreePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         },
     });
     const mutationDeleteManyDegrees = useMutation({
@@ -203,7 +203,7 @@ const DegreePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         },
     });
     const { data: dataDegrees, isLoading: isLoadingDegrees } = queryGetAllDegrees;

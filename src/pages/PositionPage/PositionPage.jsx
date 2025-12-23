@@ -121,7 +121,7 @@ const PositionPage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || error.message);
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     });
     const { data: dataPositions, isLoading: isLoadingPositions } = queryGetAllPositions;

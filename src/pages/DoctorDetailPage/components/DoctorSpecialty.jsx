@@ -60,7 +60,7 @@ const DoctorSpecialty = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Thêm chuyên khoa thất bại");
+            Message.error(error?.message || "Thêm chuyên khoa thất bại");
         }
     });
     const mutationCreateMultipleDoctorSpecialty = useMutation({
@@ -78,7 +78,7 @@ const DoctorSpecialty = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Thêm chuyên khoa thất bại");
+            Message.error(error?.message || "Thêm chuyên khoa thất bại");
         }
     });
     const mutationDeleteDoctorSpecialty = useMutation({
@@ -95,7 +95,7 @@ const DoctorSpecialty = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Xoá chuyên khoa thất bại");
+            Message.error(error?.message || "Xoá chuyên khoa thất bại");
         }
     });
     const mutationDeleteManyDoctorSpecialty = useMutation({
@@ -112,7 +112,7 @@ const DoctorSpecialty = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Xoá chuyên khoa thất bại");
+            Message.error(error?.message || "Xoá chuyên khoa thất bại");
         }
     });
     const mutationUpdateDoctorSpecialty = useMutation({
@@ -130,7 +130,7 @@ const DoctorSpecialty = ({ id }) => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Cập nhật nơi làm việc thất bại");
+            Message.error(error?.message || "Cập nhật nơi làm việc thất bại");
         }
     });
     const { data: doctorSpecialties, isLoading: isLoadingSpecialtiesByDoctor } = queryGetAllSpecialtiesByDoctor;

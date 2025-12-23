@@ -175,7 +175,7 @@ const AppointmentPage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error?.response?.data?.message || "Xoá lịch khám thất bại");
+            Message.error(error?.message || "Xoá lịch khám thất bại");
         }
     });
     const mutationConfirmAppointment = useMutation({
@@ -192,8 +192,8 @@ const AppointmentPage = () => {
             }
         },
         onError: (error) => {
-           
-            Message.error(error?.response?.data?.message || "Xác nhận lịch khám thất bại");
+            console.log(error);
+            Message.error(error?.message || "Xác nhận lịch khám thất bại");
         }
     });
     const mutationDeleteManyAppointments = useMutation({

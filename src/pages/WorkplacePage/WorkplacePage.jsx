@@ -152,7 +152,7 @@ const WorkplacePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     });
     const mutationUpdateWorkplace = useMutation({
@@ -169,7 +169,7 @@ const WorkplacePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     });
     const mutationDeleteWorkplace = useMutation({
@@ -185,7 +185,7 @@ const WorkplacePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     });
     const mutationDeleteManyWorkplaces = useMutation({
@@ -202,7 +202,7 @@ const WorkplacePage = () => {
             }
         },
         onError: (error) => {
-            Message.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            Message.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     });
     const { data: dataWorkplaces, isLoading: isLoadingWorkplaces } = queryGetAllWorkplaces;
